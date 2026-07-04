@@ -12,3 +12,6 @@ spring:
     username: admin
     password: changeme
     driverClassName: org.postgresql.Driver
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
