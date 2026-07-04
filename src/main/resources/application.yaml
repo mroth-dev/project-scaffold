@@ -1,3 +1,14 @@
+server:
+  port: 8000
+  ssl:
+    enabled: false
+
 spring:
   application:
     name: scaffold
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/mydb?sslmode=disable
+    username: admin
+    password: changeme
+    driverClassName: org.postgresql.Driver
