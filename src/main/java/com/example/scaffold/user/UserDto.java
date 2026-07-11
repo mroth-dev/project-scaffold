@@ -1,5 +1,13 @@
 package com.example.scaffold.user;
 
-public class UserDto {
-    private String name;
+import java.time.LocalDate;
+
+import com.example.scaffold.common.Gender;
+
+public record UserDto(
+        Long id,
+        String name,
+        String email,
+        LocalDate birthDate,
+        Gender gender) {
 }
