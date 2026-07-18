@@ -8,13 +8,82 @@ spring:
     name: scaffold
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/mydb?sslmode=disable
-    username: admin
-    password: changeme
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/mydb?sslmode=disable}
+    username: ${DATABASE_USERNAME:admin}
+    password: ${DATABASE_PASSWORD:changeme}
     driverClassName: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: ${DB_POOL_SIZE:10}
+      minimum-idle: ${DB_POOL_MIN_IDLE:5}
+      connection-timeout: ${DB_CONNECTION_TIMEOUT:30000}
+      idle-timeout: ${DB_IDLE_TIMEOUT:600000}
+      max-lifetime: ${DB_MAX_LIFETIME:1800000}
+      leak-detection-threshold: ${DB_LEAK_DETECTION:60000}
   flyway:
     enabled: true
     locations: classpath:db/migration
   jpa:
     hibernate:
       ddl-auto: validate
+
+  # Redis Configuration
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: ${REDIS_TIMEOUT:2000ms}
+      connect-timeout: ${REDIS_CONNECT_TIMEOUT:2000ms}
+      jedis:
+        pool:
+          max-active: ${REDIS_POOL_MAX_ACTIVE:8}
+          max-idle: ${REDIS_POOL_MAX_IDLE:8}
+          min-idle: ${REDIS_POOL_MIN_IDLE:0}
+          max-wait: ${REDIS_POOL_MAX_WAIT:-1ms}
+
+  # Cache Configuration
+  cache:
+    type: redis
+    redis:
+      time-to-live: 600000 # 10 minutes default TTL
+      cache-null-values: false
+      use-key-prefix: true
+
+# Management and Actuator Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when_authorized
+  health:
+    redis:
+      enabled: true
+
+# Application Configuration
+app:
+  # JWT Configuration
+  jwt:
+    secret: mySecretKey123456789012345678901234567890 # Should be externalized in production
+    expiration: 86400000 # 24 hours in milliseconds
+
+  # Rate Limiting Configuration
+  rate-limit:
+    default:
+      requests: 100
+      window: 60 # seconds
+    auth:
+      requests: 5
+      window: 300 # 5 minutes
+    api:
+      requests: 1000
+      window: 60 # 1 minute
+
+# Logging Configuration
+logging:
+  level:
+    com.example.scaffold: DEBUG
+    org.springframework.cache: DEBUG
+    org.springframework.data.redis: DEBUG
