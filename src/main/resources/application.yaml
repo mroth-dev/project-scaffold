@@ -48,6 +48,8 @@ spring:
       time-to-live: 600000 # 10 minutes default TTL
       cache-null-values: false
       use-key-prefix: true
+      key-prefix: "scaffold:cache:"
+      enable-statistics: true
 
 # Management and Actuator Configuration
 management:
@@ -66,20 +68,40 @@ management:
 app:
   # JWT Configuration
   jwt:
-    secret: mySecretKey123456789012345678901234567890 # Should be externalized in production
-    expiration: 86400000 # 24 hours in milliseconds
+    secret: ${JWT_SECRET:mySecretKey123456789012345678901234567890} # Should be externalized in production
+    expiration: ${JWT_EXPIRATION:86400000} # 24 hours in milliseconds
+    header: ${JWT_HEADER:Authorization}
+    prefix: ${JWT_PREFIX:Bearer }
+
+  # Cache Configuration
+  cache:
+    ttl:
+      users: PT1H # 1 hour
+      products: PT30M # 30 minutes
+      categories: PT2H # 2 hours
+      orders: PT15M # 15 minutes
+    key-prefix: "scaffold:cache:"
 
   # Rate Limiting Configuration
   rate-limit:
+    enabled: ${RATE_LIMIT_ENABLED:true}
     default:
-      requests: 100
-      window: 60 # seconds
+      requests: ${RATE_LIMIT_DEFAULT_REQUESTS:100}
+      window: ${RATE_LIMIT_DEFAULT_WINDOW:60} # seconds
     auth:
-      requests: 5
-      window: 300 # 5 minutes
+      requests: ${RATE_LIMIT_AUTH_REQUESTS:5}
+      window: ${RATE_LIMIT_AUTH_WINDOW:300} # 5 minutes
     api:
-      requests: 1000
-      window: 60 # 1 minute
+      requests: ${RATE_LIMIT_API_REQUESTS:1000}
+      window: ${RATE_LIMIT_API_WINDOW:60} # 1 minute
+    # Custom endpoint patterns
+    endpoints:
+      "/api/users/register":
+        requests: 3
+        window: 3600 # 1 hour
+      "/api/auth/login":
+        requests: 10
+        window: 900 # 15 minutes
 
 # Logging Configuration
 logging:

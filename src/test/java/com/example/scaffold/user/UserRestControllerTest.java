@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -43,18 +44,22 @@ class UserRestControllerTest {
 
     @Test
     void getUsersReturnsList() throws Exception {
-        UserDto user = new UserDto(1L, "Sir Admin", "admin@mail.com", LocalDate.of(1999, 8, 30), Gender.MALE);
+        UserDto user = new UserDto(1L, "admin@mail.com", "Sir", "Admin", 
+                LocalDate.of(1999, 8, 30), Gender.MALE, UserRole.ADMIN, 
+                AccountStatus.ACTIVE, LocalDateTime.now(), LocalDateTime.now());
         given(userService.getUsers()).willReturn(List.of(user));
 
         mockMvc.perform(get("/api/users"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].name").value("Sir Admin"));
+                .andExpect(jsonPath("$[0].firstName").value("Sir"));
     }
 
     @Test
     void getUserReturnsSingleUser() throws Exception {
-        UserDto user = new UserDto(1L, "Sir Admin", "admin@mail.com", LocalDate.of(1999, 8, 30), Gender.MALE);
+        UserDto user = new UserDto(1L, "admin@mail.com", "Sir", "Admin", 
+                LocalDate.of(1999, 8, 30), Gender.MALE, UserRole.ADMIN, 
+                AccountStatus.ACTIVE, LocalDateTime.now(), LocalDateTime.now());
         given(userService.getUser(1L)).willReturn(user);
 
         mockMvc.perform(get("/api/users/1"))
@@ -72,8 +77,11 @@ class UserRestControllerTest {
 
     @Test
     void createUserReturns201() throws Exception {
-        UserRequest request = new UserRequest("New User", "new.user@mail.com", LocalDate.of(2000, 1, 1), Gender.FEMALE);
-        UserDto created = new UserDto(2L, "New User", "new.user@mail.com", LocalDate.of(2000, 1, 1), Gender.FEMALE);
+        UserRequest request = new UserRequest("new.user@mail.com", "password123", "New", "User", 
+                LocalDate.of(2000, 1, 1), Gender.FEMALE, UserRole.CUSTOMER);
+        UserDto created = new UserDto(2L, "new.user@mail.com", "New", "User", 
+                LocalDate.of(2000, 1, 1), Gender.FEMALE, UserRole.CUSTOMER, 
+                AccountStatus.ACTIVE, LocalDateTime.now(), LocalDateTime.now());
         given(userService.createUser(any(UserRequest.class))).willReturn(created);
 
         mockMvc.perform(post("/api/users")
@@ -85,7 +93,7 @@ class UserRestControllerTest {
 
     @Test
     void createUserReturns400WhenInvalid() throws Exception {
-        UserRequest invalid = new UserRequest("", "not-an-email", null, null);
+        UserRequest invalid = new UserRequest("not-an-email", "short", null, null, null, null, null);
 
         mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)

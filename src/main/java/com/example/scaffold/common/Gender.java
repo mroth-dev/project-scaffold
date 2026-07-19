@@ -2,5 +2,7 @@ package com.example.scaffold.common;
 
 public enum Gender {
     MALE, 
-    FEMALE
+    FEMALE, 
+    OTHER, 
+    PREFER_NOT_TO_SAY
 }

@@ -2,6 +2,7 @@ package com.example.scaffold.user;
 
 import java.util.List;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.scaffold.exception.NotFoundException;
@@ -10,9 +11,11 @@ import com.example.scaffold.exception.NotFoundException;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public List<UserDto> getUsers() {
@@ -30,6 +33,12 @@ public class UserService {
 
     public UserDto getUser(Long id) {
         return toDto(findUserOrThrow(id));
+    }
+
+    public UserDto getUserByEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User with email: " + email + " not found"));
+        return toDto(user);
     }
 
     public UserDto createUser(UserRequest request) {
@@ -56,13 +65,30 @@ public class UserService {
     }
 
     private void applyRequest(User user, UserRequest request) {
-        user.setName(request.name());
         user.setEmail(request.email());
+        user.setPassword(passwordEncoder.encode(request.password()));
+        user.setFirstName(request.firstName());
+        user.setLastName(request.lastName());
         user.setBirthDate(request.birthDate());
         user.setGender(request.gender());
+        if (request.role() != null) {
+            user.setRole(request.role());
+        }
+        // Status defaults to ACTIVE via entity default
     }
 
     private UserDto toDto(User user) {
-        return new UserDto(user.getId(), user.getName(), user.getEmail(), user.getBirthDate(), user.getGender());
+        return new UserDto(
+            user.getId(), 
+            user.getEmail(), 
+            user.getFirstName(), 
+            user.getLastName(), 
+            user.getBirthDate(), 
+            user.getGender(),
+            user.getRole(),
+            user.getStatus(),
+            user.getCreatedAt(),
+            user.getUpdatedAt()
+        );
     }
 }
