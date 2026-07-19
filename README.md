@@ -6,7 +6,7 @@ Basic Project Scaffold working through some general consideration for a starting
 
 `./mvnw clean package`
 
-`./mvnw spring-boot:run`
+`./mvnw spring-boot:run -q`
 
 *This will fail due to the DB connections* 
 

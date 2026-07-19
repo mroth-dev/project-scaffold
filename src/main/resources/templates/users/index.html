@@ -32,7 +32,7 @@
             <tbody id="user-table-body" th:fragment="userTable">
                 <tr th:each="user : ${users}">
                     <td th:text="${user.id}"></td>
-                    <td th:text="${user.name}"></td>
+                    <td th:text="${user.firstName}"></td>
                     <td th:text="${user.email}"></td>
                     <td th:text="${user.birthDate}"></td>
                     <td th:text="${user.gender}"></td>

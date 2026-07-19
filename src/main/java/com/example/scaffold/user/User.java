@@ -3,6 +3,7 @@ package com.example.scaffold.user;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import com.example.scaffold.audit.AuditEntityListener;
 import com.example.scaffold.common.Gender;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -12,6 +13,7 @@ import org.hibernate.type.SqlTypes;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
@@ -24,6 +26,7 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "users")
+@EntityListeners(AuditEntityListener.class)
 @Getter
 @Setter
 @NoArgsConstructor
