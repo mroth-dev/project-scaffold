@@ -33,6 +33,8 @@ public class SecurityConfig {
                         // Public endpoints
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/users", "/api/users/**").permitAll() // Temporarily permit all for development
+                        .requestMatchers("/api/products", "/api/products/**").permitAll() // Temporarily permit all for development
+                        .requestMatchers("/api/categories", "/api/categories/**").permitAll() // Temporarily permit all for development
                         .requestMatchers("/users/**", "/webjars/**", "/css/**", "/js/**").permitAll()
                         .requestMatchers("/actuator/health/**").permitAll()
                         // Protected endpoints

@@ -41,7 +41,7 @@ public class RedisHealthIndicator {
             long startTime = System.currentTimeMillis();
             String pong = connection.ping();
             long responseTime = System.currentTimeMillis() - startTime;
-
+            
             // Check if ping was successful
             if (!"PONG".equals(pong)) {
                 health.put("status", "DOWN");

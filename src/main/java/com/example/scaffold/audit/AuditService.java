@@ -10,8 +10,9 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.example.scaffold.security.CustomUserDetailsService.CustomUserPrincipal;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -200,7 +201,7 @@ public class AuditService {
         
         try {
             return objectMapper.writeValueAsString(details);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             log.warn("Failed to convert details to JSON, using toString: {}", e.getMessage());
             return details.toString();
         }

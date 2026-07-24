@@ -1,4 +1,4 @@
-package com.example.scaffold.common;
+package com.example.scaffold.user;
 
 public enum Gender {
     MALE, 

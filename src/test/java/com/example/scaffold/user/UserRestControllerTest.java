@@ -23,7 +23,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.example.scaffold.common.Gender;
 import com.example.scaffold.config.SecurityConfig;
 import com.example.scaffold.exception.NotFoundException;
 

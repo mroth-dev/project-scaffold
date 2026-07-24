@@ -1,67 +1,59 @@
-package com.example.scaffold.user;
+package com.example.scaffold.category;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.example.scaffold.audit.AuditEntityListener;
 
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.hibernate.type.SqlTypes;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "users")
+@Table(name = "categories")
 @EntityListeners(AuditEntityListener.class)
 @Getter
 @Setter
 @NoArgsConstructor
-public class User {
+public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
+    private String name;
+
     @Column(nullable = false, unique = true)
-    private String email;
+    private String slug;
 
-    @Column(nullable = false)
-    private String password;
+    private String description;
 
-    @Column(name = "first_name")
-    private String firstName;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id")
+    private Category parent;
 
-    @Column(name = "last_name")
-    private String lastName;
+    @OneToMany(mappedBy = "parent")
+    @OrderBy("sortOrder ASC")
+    private List<Category> children = new ArrayList<>();
 
-    @Column(name = "birth_date")
-    private LocalDate birthDate;
-
-    @Enumerated(EnumType.STRING)
-    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
-    private Gender gender;
-
-    @Enumerated(EnumType.STRING)
-    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
-    @Column(nullable = false)
-    private UserRole role = UserRole.CUSTOMER;
-
-    @Enumerated(EnumType.STRING)
-    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
-    @Column(nullable = false)
-    private AccountStatus status = AccountStatus.ACTIVE;
+    @Column(name = "sort_order", nullable = false)
+    private int sortOrder;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
