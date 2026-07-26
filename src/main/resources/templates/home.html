@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Scaffold Shop</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <script th:src="@{/webjars/htmx.org/2.0.4/dist/htmx.min.js}"></script>
+</head>
+<body>
+    <div th:replace="~{fragments/nav :: nav}"></div>
+
+    <main class="container mx-auto px-4 md:px-8 max-w-6xl">
+        <section th:if="${!carouselProducts.isEmpty()}" class="carousel w-full h-80 rounded-box">
+            <div class="carousel-item relative w-full" th:each="product, iter : ${carouselProducts}" th:id="'slide' + ${iter.index}">
+                <a class="w-full" th:href="@{'/products/' + ${product.id}}">
+                    <img th:if="${!product.images.isEmpty()}" th:src="${product.images[0].url}" th:alt="${product.name}"
+                         class="w-full h-80 object-cover">
+                    <div th:if="${product.images.isEmpty()}"
+                         class="w-full h-80 bg-base-200 flex items-center justify-center text-base-content/40">No image</div>
+                </a>
+                <div class="absolute bottom-4 left-4 bg-base-100/90 rounded-box px-4 py-2">
+                    <p class="font-semibold" th:text="${product.name}"></p>
+                    <p class="text-sm text-base-content/70" th:text="${'£' + product.basePrice}"></p>
+                </div>
+                <div class="absolute flex justify-between -translate-y-1/2 left-4 right-4 top-1/2">
+                    <a class="btn btn-circle btn-sm"
+                       th:href="'#slide' + ${iter.index == 0 ? carouselProducts.size() - 1 : iter.index - 1}">&#10094;</a>
+                    <a class="btn btn-circle btn-sm"
+                       th:href="'#slide' + ${iter.index == carouselProducts.size() - 1 ? 0 : iter.index + 1}">&#10095;</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="mt-12 mb-12">
+            <h2 class="text-xl font-bold mb-4">Shop by Category</h2>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                <a class="card bg-base-100 shadow-sm border border-base-300 hover:shadow-md transition-shadow"
+                   th:each="category : ${categories}" th:href="@{/products(categoryId=${category.id})}">
+                    <div class="card-body items-center text-center py-8">
+                        <h3 class="font-semibold" th:text="${category.name}"></h3>
+                    </div>
+                </a>
+                <p class="col-span-full text-base-content/60" th:if="${categories.isEmpty()}">No categories yet.</p>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

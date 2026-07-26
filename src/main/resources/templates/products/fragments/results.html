@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <section th:fragment="productResults" id="product-results">
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            <a class="card bg-base-100 shadow-sm border border-base-300 hover:shadow-md transition-shadow"
+               th:each="product : ${page.content}" th:href="@{'/products/' + ${product.id}}">
+                <figure class="h-40 bg-base-200">
+                    <img th:if="${!product.images.isEmpty()}"
+                         th:src="${product.images[0].thumbnailUrl ?: product.images[0].url}" th:alt="${product.name}"
+                         class="h-full w-full object-cover">
+                </figure>
+                <div class="card-body p-4 gap-1">
+                    <h3 class="font-semibold text-sm truncate" th:text="${product.name}"></h3>
+                    <p class="text-xs text-base-content/60" th:text="${product.sku}"></p>
+                    <p class="font-bold" th:text="${'£' + product.basePrice}"></p>
+                    <div class="badge badge-sm" th:classappend="${product.active} ? 'badge-success' : 'badge-error'"
+                         th:text="${product.active} ? 'In stock' : 'Unavailable'"></div>
+                </div>
+            </a>
+            <p class="col-span-full text-base-content/60" th:if="${page.content.isEmpty()}">No products found.</p>
+        </div>
+
+        <div class="flex justify-center items-center gap-4 mt-8" th:if="${page.totalPages > 1}">
+            <button class="btn btn-outline btn-sm" th:if="${page.hasPrevious()}"
+                    th:attr="hx-get=@{/products/list(query=${query}, categoryId=${categoryId}, page=${page.number - 1})}"
+                    hx-target="#product-results" hx-swap="outerHTML">Previous</button>
+            <span class="text-sm text-base-content/60" th:text="'Page ' + ${page.number + 1} + ' of ' + ${page.totalPages}"></span>
+            <button class="btn btn-outline btn-sm" th:if="${page.hasNext()}"
+                    th:attr="hx-get=@{/products/list(query=${query}, categoryId=${categoryId}, page=${page.number + 1})}"
+                    hx-target="#product-results" hx-swap="outerHTML">Next</button>
+        </div>
+    </section>
+</body>
+</html>

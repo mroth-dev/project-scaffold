@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Users</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <script th:src="@{/webjars/htmx.org/2.0.4/dist/htmx.min.js}"></script>
+</head>
+<body>
+    <main class="container mx-auto px-4 md:px-8 max-w-4xl py-8">
+        <h1 class="text-2xl font-bold mb-6">Users</h1>
+
+        <input type="search"
+               name="query"
+               placeholder="Search by name..."
+               autocomplete="off"
+               hx-get="/users/table"
+               hx-trigger="keyup changed delay:300ms, search"
+               hx-target="#user-table-body"
+               hx-swap="outerHTML"
+               class="input w-full mb-4" />
+
+        <div class="overflow-x-auto">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Date of Birth</th>
+                        <th>Gender</th>
+                    </tr>
+                </thead>
+                <tbody id="user-table-body" th:fragment="userTable">
+                    <tr th:each="user : ${users}">
+                        <td th:text="${user.id}"></td>
+                        <td th:text="${user.firstName}"></td>
+                        <td th:text="${user.email}"></td>
+                        <td th:text="${user.birthDate}"></td>
+                        <td th:text="${user.gender}"></td>
+                    </tr>
+                    <tr th:if="${users.isEmpty()}">
+                        <td colspan="5" class="text-base-content/60">No users found.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</body>
+</html>

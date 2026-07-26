@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${status} + ' - Scaffold Shop'">Error - Scaffold Shop</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+    <div class="navbar bg-base-100 shadow-sm px-4 md:px-8 mb-8">
+        <a class="btn btn-ghost text-lg px-2" th:href="@{/}">Scaffold Shop</a>
+    </div>
+
+    <main class="flex justify-center px-4">
+        <div class="card w-full max-w-sm bg-base-100 shadow-sm border border-base-300">
+            <div class="card-body items-center text-center">
+                <h1 class="card-title" th:text="${status} + ' ' + ${error}">Error</h1>
+                <div role="alert" class="alert alert-error">
+                    <span th:text="${message}"></span>
+                </div>
+                <a class="btn btn-primary mt-2" th:href="@{/}">Return to the homepage</a>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Log in - Scaffold Shop</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <script th:src="@{/webjars/htmx.org/2.0.4/dist/htmx.min.js}"></script>
+</head>
+<body>
+    <div th:replace="~{fragments/nav :: nav}"></div>
+
+    <main class="flex justify-center px-4">
+        <div class="card w-full max-w-sm bg-base-100 shadow-sm border border-base-300">
+            <div class="card-body">
+                <h1 class="card-title">Log in</h1>
+
+                <div role="alert" class="alert alert-error" th:if="${error}">
+                    <span th:text="${error}"></span>
+                </div>
+
+                <form method="post" th:action="@{/login}" class="flex flex-col gap-3">
+                    <label class="fieldset-label" for="email">Email</label>
+                    <input type="email" id="email" name="email" th:value="${email}" required autofocus class="input w-full">
+
+                    <label class="fieldset-label" for="password">Password</label>
+                    <input type="password" id="password" name="password" required class="input w-full">
+
+                    <button type="submit" class="btn btn-primary mt-2">Log in</button>
+                </form>
+
+                <p class="text-sm mt-2">Don't have an account? <a class="link link-primary" th:href="@{/register}">Register</a></p>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

@@ -1,0 +1,8 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <p class="text-sm text-error -mt-2" th:fragment="emailFeedback">
+        <span th:if="${taken}">That email is already registered.</span>
+    </p>
+</body>
+</html>

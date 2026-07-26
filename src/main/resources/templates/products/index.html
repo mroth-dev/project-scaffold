@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Products - Scaffold Shop</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <script th:src="@{/webjars/htmx.org/2.0.4/dist/htmx.min.js}"></script>
+</head>
+<body>
+    <div th:replace="~{fragments/nav :: nav}"></div>
+
+    <main class="container mx-auto px-4 md:px-8 max-w-6xl">
+        <h1 class="text-2xl font-bold mb-6" th:text="${categoryName != null ? categoryName : 'Products'}">Products</h1>
+
+        <div id="product-results" th:replace="~{products/fragments/results :: productResults}"></div>
+    </main>
+</body>
+</html>
