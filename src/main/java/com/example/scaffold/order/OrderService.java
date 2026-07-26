@@ -46,10 +46,8 @@ public class OrderService {
                     .orElseThrow(() -> new NotFoundException("ProductVariation", itemRequest.productVariationId()));
 
             if (variation.getInventoryCount() < itemRequest.quantity()) {
-                throw new IllegalArgumentException(
-                        "Insufficient inventory for variation " + variation.getSku()
-                                + ": requested " + itemRequest.quantity()
-                                + ", available " + variation.getInventoryCount());
+                throw new InsufficientInventoryException(
+                        variation.getSku(), itemRequest.quantity(), variation.getInventoryCount());
             }
             variation.setInventoryCount(variation.getInventoryCount() - itemRequest.quantity());
             productVariationRepository.save(variation);
@@ -98,8 +96,7 @@ public class OrderService {
         Order order = findOrderOrThrow(orderId);
 
         if (order.getStatus() == OrderStatus.DELIVERED || order.getStatus() == OrderStatus.CANCELLED) {
-            throw new IllegalArgumentException(
-                    "Order " + orderId + " is already " + order.getStatus() + " and cannot be updated");
+            throw new InvalidOrderStateException(orderId, order.getStatus());
         }
 
         if (newStatus == OrderStatus.CANCELLED) {

@@ -50,12 +50,15 @@ public class UserService {
     public UserDto getUserByEmail(String email) {
         log.debug("Fetching user by email: {}", email);
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User with email: " + email + " not found"));
+                .orElseThrow(() -> new NotFoundException("User with email: " + email + " not found"));
         return toDto(user);
     }
 
     public UserDto createUser(UserRequest request) {
         log.debug("Creating new user with email: {}", request.email());
+        if (userRepository.findByEmail(request.email()).isPresent()) {
+            throw new DuplicateEmailException(request.email());
+        }
         User user = new User();
         applyRequest(user, request);
         User savedUser = userRepository.save(user);

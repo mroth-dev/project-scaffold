@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${status} + ' - Scaffold Shop'">Error - Scaffold Shop</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+    <nav class="site-nav">
+        <a class="brand" th:href="@{/}">Scaffold Shop</a>
+    </nav>
+
+    <main class="container narrow">
+        <h1 th:text="${status} + ' ' + ${error}">Error</h1>
+        <p class="error" th:text="${message}"></p>
+        <p><a th:href="@{/}">Return to the homepage</a></p>
+    </main>
+</body>
+</html>

@@ -100,7 +100,7 @@ class CategoryServiceTest {
         CategoryRequest request = new CategoryRequest("Shirts", "shirts", null, 2L, 0);
         when(categoryRepository.findById(2L)).thenReturn(Optional.of(child));
 
-        assertThrows(IllegalArgumentException.class, () -> categoryService.updateCategory(2L, request));
+        assertThrows(InvalidCategoryHierarchyException.class, () -> categoryService.updateCategory(2L, request));
     }
 
     @Test
@@ -111,7 +111,7 @@ class CategoryServiceTest {
 
         CategoryRequest request = new CategoryRequest("Clothing", "clothing", null, 2L, 0);
 
-        assertThrows(IllegalArgumentException.class, () -> categoryService.updateCategory(1L, request));
+        assertThrows(InvalidCategoryHierarchyException.class, () -> categoryService.updateCategory(1L, request));
     }
 
     @Test

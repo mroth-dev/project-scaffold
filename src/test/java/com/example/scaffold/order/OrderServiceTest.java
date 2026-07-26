@@ -85,7 +85,7 @@ class OrderServiceTest {
 
         OrderRequest request = new OrderRequest(List.of(new OrderItemRequest(1L, 100)));
 
-        assertThrows(IllegalArgumentException.class, () -> orderService.createOrder(1L, request));
+        assertThrows(InsufficientInventoryException.class, () -> orderService.createOrder(1L, request));
         verify(orderRepository, never()).save(any());
     }
 
@@ -145,7 +145,7 @@ class OrderServiceTest {
         order.setStatus(OrderStatus.DELIVERED);
         when(orderRepository.findById(5L)).thenReturn(Optional.of(order));
 
-        assertThrows(IllegalArgumentException.class, () -> orderService.updateOrderStatus(5L, OrderStatus.CANCELLED));
+        assertThrows(InvalidOrderStateException.class, () -> orderService.updateOrderStatus(5L, OrderStatus.CANCELLED));
         verify(orderRepository, never()).save(any());
     }
 

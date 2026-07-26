@@ -124,7 +124,7 @@ public class CategoryService {
             return;
         }
         if (parentId.equals(category.getId())) {
-            throw new IllegalArgumentException("A category cannot be its own parent");
+            throw new InvalidCategoryHierarchyException("A category cannot be its own parent");
         }
         if (category.getId() != null) {
             assertNotDescendant(category.getId(), parentId);
@@ -137,7 +137,7 @@ public class CategoryService {
         Long currentId = candidateParentId;
         while (currentId != null) {
             if (currentId.equals(categoryId)) {
-                throw new IllegalArgumentException("Cannot assign a descendant category as parent");
+                throw new InvalidCategoryHierarchyException("Cannot assign a descendant category as parent");
             }
             currentId = categoryRepository.findParentId(currentId).orElse(null);
         }

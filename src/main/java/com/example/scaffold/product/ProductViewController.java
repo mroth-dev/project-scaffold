@@ -8,8 +8,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.example.scaffold.exception.NotFoundException;
-
 @Controller
 @RequestMapping("/products")
 public class ProductViewController {
@@ -36,11 +34,7 @@ public class ProductViewController {
 
     @GetMapping("/{productId}")
     public String detail(@PathVariable Long productId, Model model) {
-        try {
-            model.addAttribute("product", productService.getProduct(productId));
-            return "products/detail";
-        } catch (NotFoundException e) {
-            return "redirect:/products";
-        }
+        model.addAttribute("product", productService.getProduct(productId));
+        return "products/detail";
     }
 }

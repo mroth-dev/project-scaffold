@@ -259,6 +259,16 @@ class UserServiceTest {
     }
 
     @Test
+    void testCreateUser_ThrowsWhenEmailAlreadyExists() {
+        // Given
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
+
+        // When / Then
+        assertThrows(DuplicateEmailException.class, () -> userService.createUser(testUserRequest));
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
     void testWarmupUserCache() {
         // Given
         List<User> activeUsers = List.of(testUser);
