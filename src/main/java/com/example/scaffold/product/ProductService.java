@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.scaffold.config.CacheConfig;
 import com.example.scaffold.exception.NotFoundException;
+
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -109,8 +110,10 @@ public class ProductService {
             variation.setSize(variationRequest.size());
             variation.setColor(variationRequest.color());
             variation.setSku(variationRequest.sku());
-            variation.setInventoryCount(variationRequest.inventoryCount() != null ? variationRequest.inventoryCount() : 0);
-            variation.setPriceAdjustment(variationRequest.priceAdjustment() != null ? variationRequest.priceAdjustment() : BigDecimal.ZERO);
+            variation.setInventoryCount(
+                    variationRequest.inventoryCount() != null ? variationRequest.inventoryCount() : 0);
+            variation.setPriceAdjustment(
+                    variationRequest.priceAdjustment() != null ? variationRequest.priceAdjustment() : BigDecimal.ZERO);
             product.getVariations().add(variation);
         }
     }

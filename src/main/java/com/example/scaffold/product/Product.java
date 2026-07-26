@@ -7,11 +7,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.example.scaffold.audit.AuditEntityListener;
-import com.example.scaffold.category.Category;
-
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+
+import com.example.scaffold.audit.AuditEntityListener;
+import com.example.scaffold.category.Category;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;

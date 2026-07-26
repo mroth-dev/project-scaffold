@@ -11,7 +11,8 @@ class InvalidCategoryHierarchyExceptionTest {
 
     @Test
     void mapsTo400WithGivenMessage() {
-        InvalidCategoryHierarchyException ex = new InvalidCategoryHierarchyException("A category cannot be its own parent");
+        InvalidCategoryHierarchyException ex =
+                new InvalidCategoryHierarchyException("A category cannot be its own parent");
 
         assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
         assertEquals("A category cannot be its own parent", ex.getMessage());

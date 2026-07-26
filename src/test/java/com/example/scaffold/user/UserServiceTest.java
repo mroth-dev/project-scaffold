@@ -1,8 +1,16 @@
 package com.example.scaffold.user;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -112,7 +120,7 @@ class UserServiceTest {
     }
 
     @Test
-    void testGetUser_CacheEnabled() {
+    void testGetUser_cacheEnabled() {
         // Given
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
 
@@ -135,7 +143,7 @@ class UserServiceTest {
     }
 
     @Test
-    void testGetUserByEmail_CacheEnabled() {
+    void testGetUserByEmail_cacheEnabled() {
         // Given
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
 
@@ -157,7 +165,7 @@ class UserServiceTest {
     }
 
     @Test
-    void testSearchUsers_CacheEnabled() {
+    void testSearchUsers_cacheEnabled() {
         // Given
         String query = "John";
         List<User> users = List.of(testUser);
@@ -182,7 +190,7 @@ class UserServiceTest {
     }
 
     @Test
-    void testSearchUsers_EmptyResult_NotCached() {
+    void testSearchUsers_emptyResult_notCached() {
         // Given
         String query = "NonExistentName";
         List<User> emptyUsers = List.of();
@@ -206,7 +214,7 @@ class UserServiceTest {
     }
 
     @Test
-    void testUpdateUser_CacheEviction() {
+    void testUpdateUser_cacheEviction() {
         // Given
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
@@ -236,7 +244,7 @@ class UserServiceTest {
     }
 
     @Test
-    void testDeleteUser_CacheEviction() {
+    void testDeleteUser_cacheEviction() {
         // Given
         when(userRepository.existsById(1L)).thenReturn(true);
 
@@ -261,7 +269,7 @@ class UserServiceTest {
     }
 
     @Test
-    void testCreateUser_NoCacheInteraction() {
+    void testCreateUser_noCacheInteraction() {
         // Given
         when(userRepository.save(any(User.class))).thenReturn(testUser);
 
@@ -276,7 +284,7 @@ class UserServiceTest {
     }
 
     @Test
-    void testCreateUser_ThrowsWhenEmailAlreadyExists() {
+    void testCreateUser_throwsWhenEmailAlreadyExists() {
         // Given
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
 
@@ -326,7 +334,7 @@ class UserServiceTest {
     }
 
     @Test
-    void testGetUser_NotFound() {
+    void testGetUser_notFound() {
         // Given
         when(userRepository.findById(999L)).thenReturn(Optional.empty());
 
@@ -336,7 +344,7 @@ class UserServiceTest {
     }
 
     @Test
-    void testGetUserByEmail_NotFound() {
+    void testGetUserByEmail_notFound() {
         // Given
         when(userRepository.findByEmail("nonexistent@example.com")).thenReturn(Optional.empty());
 
@@ -346,7 +354,7 @@ class UserServiceTest {
     }
 
     @Test
-    void testDeleteUser_NotFound() {
+    void testDeleteUser_notFound() {
         // Given
         when(userRepository.existsById(999L)).thenReturn(false);
 

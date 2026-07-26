@@ -56,12 +56,14 @@ class CategoryRestControllerTest {
     private RateLimitConfig rateLimitConfig;
 
     private CategoryDto sampleCategory() {
-        return new CategoryDto(1L, "Clothing", "clothing", "Apparel", null, 0, LocalDateTime.now(), LocalDateTime.now());
+        return new CategoryDto(
+                1L, "Clothing", "clothing", "Apparel", null, 0, LocalDateTime.now(), LocalDateTime.now());
     }
 
     @Test
     void getCategoryTreeReturnsList() throws Exception {
-        given(categoryService.getCategoryTree()).willReturn(List.of(new CategoryTreeDto(1L, "Clothing", "clothing", 0, List.of())));
+        given(categoryService.getCategoryTree())
+                .willReturn(List.of(new CategoryTreeDto(1L, "Clothing", "clothing", 0, List.of())));
 
         mockMvc.perform(get("/api/categories/tree"))
                 .andExpect(status().isOk())

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.scaffold.config.CacheConfig;
 import com.example.scaffold.exception.NotFoundException;
+
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -117,11 +118,11 @@ public class UserService {
 
     private UserDto toDto(User user) {
         return new UserDto(
-            user.getId(), 
-            user.getEmail(), 
-            user.getFirstName(), 
-            user.getLastName(), 
-            user.getBirthDate(), 
+            user.getId(),
+            user.getEmail(),
+            user.getFirstName(),
+            user.getLastName(),
+            user.getBirthDate(),
             user.getGender(),
             user.getRole(),
             user.getStatus(),
@@ -129,7 +130,7 @@ public class UserService {
             user.getUpdatedAt()
         );
     }
-    
+
     /**
      * Warm up user cache with frequently accessed users
      * This method is called during application startup
@@ -148,8 +149,8 @@ public class UserService {
             List<User> activeUsers = userRepository.findByStatusOrderByCreatedAtDesc(
                 AccountStatus.ACTIVE
             ).stream()
-            .limit(100) // Limit to 100 most recent active users
-            .toList();
+                .limit(100) // Limit to 100 most recent active users
+                .toList();
 
             // Populate the cache directly (matching @Cacheable's `key = "#id"` on getUser)
             // rather than calling getUser(id), since that self-invocation would bypass
@@ -165,7 +166,7 @@ public class UserService {
             log.error("Error during user cache warmup: {}", e.getMessage(), e);
         }
     }
-    
+
     /**
      * Clear user-related caches
      */

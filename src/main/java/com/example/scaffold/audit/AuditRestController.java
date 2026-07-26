@@ -4,11 +4,9 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,9 +31,11 @@ import lombok.extern.slf4j.Slf4j;
 @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH)
 public class AuditRestController {
 
+    private static final String OWN_HISTORY_ACCESS =
+            "hasRole('ADMIN') or hasRole('MANAGER') or (hasRole('USER') and #userId == authentication.principal.id)";
+
     private final AuditEventRepository auditEventRepository;
 
-    @Autowired
     public AuditRestController(AuditEventRepository auditEventRepository) {
         this.auditEventRepository = auditEventRepository;
     }
@@ -81,7 +81,7 @@ public class AuditRestController {
 
         return ResponseEntity.ok(auditEvents);
     }
-    
+
     /**
      * Get audit events for a specific entity
      */
@@ -104,12 +104,12 @@ public class AuditRestController {
 
         return ResponseEntity.ok(auditEvents);
     }
-    
+
     /**
      * Get audit events for a specific user's actions
      */
     @GetMapping("/user/{userId}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or (hasRole('USER') and #userId == authentication.principal.id)")
+    @PreAuthorize(OWN_HISTORY_ACCESS)
     @RateLimit(requests = 100, window = 60)
     @Operation(summary = "Get a user's audit history")
     public ResponseEntity<Page<AuditEvent>> getUserAuditHistory(
@@ -125,12 +125,12 @@ public class AuditRestController {
 
         return ResponseEntity.ok(auditEvents);
     }
-    
+
     /**
      * Get recent audit events for a user (last 24 hours)
      */
     @GetMapping("/user/{userId}/recent")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or (hasRole('USER') and #userId == authentication.principal.id)")
+    @PreAuthorize(OWN_HISTORY_ACCESS)
     @RateLimit(requests = 200, window = 60)
     @Operation(summary = "Get a user's audit events from the last 24 hours")
     public ResponseEntity<?> getRecentUserActivity(@PathVariable Long userId) {
@@ -139,7 +139,7 @@ public class AuditRestController {
 
         return ResponseEntity.ok(recentEvents);
     }
-    
+
     /**
      * Get audit statistics
      */
@@ -164,7 +164,7 @@ public class AuditRestController {
         if (dateTimeString == null || dateTimeString.trim().isEmpty()) {
             return null;
         }
-        
+
         try {
             // Try ISO format first
             return LocalDateTime.parse(dateTimeString, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
@@ -183,7 +183,7 @@ public class AuditRestController {
             }
         }
     }
-    
+
     /**
      * DTO for audit statistics
      */

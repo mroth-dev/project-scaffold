@@ -20,7 +20,7 @@ class JwtTokenProviderTest {
     @BeforeEach
     void setUp() {
         jwtTokenProvider = new JwtTokenProvider("mySecretKey1234567890123456789012345678901234567890", 86400000);
-        
+
         testUser = new User();
         testUser.setId(1L);
         testUser.setEmail("test@example.com");
@@ -29,7 +29,7 @@ class JwtTokenProviderTest {
     }
 
     @Test
-    void generateToken_ValidUser_ReturnsToken() {
+    void generateToken_validUser_returnsToken() {
         // Act
         String token = jwtTokenProvider.generateToken(testUser);
 
@@ -39,7 +39,7 @@ class JwtTokenProviderTest {
     }
 
     @Test
-    void getEmailFromToken_ValidToken_ReturnsEmail() {
+    void getEmailFromToken_validToken_returnsEmail() {
         // Arrange
         String token = jwtTokenProvider.generateToken(testUser);
 
@@ -51,7 +51,7 @@ class JwtTokenProviderTest {
     }
 
     @Test
-    void getUserIdFromToken_ValidToken_ReturnsUserId() {
+    void getUserIdFromToken_validToken_returnsUserId() {
         // Arrange
         String token = jwtTokenProvider.generateToken(testUser);
 
@@ -63,7 +63,7 @@ class JwtTokenProviderTest {
     }
 
     @Test
-    void getRoleFromToken_ValidToken_ReturnsRole() {
+    void getRoleFromToken_validToken_returnsRole() {
         // Arrange
         String token = jwtTokenProvider.generateToken(testUser);
 
@@ -75,7 +75,7 @@ class JwtTokenProviderTest {
     }
 
     @Test
-    void validateToken_ValidToken_ReturnsTrue() {
+    void validateToken_validToken_returnsTrue() {
         // Arrange
         String token = jwtTokenProvider.generateToken(testUser);
 
@@ -87,7 +87,7 @@ class JwtTokenProviderTest {
     }
 
     @Test
-    void validateToken_InvalidToken_ReturnsFalse() {
+    void validateToken_invalidToken_returnsFalse() {
         // Arrange
         String invalidToken = "invalid.token.here";
 
@@ -99,7 +99,7 @@ class JwtTokenProviderTest {
     }
 
     @Test
-    void validateToken_EmptyToken_ReturnsFalse() {
+    void validateToken_emptyToken_returnsFalse() {
         // Act
         boolean isValid = jwtTokenProvider.validateToken("");
 

@@ -7,7 +7,7 @@ import tools.jackson.databind.ObjectMapper;
 
 @Configuration
 public class JacksonConfig {
-    
+
     @Bean
     public ObjectMapper objectMapper() {
         return new ObjectMapper();

@@ -36,9 +36,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Public endpoints
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/users", "/api/users/**").permitAll() // Temporarily permit all for development
-                        .requestMatchers("/api/products", "/api/products/**").permitAll() // Temporarily permit all for development
-                        .requestMatchers("/api/categories", "/api/categories/**").permitAll() // Temporarily permit all for development
+                        // Temporarily permit all for development
+                        .requestMatchers("/api/users", "/api/users/**").permitAll()
+                        .requestMatchers("/api/products", "/api/products/**").permitAll()
+                        .requestMatchers("/api/categories", "/api/categories/**").permitAll()
                         .requestMatchers("/users/**", "/webjars/**", "/css/**", "/js/**").permitAll()
                         .requestMatchers("/actuator/health/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()

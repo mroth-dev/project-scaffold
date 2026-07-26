@@ -1,8 +1,13 @@
 package com.example.scaffold.audit;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -30,7 +35,7 @@ class AuditRestControllerTest {
     @BeforeEach
     void setUp() {
         auditRestController = new AuditRestController(auditEventRepository);
-        
+
         // Create test audit events
         testAuditEvents = List.of(
                 createAuditEvent(1L, "USER", 100L, "CREATE", 1L),
@@ -40,7 +45,7 @@ class AuditRestControllerTest {
     }
 
     @Test
-    void getAuditEvents_ShouldReturnPagedResults() {
+    void getAuditEvents_shouldReturnPagedResults() {
         // Arrange
         Page<AuditEvent> page = new PageImpl<>(testAuditEvents);
         when(auditEventRepository.findByFilters(any(), any(), any(), any(), any(), any(), any(Pageable.class)))
@@ -58,10 +63,10 @@ class AuditRestControllerTest {
     }
 
     @Test
-    void getAuditEvents_WithFilters_ShouldPassFiltersCorrectly() {
+    void getAuditEvents_withFilters_shouldPassFiltersCorrectly() {
         // Arrange
         Page<AuditEvent> page = new PageImpl<>(List.of(testAuditEvents.get(0)));
-        when(auditEventRepository.findByFilters(eq("USER"), eq(100L), eq("CREATE"), eq(1L), 
+        when(auditEventRepository.findByFilters(eq("USER"), eq(100L), eq("CREATE"), eq(1L),
                 any(), any(), any(Pageable.class)))
                 .thenReturn(page);
 
@@ -72,15 +77,15 @@ class AuditRestControllerTest {
         // Assert
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        verify(auditEventRepository).findByFilters(eq("USER"), eq(100L), eq("CREATE"), eq(1L), 
+        verify(auditEventRepository).findByFilters(eq("USER"), eq(100L), eq("CREATE"), eq(1L),
                 any(), any(), any(Pageable.class));
     }
 
     @Test
-    void getEntityAuditHistory_ShouldReturnEntitySpecificEvents() {
+    void getEntityAuditHistory_shouldReturnEntitySpecificEvents() {
         // Arrange
         Page<AuditEvent> page = new PageImpl<>(List.of(testAuditEvents.get(0)));
-        when(auditEventRepository.findByFilters(eq("USER"), eq(100L), any(), any(), any(), any(), 
+        when(auditEventRepository.findByFilters(eq("USER"), eq(100L), any(), any(), any(), any(),
                 any(Pageable.class)))
                 .thenReturn(page);
 
@@ -98,7 +103,7 @@ class AuditRestControllerTest {
     }
 
     @Test
-    void getUserAuditHistory_ShouldReturnUserSpecificEvents() {
+    void getUserAuditHistory_shouldReturnUserSpecificEvents() {
         // Arrange
         Page<AuditEvent> page = new PageImpl<>(List.of(testAuditEvents.get(0), testAuditEvents.get(1)));
         when(auditEventRepository.findByUserIdOrderByTimestampDesc(eq(1L), any(Pageable.class)))
@@ -116,7 +121,7 @@ class AuditRestControllerTest {
     }
 
     @Test
-    void getRecentUserActivity_ShouldReturnRecentEvents() {
+    void getRecentUserActivity_shouldReturnRecentEvents() {
         // Arrange
         List<AuditEvent> recentEvents = List.of(testAuditEvents.get(0));
         when(auditEventRepository.findRecentEventsByUser(eq(1L), any(LocalDateTime.class)))
@@ -137,7 +142,7 @@ class AuditRestControllerTest {
     }
 
     @Test
-    void getAuditStatistics_ShouldReturnCorrectStatistics() {
+    void getAuditStatistics_shouldReturnCorrectStatistics() {
         // Arrange
         when(auditEventRepository.count()).thenReturn(1000L);
         when(auditEventRepository.countByEntityType("USER")).thenReturn(300L);
@@ -152,7 +157,7 @@ class AuditRestControllerTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         assertTrue(response.getBody() instanceof AuditRestController.AuditStatistics);
-        
+
         AuditRestController.AuditStatistics stats = (AuditRestController.AuditStatistics) response.getBody();
         assertEquals(1000L, stats.totalEvents());
         assertEquals(300L, stats.userEvents());
@@ -161,7 +166,7 @@ class AuditRestControllerTest {
     }
 
     @Test
-    void getAuditEvents_WithInvalidPageSize_ShouldLimitPageSize() {
+    void getAuditEvents_withInvalidPageSize_shouldLimitPageSize() {
         // Arrange
         Page<AuditEvent> page = new PageImpl<>(testAuditEvents);
         when(auditEventRepository.findByFilters(any(), any(), any(), any(), any(), any(), any(Pageable.class)))
@@ -174,14 +179,14 @@ class AuditRestControllerTest {
         // Assert
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        
+
         // Verify that the page size was limited to maximum allowed (100)
-        verify(auditEventRepository).findByFilters(any(), any(), any(), any(), any(), any(), 
+        verify(auditEventRepository).findByFilters(any(), any(), any(), any(), any(), any(),
                 argThat(pageable -> pageable.getPageSize() <= 100));
     }
 
     @Test
-    void getAuditEvents_WithNegativePage_ShouldUseDefaultPage() {
+    void getAuditEvents_withNegativePage_shouldUseDefaultPage() {
         // Arrange
         Page<AuditEvent> page = new PageImpl<>(testAuditEvents);
         when(auditEventRepository.findByFilters(any(), any(), any(), any(), any(), any(), any(Pageable.class)))
@@ -194,9 +199,9 @@ class AuditRestControllerTest {
         // Assert
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        
+
         // Verify that the page number was corrected to 0
-        verify(auditEventRepository).findByFilters(any(), any(), any(), any(), any(), any(), 
+        verify(auditEventRepository).findByFilters(any(), any(), any(), any(), any(), any(),
                 argThat(pageable -> pageable.getPageNumber() >= 0));
     }
 

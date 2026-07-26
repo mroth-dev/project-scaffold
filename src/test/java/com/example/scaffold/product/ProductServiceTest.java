@@ -1,8 +1,17 @@
 package com.example.scaffold.product;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -54,7 +63,8 @@ class ProductServiceTest {
                 new BigDecimal("29.99"),
                 new BigDecimal("19.99"),
                 true,
-                List.of(new ProductImageRequest("http://example.com/image.jpg", "http://example.com/thumb.jpg", "Front view", 0)),
+                List.of(new ProductImageRequest(
+                        "http://example.com/image.jpg", "http://example.com/thumb.jpg", "Front view", 0)),
                 List.of(new ProductVariationRequest("M", "Blue", "TSHIRT-001-M-BLUE", 10, BigDecimal.ZERO)));
     }
 

@@ -46,7 +46,7 @@ class AuthControllerTest {
     private RateLimitConfig rateLimitConfig;
 
     @Test
-    void login_ValidCredentials_ReturnsToken() throws Exception {
+    void login_validCredentials_returnsToken() throws Exception {
         // Arrange
         AuthController.LoginRequest request = new AuthController.LoginRequest("test@example.com", "password");
         String expectedToken = "jwt-token";
@@ -62,10 +62,11 @@ class AuthControllerTest {
     }
 
     @Test
-    void login_InvalidCredentials_ReturnsUnauthorized() throws Exception {
+    void login_invalidCredentials_returnsUnauthorized() throws Exception {
         // Arrange
         AuthController.LoginRequest request = new AuthController.LoginRequest("test@example.com", "wrong-password");
-        given(authenticationService.authenticate(anyString(), anyString())).willThrow(new BadCredentialsException("Invalid credentials"));
+        given(authenticationService.authenticate(anyString(), anyString()))
+                .willThrow(new BadCredentialsException("Invalid credentials"));
 
         // Act & Assert
         mockMvc.perform(post("/api/auth/login")
@@ -75,7 +76,7 @@ class AuthControllerTest {
     }
 
     @Test
-    void login_InvalidEmail_ReturnsBadRequest() throws Exception {
+    void login_invalidEmail_returnsBadRequest() throws Exception {
         // Arrange
         AuthController.LoginRequest request = new AuthController.LoginRequest("invalid-email", "password");
 
@@ -87,7 +88,7 @@ class AuthControllerTest {
     }
 
     @Test
-    void logout_ReturnsOk() throws Exception {
+    void logout_returnsOk() throws Exception {
         // Act & Assert
         mockMvc.perform(post("/api/auth/logout"))
                 .andExpect(status().isOk());

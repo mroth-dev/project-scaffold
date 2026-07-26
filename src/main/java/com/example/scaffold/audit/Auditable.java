@@ -13,17 +13,17 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Auditable {
-    
+
     /**
      * The entity type being audited (e.g., "USER", "PRODUCT", "ORDER")
      */
     String entityType();
-    
+
     /**
      * The event type for this operation (e.g., "CREATE", "UPDATE", "DELETE", "VIEW")
      */
     String eventType();
-    
+
     /**
      * SpEL expression to extract entity ID from method parameters or return value
      * Examples:
@@ -33,7 +33,7 @@ public @interface Auditable {
      * - "#id" - use parameter named 'id' directly
      */
     String entityIdExpression() default "";
-    
+
     /**
      * SpEL expression to extract additional details for the audit log
      * Examples:
@@ -41,22 +41,22 @@ public @interface Auditable {
      * - "{'oldValue': #oldValue, 'newValue': #result}" - log before/after values
      */
     String detailsExpression() default "";
-    
+
     /**
      * Whether to log before method execution (useful for DELETE operations)
      */
     boolean logBefore() default false;
-    
+
     /**
      * Whether to log after method execution (default, useful for CREATE/UPDATE operations)
      */
     boolean logAfter() default true;
-    
+
     /**
      * Whether to include method parameters in the audit details
      */
     boolean includeParameters() default false;
-    
+
     /**
      * Whether to include return value in the audit details
      */

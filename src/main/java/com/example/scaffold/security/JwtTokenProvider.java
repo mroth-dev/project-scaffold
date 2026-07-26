@@ -1,7 +1,6 @@
 package com.example.scaffold.security;
 
 import java.util.Date;
-
 import javax.crypto.SecretKey;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -20,8 +19,9 @@ public class JwtTokenProvider {
     private final SecretKey key;
     private final long jwtExpiration;
 
-    public JwtTokenProvider(@Value("${app.jwt.secret:mySecretKey1234567890123456789012345678901234567890}") String secret,
-                           @Value("${app.jwt.expiration:86400000}") long jwtExpiration) {
+    public JwtTokenProvider(
+            @Value("${app.jwt.secret:mySecretKey1234567890123456789012345678901234567890}") String secret,
+            @Value("${app.jwt.expiration:86400000}") long jwtExpiration) {
         this.key = Keys.hmacShaKeyFor(secret.getBytes());
         this.jwtExpiration = jwtExpiration;
     }

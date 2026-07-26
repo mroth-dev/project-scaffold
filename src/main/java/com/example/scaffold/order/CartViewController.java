@@ -78,7 +78,8 @@ public class CartViewController {
         for (Map.Entry<Long, Integer> entry : cart.getItems().entrySet()) {
             productVariationRepository.findById(entry.getKey()).ifPresent(variation -> {
                 BigDecimal unitPrice = variation.getProduct().getBasePrice().add(variation.getPriceAdjustment());
-                lines.add(new CartLine(variation, entry.getValue(), unitPrice, unitPrice.multiply(BigDecimal.valueOf(entry.getValue()))));
+                BigDecimal lineTotal = unitPrice.multiply(BigDecimal.valueOf(entry.getValue()));
+                lines.add(new CartLine(variation, entry.getValue(), unitPrice, lineTotal));
             });
         }
         return lines;

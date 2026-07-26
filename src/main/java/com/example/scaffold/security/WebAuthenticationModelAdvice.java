@@ -38,7 +38,8 @@ public class WebAuthenticationModelAdvice {
                 && !(authentication instanceof AnonymousAuthenticationToken);
 
         model.addAttribute("authenticated", authenticated);
-        if (authenticated && authentication.getPrincipal() instanceof CustomUserDetailsService.CustomUserPrincipal principal) {
+        if (authenticated
+                && authentication.getPrincipal() instanceof CustomUserDetailsService.CustomUserPrincipal principal) {
             model.addAttribute("currentUserEmail", principal.getUsername());
         }
         ShoppingCart cart = shoppingCart.getIfAvailable();

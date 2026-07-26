@@ -2,21 +2,23 @@ server:
   port: 8000
   ssl:
     enabled: false
-  error:
-    # Business/validation errors are handled explicitly by ApiExceptionHandler
-    # and WebExceptionHandler with curated, safe messages. These settings
-    # only govern the Boot fallback path (e.g. exceptions raised outside
-    # controller dispatch), keeping raw exception details from leaking.
-    include-message: never
-    include-binding-errors: never
-    include-stacktrace: never
-    include-exception: false
-    whitelabel:
-      enabled: false
 
 spring:
   application:
     name: scaffold
+
+  web:
+    error:
+      # Business/validation errors are handled explicitly by ApiExceptionHandler
+      # and WebExceptionHandler with curated, safe messages. These settings
+      # only govern the Boot fallback path (e.g. exceptions raised outside
+      # controller dispatch), keeping raw exception details from leaking.
+      include-message: never
+      include-binding-errors: never
+      include-stacktrace: never
+      include-exception: false
+      whitelabel:
+        enabled: false
 
   datasource:
     url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/mydb?sslmode=disable}

@@ -24,83 +24,83 @@ import lombok.extern.slf4j.Slf4j;
 @Configurable
 @Slf4j
 public class AuditEntityListener implements ApplicationContextAware {
-    
+
     private static ApplicationContext applicationContext;
     private static AuditService auditService;
-    
+
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) {
         AuditEntityListener.applicationContext = applicationContext;
     }
-    
+
     private AuditService getAuditService() {
         if (auditService == null && applicationContext != null) {
             auditService = applicationContext.getBean(AuditService.class);
         }
         return auditService;
     }
-    
+
     @PrePersist
     public void prePersist(Object entity) {
         logEntityEvent(entity, "PRE_CREATE");
     }
-    
+
     @PostPersist
     public void postPersist(Object entity) {
         logEntityEvent(entity, "CREATE");
     }
-    
+
     @PreUpdate
     public void preUpdate(Object entity) {
         logEntityEvent(entity, "PRE_UPDATE");
     }
-    
+
     @PostUpdate
     public void postUpdate(Object entity) {
         logEntityEvent(entity, "UPDATE");
     }
-    
+
     @PreRemove
     public void preRemove(Object entity) {
         logEntityEvent(entity, "PRE_DELETE");
     }
-    
+
     @PostRemove
     public void postRemove(Object entity) {
         logEntityEvent(entity, "DELETE");
     }
-    
+
     @PostLoad
     public void postLoad(Object entity) {
         // Optionally log read operations (can be very verbose)
         // Uncomment the following line if you want to audit read operations
         // logEntityEvent(entity, "READ");
     }
-    
+
     private void logEntityEvent(Object entity, String eventType) {
         try {
             AuditService service = getAuditService();
             if (service == null) {
-                log.debug("AuditService not available, skipping audit for {} {}", 
+                log.debug("AuditService not available, skipping audit for {} {}",
                          entity.getClass().getSimpleName(), eventType);
                 return;
             }
-            
+
             String entityType = entity.getClass().getSimpleName().toUpperCase();
             Long entityId = extractEntityId(entity);
-            
+
             // Create basic details about the entity
-            String details = String.format("Entity: %s, Event: %s", 
+            String details = String.format("Entity: %s, Event: %s",
                                           entity.getClass().getSimpleName(), eventType);
-            
+
             service.logEvent(entityType, entityId, eventType, details);
-            
+
         } catch (Exception e) {
-            log.error("Failed to log entity audit event for {} {}", 
+            log.error("Failed to log entity audit event for {} {}",
                      entity.getClass().getSimpleName(), eventType, e);
         }
     }
-    
+
     /**
      * Extract entity ID using reflection.
      * Looks for fields named 'id' or annotated with @Id.
@@ -108,7 +108,7 @@ public class AuditEntityListener implements ApplicationContextAware {
     private Long extractEntityId(Object entity) {
         try {
             Class<?> entityClass = entity.getClass();
-            
+
             // First try to find a field named 'id'
             try {
                 Field idField = entityClass.getDeclaredField("id");
@@ -118,7 +118,7 @@ public class AuditEntityListener implements ApplicationContextAware {
             } catch (NoSuchFieldException e) {
                 // Field 'id' not found, continue with other approaches
             }
-            
+
             // Look for @Id annotated fields
             Field[] fields = entityClass.getDeclaredFields();
             for (Field field : fields) {
@@ -128,7 +128,7 @@ public class AuditEntityListener implements ApplicationContextAware {
                     return convertToLong(idValue);
                 }
             }
-            
+
             // Also check superclass fields
             Class<?> superClass = entityClass.getSuperclass();
             while (superClass != null && superClass != Object.class) {
@@ -142,20 +142,20 @@ public class AuditEntityListener implements ApplicationContextAware {
                 }
                 superClass = superClass.getSuperclass();
             }
-            
+
         } catch (Exception e) {
-            log.debug("Could not extract entity ID from {}: {}", 
+            log.debug("Could not extract entity ID from {}: {}",
                      entity.getClass().getSimpleName(), e.getMessage());
         }
-        
+
         return null;
     }
-    
+
     private Long convertToLong(Object value) {
         if (value == null) {
             return null;
         }
-        
+
         if (value instanceof Long) {
             return (Long) value;
         } else if (value instanceof Number) {

@@ -33,7 +33,8 @@ import jakarta.validation.Valid;
 @Tag(name = "Categories", description = "Hierarchical product categories")
 public class CategoryRestController {
 
-    private static final CacheControl CATEGORY_CACHE_CONTROL = CacheControl.maxAge(Duration.ofMinutes(30)).cachePublic();
+    private static final CacheControl CATEGORY_CACHE_CONTROL =
+            CacheControl.maxAge(Duration.ofMinutes(30)).cachePublic();
 
     private final CategoryService categoryService;
 
@@ -64,7 +65,8 @@ public class CategoryRestController {
     @GetMapping("/{categoryId}/products")
     @Operation(summary = "List products assigned to a category")
     public ResponseEntity<Page<ProductSummaryDto>> getProducts(@PathVariable Long categoryId, Pageable pageable) {
-        return ResponseEntity.ok().cacheControl(CATEGORY_CACHE_CONTROL).body(categoryService.getProductsInCategory(categoryId, pageable));
+        return ResponseEntity.ok().cacheControl(CATEGORY_CACHE_CONTROL)
+                .body(categoryService.getProductsInCategory(categoryId, pageable));
     }
 
     @PostMapping

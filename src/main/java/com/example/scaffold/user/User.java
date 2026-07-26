@@ -3,12 +3,12 @@ package com.example.scaffold.user;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import com.example.scaffold.audit.AuditEntityListener;
-
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.type.SqlTypes;
+
+import com.example.scaffold.audit.AuditEntityListener;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

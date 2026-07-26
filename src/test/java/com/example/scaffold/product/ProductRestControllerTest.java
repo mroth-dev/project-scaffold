@@ -61,14 +61,16 @@ class ProductRestControllerTest {
     private ProductDto sampleProduct() {
         return new ProductDto(1L, "T-Shirt", "Cotton crew neck t-shirt", "TSHIRT-001",
                 new BigDecimal("29.99"), new BigDecimal("19.99"), true,
-                List.of(new ProductImageDto(1L, "http://example.com/image.jpg", "http://example.com/thumb.jpg", "Front view", 0)),
+                List.of(new ProductImageDto(
+                        1L, "http://example.com/image.jpg", "http://example.com/thumb.jpg", "Front view", 0)),
                 List.of(new ProductVariationDto(1L, "M", "Blue", "TSHIRT-001-M-BLUE", 10, BigDecimal.ZERO)),
                 LocalDateTime.now(), LocalDateTime.now());
     }
 
     @Test
     void getProductsReturnsPage() throws Exception {
-        given(productService.searchProducts(eq(null), any())).willReturn(new PageImpl<>(List.of(sampleProduct()), PageRequest.of(0, 20), 1));
+        given(productService.searchProducts(eq(null), any()))
+                .willReturn(new PageImpl<>(List.of(sampleProduct()), PageRequest.of(0, 20), 1));
 
         mockMvc.perform(get("/api/products"))
                 .andExpect(status().isOk())

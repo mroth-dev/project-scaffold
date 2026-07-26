@@ -2,7 +2,6 @@ package com.example.scaffold.config;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
-
 import javax.sql.DataSource;
 
 import org.springframework.boot.health.contributor.Health;

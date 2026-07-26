@@ -33,7 +33,7 @@ class CustomUserDetailsServiceTest {
     @BeforeEach
     void setUp() {
         userDetailsService = new CustomUserDetailsService(userRepository);
-        
+
         testUser = new User();
         testUser.setId(1L);
         testUser.setEmail("test@example.com");
@@ -43,7 +43,7 @@ class CustomUserDetailsServiceTest {
     }
 
     @Test
-    void loadUserByUsername_ExistingUser_ReturnsUserDetails() {
+    void loadUserByUsername_existingUser_returnsUserDetails() {
         // Arrange
         String email = "test@example.com";
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(testUser));
@@ -60,7 +60,7 @@ class CustomUserDetailsServiceTest {
     }
 
     @Test
-    void loadUserByUsername_InactiveUser_ReturnsDisabledUserDetails() {
+    void loadUserByUsername_inactiveUser_returnsDisabledUserDetails() {
         // Arrange
         String email = "test@example.com";
         testUser.setStatus(AccountStatus.INACTIVE);
@@ -75,18 +75,18 @@ class CustomUserDetailsServiceTest {
     }
 
     @Test
-    void loadUserByUsername_NonExistentUser_ThrowsUsernameNotFoundException() {
+    void loadUserByUsername_nonExistentUser_throwsUsernameNotFoundException() {
         // Arrange
         String email = "nonexistent@example.com";
         when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThrows(UsernameNotFoundException.class, () -> 
+        assertThrows(UsernameNotFoundException.class, () ->
             userDetailsService.loadUserByUsername(email));
     }
 
     @Test
-    void loadUserByUsername_AdminUser_ReturnsAdminRole() {
+    void loadUserByUsername_adminUser_returnsAdminRole() {
         // Arrange
         String email = "admin@example.com";
         testUser.setRole(UserRole.ADMIN);

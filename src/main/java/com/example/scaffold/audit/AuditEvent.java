@@ -24,33 +24,33 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 public class AuditEvent {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
     @Column(name = "entity_type", nullable = false)
     private String entityType;
-    
+
     @Column(name = "entity_id")
     private Long entityId;
-    
+
     @Column(name = "event_type", nullable = false)
     private String eventType;
-    
+
     @Column(name = "user_id")
     private Long userId;
-    
+
     @Column(name = "details", columnDefinition = "TEXT")
     private String details;
-    
+
     @Column(name = "timestamp", nullable = false)
     private LocalDateTime timestamp;
-    
+
     @Column(name = "ip_address", columnDefinition = "INET")
     @ColumnTransformer(write = "?::inet")
     private String ipAddress;
-    
+
     @Column(name = "user_agent")
     private String userAgent;
 }

@@ -1,7 +1,9 @@
 package com.example.scaffold.audit;
 
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,7 +28,7 @@ class AuditableAspectTest {
     void setUp() {
         auditableAspect = new AuditableAspect(auditService);
         testService = new TestService();
-        
+
         // Create proxy with aspect
         AspectJProxyFactory factory = new AspectJProxyFactory(testService);
         factory.addAspect(auditableAspect);
@@ -34,7 +36,7 @@ class AuditableAspectTest {
     }
 
     @Test
-    void auditableAnnotation_OnMethodExecution_ShouldLogEvent() {
+    void auditableAnnotation_onMethodExecution_shouldLogEvent() {
         // Act
         TestEntity result = proxiedTestService.createEntity("Test Name");
 
@@ -48,7 +50,7 @@ class AuditableAspectTest {
     }
 
     @Test
-    void auditableAnnotation_WithLogBefore_ShouldLogBeforeExecution() {
+    void auditableAnnotation_withLogBefore_shouldLogBeforeExecution() {
         // Act
         proxiedTestService.deleteEntity(456L);
 
@@ -62,7 +64,7 @@ class AuditableAspectTest {
     }
 
     @Test
-    void auditableAnnotation_WithDetailsExpression_ShouldExtractCustomDetails() {
+    void auditableAnnotation_withDetailsExpression_shouldExtractCustomDetails() {
         // Act
         TestEntity result = proxiedTestService.updateEntity(789L, "Updated Name");
 
@@ -77,8 +79,8 @@ class AuditableAspectTest {
 
     // Test service class with auditable methods
     static class TestService {
-        
-        @Auditable(entityType = "TEST_ENTITY", eventType = "CREATE", 
+
+        @Auditable(entityType = "TEST_ENTITY", eventType = "CREATE",
                   entityIdExpression = "#result.id")
         public TestEntity createEntity(String name) {
             TestEntity entity = new TestEntity();
@@ -86,13 +88,13 @@ class AuditableAspectTest {
             entity.setName(name);
             return entity;
         }
-        
-        @Auditable(entityType = "TEST_ENTITY", eventType = "DELETE", 
+
+        @Auditable(entityType = "TEST_ENTITY", eventType = "DELETE",
                   entityIdExpression = "#id", logBefore = true, logAfter = false)
         public void deleteEntity(Long id) {
             // Simulate deletion
         }
-        
+
         @Auditable(entityType = "TEST_ENTITY", eventType = "UPDATE",
                   entityIdExpression = "#id", detailsExpression = "#name")
         public TestEntity updateEntity(Long id, String name) {
@@ -108,9 +110,20 @@ class AuditableAspectTest {
         private Long id;
         private String name;
 
-        public Long getId() { return id; }
-        public void setId(Long id) { this.id = id; }
-        public String getName() { return name; }
-        public void setName(String name) { this.name = name; }
+        public Long getId() {
+            return id;
+        }
+
+        public void setId(Long id) {
+            this.id = id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
     }
 }

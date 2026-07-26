@@ -8,8 +8,8 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 @EnableAspectJAutoProxy
 public class ScaffoldApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(ScaffoldApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(ScaffoldApplication.class, args);
+    }
 
 }

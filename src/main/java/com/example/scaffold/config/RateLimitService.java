@@ -1,12 +1,13 @@
 package com.example.scaffold.config;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.time.Duration;
+import java.util.concurrent.TimeUnit;
+
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
-import java.util.concurrent.TimeUnit;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Redis-based rate limiting service
@@ -23,13 +24,13 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class RateLimitService {
 
-    private final StringRedisTemplate redisTemplate;
-
     private static final String RATE_LIMIT_KEY_PREFIX = "rate_limit:";
+
+    private final StringRedisTemplate redisTemplate;
 
     /**
      * Check if a request is allowed based on rate limiting rules
-     * 
+     *
      * @param key Unique identifier for the client/endpoint combination
      * @param maxRequests Maximum number of requests allowed
      * @param windowSeconds Time window in seconds
@@ -37,30 +38,30 @@ public class RateLimitService {
      */
     public boolean isAllowed(String key, int maxRequests, int windowSeconds) {
         String redisKey = RATE_LIMIT_KEY_PREFIX + key;
-        
+
         try {
             // Get current count
             String countStr = redisTemplate.opsForValue().get(redisKey);
             int currentCount = countStr != null ? Integer.parseInt(countStr) : 0;
-            
+
             if (currentCount >= maxRequests) {
-                log.debug("Rate limit exceeded for key: {}, current: {}, max: {}", 
+                log.debug("Rate limit exceeded for key: {}, current: {}, max: {}",
                          key, currentCount, maxRequests);
                 return false;
             }
-            
+
             // Increment counter
             Long newCount = redisTemplate.opsForValue().increment(redisKey);
-            
+
             // Set expiration if this is the first request in the window
             if (newCount == 1) {
                 redisTemplate.expire(redisKey, Duration.ofSeconds(windowSeconds));
             }
-            
-            log.debug("Rate limit check passed for key: {}, count: {}/{}", 
+
+            log.debug("Rate limit check passed for key: {}, count: {}/{}",
                      key, newCount, maxRequests);
             return true;
-            
+
         } catch (Exception e) {
             log.warn("Redis rate limiting failed for key: {}, allowing request", key, e);
             // If Redis fails, allow the request (fail open)
@@ -70,14 +71,14 @@ public class RateLimitService {
 
     /**
      * Get remaining requests for a given key
-     * 
+     *
      * @param key Unique identifier for the client/endpoint combination
      * @param maxRequests Maximum number of requests allowed
      * @return Number of remaining requests, or maxRequests if no current limit
      */
     public int getRemainingRequests(String key, int maxRequests) {
         String redisKey = RATE_LIMIT_KEY_PREFIX + key;
-        
+
         try {
             String countStr = redisTemplate.opsForValue().get(redisKey);
             int currentCount = countStr != null ? Integer.parseInt(countStr) : 0;
@@ -90,13 +91,13 @@ public class RateLimitService {
 
     /**
      * Get TTL for a rate limit key
-     * 
+     *
      * @param key Unique identifier for the client/endpoint combination
      * @return TTL in seconds, or -1 if key doesn't exist
      */
     public long getTtl(String key) {
         String redisKey = RATE_LIMIT_KEY_PREFIX + key;
-        
+
         try {
             return redisTemplate.getExpire(redisKey, TimeUnit.SECONDS);
         } catch (Exception e) {
@@ -107,12 +108,12 @@ public class RateLimitService {
 
     /**
      * Reset rate limit for a specific key (useful for testing or admin operations)
-     * 
+     *
      * @param key Unique identifier for the client/endpoint combination
      */
     public void reset(String key) {
         String redisKey = RATE_LIMIT_KEY_PREFIX + key;
-        
+
         try {
             redisTemplate.delete(redisKey);
             log.debug("Rate limit reset for key: {}", key);
@@ -123,7 +124,7 @@ public class RateLimitService {
 
     /**
      * Build a rate limiting key from client identifier and endpoint
-     * 
+     *
      * @param clientId Client identifier (IP address, user ID, etc.)
      * @param endpoint API endpoint path
      * @return Formatted rate limit key

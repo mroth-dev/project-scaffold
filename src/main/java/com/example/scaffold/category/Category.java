@@ -4,10 +4,10 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.example.scaffold.audit.AuditEntityListener;
-
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+
+import com.example.scaffold.audit.AuditEntityListener;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

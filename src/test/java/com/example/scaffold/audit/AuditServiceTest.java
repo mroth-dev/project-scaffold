@@ -1,8 +1,13 @@
 package com.example.scaffold.audit;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -23,6 +28,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.example.scaffold.security.CustomUserDetailsService.CustomUserPrincipal;
+
 import tools.jackson.databind.ObjectMapper;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,19 +39,19 @@ class AuditServiceTest {
 
     private ObjectMapper objectMapper;
     private AuditService auditService;
-    
+
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
         auditService = new AuditService(auditEventRepository, objectMapper);
-        
+
         // Clear security context
         SecurityContextHolder.clearContext();
         RequestContextHolder.resetRequestAttributes();
     }
 
     @Test
-    void logEvent_ShouldCreateAuditEventWithBasicInfo() {
+    void logEvent_shouldCreateAuditEventWithBasicInfo() {
         // Arrange
         String entityType = "USER";
         Long entityId = 123L;
@@ -71,12 +77,13 @@ class AuditServiceTest {
     }
 
     @Test
-    void logEvent_WithAuthenticatedUser_ShouldIncludeUserId() {
+    void logEvent_withAuthenticatedUser_shouldIncludeUserId() {
         // Arrange
         CustomUserPrincipal userPrincipal = new CustomUserPrincipal(
             456L, "test@example.com", "password", List.of(), true);
-        
-        Authentication auth = new UsernamePasswordAuthenticationToken(userPrincipal, null, userPrincipal.getAuthorities());
+
+        Authentication auth =
+                new UsernamePasswordAuthenticationToken(userPrincipal, null, userPrincipal.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(auth);
 
         when(auditEventRepository.save(any(AuditEvent.class))).thenReturn(new AuditEvent());
@@ -93,12 +100,12 @@ class AuditServiceTest {
     }
 
     @Test
-    void logEvent_WithHttpRequest_ShouldIncludeRequestInfo() {
+    void logEvent_withHttpRequest_shouldIncludeRequestInfo() {
         // Arrange
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.setRemoteAddr("192.168.1.100");
         request.addHeader("User-Agent", "Mozilla/5.0 Test Browser");
-        
+
         RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
         when(auditEventRepository.save(any(AuditEvent.class))).thenReturn(new AuditEvent());
 
@@ -115,12 +122,12 @@ class AuditServiceTest {
     }
 
     @Test
-    void logEvent_WithXForwardedForHeader_ShouldUseForwardedIp() {
+    void logEvent_withXForwardedForHeader_shouldUseForwardedIp() {
         // Arrange
         MockHttpServletRequest request = new MockHttpServletRequest();
-        request.setRemoteAddr("10.0.0.1");  // Load balancer IP
+        request.setRemoteAddr("10.0.0.1"); // Load balancer IP
         request.addHeader("X-Forwarded-For", "203.0.113.195, 70.41.3.18, 150.172.238.178");
-        
+
         RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
         when(auditEventRepository.save(any(AuditEvent.class))).thenReturn(new AuditEvent());
 
@@ -136,12 +143,12 @@ class AuditServiceTest {
     }
 
     @Test
-    void logEvent_WithObjectDetails_ShouldSerializeToJson() {
+    void logEvent_withObjectDetails_shouldSerializeToJson() {
         // Arrange
         Map<String, Object> detailsMap = new HashMap<>();
         detailsMap.put("field1", "value1");
         detailsMap.put("field2", 42);
-        
+
         when(auditEventRepository.save(any(AuditEvent.class))).thenReturn(new AuditEvent());
 
         // Act
@@ -159,7 +166,7 @@ class AuditServiceTest {
     }
 
     @Test
-    void logEvent_WithExplicitUserId_ShouldUseProvidedUserId() {
+    void logEvent_withExplicitUserId_shouldUseProvidedUserId() {
         // Arrange
         Long explicitUserId = 999L;
         when(auditEventRepository.save(any(AuditEvent.class))).thenReturn(new AuditEvent());
@@ -176,12 +183,12 @@ class AuditServiceTest {
     }
 
     @Test
-    void logAuthEvent_ShouldCreateAuthenticationAuditEvent() {
+    void logAuthEvent_shouldCreateAuthenticationAuditEvent() {
         // Arrange
         String eventType = "LOGIN_ATTEMPT";
         String username = "testuser@example.com";
         String details = "Failed login attempt";
-        
+
         when(auditEventRepository.save(any(AuditEvent.class))).thenReturn(new AuditEvent());
 
         // Act
@@ -200,11 +207,11 @@ class AuditServiceTest {
     }
 
     @Test
-    void logEvent_SystemEvent_ShouldCreateSystemAuditEvent() {
+    void logEvent_systemEvent_shouldCreateSystemAuditEvent() {
         // Arrange
         String eventType = "SYSTEM_STARTUP";
         String details = "Application started successfully";
-        
+
         when(auditEventRepository.save(any(AuditEvent.class))).thenReturn(new AuditEvent());
 
         // Act
@@ -222,7 +229,7 @@ class AuditServiceTest {
     }
 
     @Test
-    void logEvent_WhenRepositoryFails_ShouldNotThrowException() {
+    void logEvent_whenRepositoryFails_shouldNotThrowException() {
         // Arrange
         when(auditEventRepository.save(any(AuditEvent.class)))
                 .thenThrow(new RuntimeException("Database error"));

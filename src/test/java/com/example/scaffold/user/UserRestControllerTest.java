@@ -58,8 +58,8 @@ class UserRestControllerTest {
 
     @Test
     void getUsersReturnsList() throws Exception {
-        UserDto user = new UserDto(1L, "admin@mail.com", "Sir", "Admin", 
-                LocalDate.of(1999, 8, 30), Gender.MALE, UserRole.ADMIN, 
+        UserDto user = new UserDto(1L, "admin@mail.com", "Sir", "Admin",
+                LocalDate.of(1999, 8, 30), Gender.MALE, UserRole.ADMIN,
                 AccountStatus.ACTIVE, LocalDateTime.now(), LocalDateTime.now());
         given(userService.getUsers()).willReturn(List.of(user));
 
@@ -71,8 +71,8 @@ class UserRestControllerTest {
 
     @Test
     void getUserReturnsSingleUser() throws Exception {
-        UserDto user = new UserDto(1L, "admin@mail.com", "Sir", "Admin", 
-                LocalDate.of(1999, 8, 30), Gender.MALE, UserRole.ADMIN, 
+        UserDto user = new UserDto(1L, "admin@mail.com", "Sir", "Admin",
+                LocalDate.of(1999, 8, 30), Gender.MALE, UserRole.ADMIN,
                 AccountStatus.ACTIVE, LocalDateTime.now(), LocalDateTime.now());
         given(userService.getUser(1L)).willReturn(user);
 
@@ -91,10 +91,10 @@ class UserRestControllerTest {
 
     @Test
     void createUserReturns201() throws Exception {
-        UserRequest request = new UserRequest("new.user@mail.com", "password123", "New", "User", 
+        UserRequest request = new UserRequest("new.user@mail.com", "password123", "New", "User",
                 LocalDate.of(2000, 1, 1), Gender.FEMALE, UserRole.CUSTOMER);
-        UserDto created = new UserDto(2L, "new.user@mail.com", "New", "User", 
-                LocalDate.of(2000, 1, 1), Gender.FEMALE, UserRole.CUSTOMER, 
+        UserDto created = new UserDto(2L, "new.user@mail.com", "New", "User",
+                LocalDate.of(2000, 1, 1), Gender.FEMALE, UserRole.CUSTOMER,
                 AccountStatus.ACTIVE, LocalDateTime.now(), LocalDateTime.now());
         given(userService.createUser(any(UserRequest.class))).willReturn(created);
 

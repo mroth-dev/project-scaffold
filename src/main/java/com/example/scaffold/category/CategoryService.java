@@ -16,6 +16,7 @@ import com.example.scaffold.exception.NotFoundException;
 import com.example.scaffold.product.Product;
 import com.example.scaffold.product.ProductRepository;
 import com.example.scaffold.product.ProductSummaryDto;
+
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -60,7 +61,7 @@ public class CategoryService {
 
     public Page<ProductSummaryDto> getProductsInCategory(Long categoryId, Pageable pageable) {
         log.debug("Fetching products in category: {}", categoryId);
-        return productRepository.findByCategories_Id(categoryId, pageable).map(this::toProductSummaryDto);
+        return productRepository.findByCategoriesId(categoryId, pageable).map(this::toProductSummaryDto);
     }
 
     public CategoryDto createCategory(CategoryRequest request) {
@@ -148,7 +149,8 @@ public class CategoryService {
                 .sorted(Comparator.comparingInt(Category::getSortOrder))
                 .map(child -> toTreeDto(child, childrenByParentId))
                 .toList();
-        return new CategoryTreeDto(category.getId(), category.getName(), category.getSlug(), category.getSortOrder(), children);
+        return new CategoryTreeDto(
+                category.getId(), category.getName(), category.getSlug(), category.getSortOrder(), children);
     }
 
     private CategoryDto toDto(Category category) {
@@ -164,6 +166,7 @@ public class CategoryService {
     }
 
     private ProductSummaryDto toProductSummaryDto(Product product) {
-        return new ProductSummaryDto(product.getId(), product.getName(), product.getSku(), product.getBasePrice(), product.isActive());
+        return new ProductSummaryDto(
+                product.getId(), product.getName(), product.getSku(), product.getBasePrice(), product.isActive());
     }
 }

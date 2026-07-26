@@ -5,13 +5,13 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.example.scaffold.audit.AuditEntityListener;
-import com.example.scaffold.user.User;
-
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.type.SqlTypes;
+
+import com.example.scaffold.audit.AuditEntityListener;
+import com.example.scaffold.user.User;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;

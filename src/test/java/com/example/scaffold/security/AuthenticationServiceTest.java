@@ -39,7 +39,7 @@ class AuthenticationServiceTest {
     @BeforeEach
     void setUp() {
         authenticationService = new AuthenticationService(userRepository, passwordEncoder, jwtTokenProvider);
-        
+
         testUser = new User();
         testUser.setId(1L);
         testUser.setEmail("test@example.com");
@@ -49,7 +49,7 @@ class AuthenticationServiceTest {
     }
 
     @Test
-    void authenticate_ValidCredentials_ReturnsToken() {
+    void authenticate_validCredentials_returnsToken() {
         // Arrange
         String email = "test@example.com";
         String password = "password";
@@ -67,7 +67,7 @@ class AuthenticationServiceTest {
     }
 
     @Test
-    void authenticate_InvalidEmail_ThrowsBadCredentialsException() {
+    void authenticate_invalidEmail_throwsBadCredentialsException() {
         // Arrange
         String email = "nonexistent@example.com";
         String password = "password";
@@ -75,12 +75,12 @@ class AuthenticationServiceTest {
         when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThrows(BadCredentialsException.class, () -> 
+        assertThrows(BadCredentialsException.class, () ->
             authenticationService.authenticate(email, password));
     }
 
     @Test
-    void authenticate_InvalidPassword_ThrowsBadCredentialsException() {
+    void authenticate_invalidPassword_throwsBadCredentialsException() {
         // Arrange
         String email = "test@example.com";
         String password = "wrongPassword";
@@ -89,12 +89,12 @@ class AuthenticationServiceTest {
         when(passwordEncoder.matches(password, testUser.getPassword())).thenReturn(false);
 
         // Act & Assert
-        assertThrows(BadCredentialsException.class, () -> 
+        assertThrows(BadCredentialsException.class, () ->
             authenticationService.authenticate(email, password));
     }
 
     @Test
-    void validateToken_ValidToken_ReturnsTrue() {
+    void validateToken_validToken_returnsTrue() {
         // Arrange
         String token = "valid-token";
         when(jwtTokenProvider.validateToken(token)).thenReturn(true);
@@ -107,7 +107,7 @@ class AuthenticationServiceTest {
     }
 
     @Test
-    void getEmailFromToken_ValidToken_ReturnsEmail() {
+    void getEmailFromToken_validToken_returnsEmail() {
         // Arrange
         String token = "valid-token";
         String expectedEmail = "test@example.com";

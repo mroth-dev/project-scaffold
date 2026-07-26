@@ -14,7 +14,7 @@ public class AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
 
-    public AuthenticationService(UserRepository userRepository, 
+    public AuthenticationService(UserRepository userRepository,
                                PasswordEncoder passwordEncoder,
                                JwtTokenProvider jwtTokenProvider) {
         this.userRepository = userRepository;
