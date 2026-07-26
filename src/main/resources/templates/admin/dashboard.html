@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Scaffold Shop</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <script th:src="@{/webjars/htmx.org/2.0.4/dist/htmx.min.js}"></script>
+</head>
+<body>
+    <div th:replace="~{fragments/nav :: nav}"></div>
+
+    <main class="container mx-auto px-4 md:px-8 max-w-4xl py-8">
+        <div th:replace="~{admin/fragments/nav :: adminNav(section='dashboard')}"></div>
+
+        <h1 class="text-2xl font-bold mb-6">Admin</h1>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            <a class="card bg-base-100 shadow-sm border border-base-300 hover:shadow-md transition-shadow" th:href="@{/admin/products}">
+                <div class="card-body items-center text-center py-8">
+                    <h3 class="font-semibold">Products</h3>
+                    <p class="text-sm text-base-content/60">Manage products &amp; variations</p>
+                </div>
+            </a>
+            <a class="card bg-base-100 shadow-sm border border-base-300 hover:shadow-md transition-shadow" th:href="@{/admin/categories}">
+                <div class="card-body items-center text-center py-8">
+                    <h3 class="font-semibold">Categories</h3>
+                    <p class="text-sm text-base-content/60">Manage the category tree</p>
+                </div>
+            </a>
+            <a class="card bg-base-100 shadow-sm border border-base-300 hover:shadow-md transition-shadow" th:href="@{/admin/orders}">
+                <div class="card-body items-center text-center py-8">
+                    <h3 class="font-semibold">Orders</h3>
+                    <p class="text-sm text-base-content/60">Review &amp; update order status</p>
+                </div>
+            </a>
+            <a class="card bg-base-100 shadow-sm border border-base-300 hover:shadow-md transition-shadow" th:href="@{/admin/users}">
+                <div class="card-body items-center text-center py-8">
+                    <h3 class="font-semibold">Users</h3>
+                    <p class="text-sm text-base-content/60">View registered users</p>
+                </div>
+            </a>
+            <a class="card bg-base-100 shadow-sm border border-base-300 hover:shadow-md transition-shadow" th:href="@{/admin/audit}">
+                <div class="card-body items-center text-center py-8">
+                    <h3 class="font-semibold">Audit Log</h3>
+                    <p class="text-sm text-base-content/60">View recorded audit events</p>
+                </div>
+            </a>
+        </div>
+    </main>
+</body>
+</html>

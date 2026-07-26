@@ -1,8 +1,11 @@
 package com.example.scaffold.security;
 
+import java.util.Set;
+
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -38,11 +41,25 @@ public class WebAuthenticationModelAdvice {
                 && !(authentication instanceof AnonymousAuthenticationToken);
 
         model.addAttribute("authenticated", authenticated);
-        if (authenticated
-                && authentication.getPrincipal() instanceof CustomUserDetailsService.CustomUserPrincipal principal) {
-            model.addAttribute("currentUserEmail", principal.getUsername());
+        boolean isAdminOrManager = false;
+        if (authenticated) {
+            if (authentication.getPrincipal() instanceof CustomUserDetailsService.CustomUserPrincipal principal) {
+                model.addAttribute("currentUserEmail", principal.getUsername());
+            }
+            isAdminOrManager = hasAnyRole(authentication, "ROLE_ADMIN", "ROLE_MANAGER");
         }
+        model.addAttribute("isAdminOrManager", isAdminOrManager);
         ShoppingCart cart = shoppingCart.getIfAvailable();
         model.addAttribute("cartItemCount", cart != null ? cart.getItemCount() : 0);
+    }
+
+    private boolean hasAnyRole(Authentication authentication, String... roles) {
+        Set<String> wanted = Set.of(roles);
+        for (GrantedAuthority authority : authentication.getAuthorities()) {
+            if (wanted.contains(authority.getAuthority())) {
+                return true;
+            }
+        }
+        return false;
     }
 }

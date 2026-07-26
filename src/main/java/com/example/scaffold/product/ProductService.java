@@ -1,7 +1,10 @@
 package com.example.scaffold.product;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -105,22 +108,34 @@ public class ProductService {
     }
 
     private void syncVariations(Product product, List<ProductVariationRequest> variationRequests) {
-        product.getVariations().clear();
         if (variationRequests == null) {
+            product.getVariations().clear();
             return;
         }
+        // Reuse existing rows matched by SKU instead of deleting and recreating
+        // every variation: since `sku` is globally unique, a blind clear-then-add
+        // schedules inserts of unchanged SKUs before Hibernate flushes the deletes
+        // of the rows they're replacing, tripping the unique constraint.
+        Map<String, ProductVariation> existingBySku = product.getVariations().stream()
+                .collect(Collectors.toMap(ProductVariation::getSku, variation -> variation));
+        List<ProductVariation> reconciled = new ArrayList<>();
         for (ProductVariationRequest variationRequest : variationRequests) {
-            ProductVariation variation = new ProductVariation();
-            variation.setProduct(product);
+            ProductVariation variation = existingBySku.remove(variationRequest.sku());
+            if (variation == null) {
+                variation = new ProductVariation();
+                variation.setProduct(product);
+                variation.setSku(variationRequest.sku());
+            }
             variation.setSize(variationRequest.size());
             variation.setColor(variationRequest.color());
-            variation.setSku(variationRequest.sku());
             variation.setInventoryCount(
                     variationRequest.inventoryCount() != null ? variationRequest.inventoryCount() : 0);
             variation.setPriceAdjustment(
                     variationRequest.priceAdjustment() != null ? variationRequest.priceAdjustment() : BigDecimal.ZERO);
-            product.getVariations().add(variation);
+            reconciled.add(variation);
         }
+        product.getVariations().clear();
+        product.getVariations().addAll(reconciled);
     }
 
     private ProductDto toDto(Product product) {

@@ -6,22 +6,30 @@
     <link rel="stylesheet" th:href="@{/css/app.css}">
     <script th:src="@{/webjars/htmx.org/2.0.4/dist/htmx.min.js}"></script>
 </head>
-<body class="min-h-screen flex flex-col">
+<body>
     <div th:replace="~{fragments/nav :: nav}"></div>
 
-    <main class="flex-1 container mx-auto px-4 md:px-8 max-w-4xl">
-        <p class="mb-4"><a class="link link-hover" th:href="@{/orders}">&larr; Back to my orders</a></p>
+    <main class="container mx-auto px-4 md:px-8 max-w-4xl py-8">
+        <div th:replace="~{admin/fragments/nav :: adminNav(section='orders')}"></div>
+
+        <p class="mb-4"><a class="link link-hover" th:href="@{/admin/orders}">&larr; Back to orders</a></p>
 
         <h1 class="text-2xl font-bold" th:text="'Order #' + ${order.id}"></h1>
-
-        <p class="mt-2 flex items-center gap-2">
-            Status:
-            <span id="order-status" hx-trigger="every 10s" hx-swap="innerHTML"
-                  th:attr="hx-get=@{'/orders/' + ${order.id} + '/status'}"
-                  th:insert="~{orders/fragments/status-badge :: statusBadge}"></span>
-        </p>
+        <p class="text-base-content/60" th:text="'Customer #' + ${order.customerId}"></p>
         <p class="text-base-content/60" th:text="'Placed ' + ${#temporals.format(order.createdAt, 'dd MMM yyyy HH:mm')}"></p>
         <p class="font-bold mt-1" th:text="'Total: £' + ${order.totalAmount}"></p>
+
+        <div class="mt-4 flex items-center gap-2" th:if="${order.status.name() != 'DELIVERED' and order.status.name() != 'CANCELLED'}">
+            <form class="flex items-center gap-2" th:action="@{'/admin/orders/' + ${order.id} + '/status'}" method="post">
+                <select name="status" class="select select-sm">
+                    <option th:each="s : ${statuses}" th:value="${s}" th:text="${s}" th:selected="${s == order.status}"></option>
+                </select>
+                <button type="submit" class="btn btn-primary btn-sm">Update status</button>
+            </form>
+        </div>
+        <div class="mt-4" th:unless="${order.status.name() != 'DELIVERED' and order.status.name() != 'CANCELLED'}">
+            <span class="badge badge-sm" th:text="${order.status}"></span>
+        </div>
 
         <div class="overflow-x-auto mt-6">
             <table class="table">
@@ -42,7 +50,5 @@
             </table>
         </div>
     </main>
-
-    <div th:replace="~{fragments/footer :: footer}"></div>
 </body>
 </html>

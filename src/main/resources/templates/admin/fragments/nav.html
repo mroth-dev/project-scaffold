@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <div th:fragment="adminNav">
+        <p class="mb-2"><a class="link link-hover" th:href="@{/}">&larr; Back to shop</a></p>
+        <div class="tabs tabs-boxed mb-8 w-fit">
+            <a class="tab" th:classappend="${section == 'dashboard'} ? 'tab-active'" th:href="@{/admin}">Dashboard</a>
+            <a class="tab" th:classappend="${section == 'products'} ? 'tab-active'" th:href="@{/admin/products}">Products</a>
+            <a class="tab" th:classappend="${section == 'categories'} ? 'tab-active'" th:href="@{/admin/categories}">Categories</a>
+            <a class="tab" th:classappend="${section == 'orders'} ? 'tab-active'" th:href="@{/admin/orders}">Orders</a>
+            <a class="tab" th:classappend="${section == 'users'} ? 'tab-active'" th:href="@{/admin/users}">Users</a>
+            <a class="tab" th:classappend="${section == 'audit'} ? 'tab-active'" th:href="@{/admin/audit}">Audit Log</a>
+        </div>
+    </div>
+</body>
+</html>

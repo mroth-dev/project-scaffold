@@ -6,10 +6,10 @@
     <link rel="stylesheet" th:href="@{/css/app.css}">
     <script th:src="@{/webjars/htmx.org/2.0.4/dist/htmx.min.js}"></script>
 </head>
-<body>
+<body class="min-h-screen flex flex-col">
     <div th:replace="~{fragments/nav :: nav}"></div>
 
-    <main class="flex justify-center px-4">
+    <main class="flex-1 flex justify-center px-4">
         <div class="card w-full max-w-sm bg-base-100 shadow-sm border border-base-300">
             <div class="card-body">
                 <h1 class="card-title">Create an account</h1>
@@ -47,5 +47,7 @@
             </div>
         </div>
     </main>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
 </body>
 </html>

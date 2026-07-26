@@ -54,13 +54,16 @@ public class SecurityConfig {
                         .requestMatchers("/orders", "/orders/**").authenticated()
                         // TODO - Temporarily permit all for development
                         .requestMatchers("/users/**", "/webjars/**", "/css/**", "/js/**").permitAll()
+                        // Admin management section (products, categories, orders, users, audit)
+                        .requestMatchers("/admin/**").hasAnyRole("ADMIN", "MANAGER")
                         // Protected endpoints
                         .requestMatchers("/api/users", "/api/users/**").hasAnyRole("ADMIN", "MANAGER")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/manager/**").hasAnyRole("ADMIN", "MANAGER")
                         // Admin/Dev endpoints
                         .requestMatchers("/actuator/health/**").hasAnyRole("ADMIN", "DEVELOPER")
-                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").hasAnyRole("ADMIN", "DEVELOPER")
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
+                                .hasAnyRole("ADMIN", "DEVELOPER")
                         // All other requests require authentication
                         .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(new WebAwareAuthenticationEntryPoint()))

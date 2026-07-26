@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <footer class="footer sm:footer-horizontal bg-base-200 text-base-content border-t border-base-300 px-4 md:px-8 py-10 mt-20" th:fragment="footer">
+        <nav>
+            <h6 class="footer-title">Scaffold Shop</h6>
+            <p class="max-w-xs text-base-content/70">Quality essentials, thoughtfully made.</p>
+        </nav>
+        <nav>
+            <h6 class="footer-title">Quick Links</h6>
+            <a class="link link-hover" th:href="@{/}">Home</a>
+            <a class="link link-hover" th:href="@{/products}">Products</a>
+            <a class="link link-hover" th:href="@{/cart}">Cart</a>
+            <a class="link link-hover" th:href="@{/orders}" th:if="${authenticated}">My Orders</a>
+            <a class="link link-hover" th:href="@{/login}" th:unless="${authenticated}">Login</a>
+        </nav>
+        <nav>
+            <h6 class="footer-title">Customer Service</h6>
+            <a class="link link-hover" href="#">Contact Us</a>
+            <a class="link link-hover" href="#">Shipping Info</a>
+            <a class="link link-hover" href="#">Returns</a>
+            <a class="link link-hover" href="#">FAQ</a>
+        </nav>
+        <nav>
+            <h6 class="footer-title">Stay Connected</h6>
+            <p class="max-w-xs text-base-content/70 mb-2">Get updates on new arrivals and offers.</p>
+            <div class="join">
+                <input type="email" placeholder="you@example.com" class="input input-sm join-item">
+                <button type="button" class="btn btn-sm btn-primary join-item">Subscribe</button>
+            </div>
+        </nav>
+    </footer>
+</body>
+</html>

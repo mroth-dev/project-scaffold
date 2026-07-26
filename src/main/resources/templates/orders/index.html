@@ -6,10 +6,10 @@
     <link rel="stylesheet" th:href="@{/css/app.css}">
     <script th:src="@{/webjars/htmx.org/2.0.4/dist/htmx.min.js}"></script>
 </head>
-<body>
+<body class="min-h-screen flex flex-col">
     <div th:replace="~{fragments/nav :: nav}"></div>
 
-    <main class="container mx-auto px-4 md:px-8 max-w-4xl">
+    <main class="flex-1 container mx-auto px-4 md:px-8 max-w-4xl">
         <h1 class="text-2xl font-bold mb-6">My Orders</h1>
 
         <div class="overflow-x-auto" th:unless="${page.content.isEmpty()}">
@@ -31,5 +31,7 @@
 
         <p class="text-base-content/60" th:if="${page.content.isEmpty()}">You haven't placed any orders yet. <a class="link link-primary" th:href="@{/products}">Start shopping</a>.</p>
     </main>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
 </body>
 </html>

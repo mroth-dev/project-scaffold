@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Orders - Scaffold Shop</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <script th:src="@{/webjars/htmx.org/2.0.4/dist/htmx.min.js}"></script>
+</head>
+<body>
+    <div th:replace="~{fragments/nav :: nav}"></div>
+
+    <main class="container mx-auto px-4 md:px-8 max-w-5xl py-8">
+        <div th:replace="~{admin/fragments/nav :: adminNav(section='orders')}"></div>
+
+        <h1 class="text-2xl font-bold mb-6">Orders</h1>
+
+        <form class="mb-4 flex items-center gap-2" th:action="@{/admin/orders}" method="get">
+            <select name="status" class="select w-48" onchange="this.form.submit()">
+                <option value="">All statuses</option>
+                <option th:each="s : ${statuses}" th:value="${s}" th:text="${s}" th:selected="${s == status}"></option>
+            </select>
+        </form>
+
+        <div class="overflow-x-auto" th:unless="${page.content.isEmpty()}">
+            <table class="table">
+                <thead>
+                    <tr><th>Order</th><th>Customer</th><th>Status</th><th>Total</th><th>Placed</th><th></th></tr>
+                </thead>
+                <tbody>
+                    <tr th:each="order : ${page.content}">
+                        <td th:text="'#' + ${order.id}"></td>
+                        <td th:text="${order.customerId}"></td>
+                        <td><span class="badge badge-sm" th:text="${order.status}"></span></td>
+                        <td th:text="${'£' + order.totalAmount}"></td>
+                        <td th:text="${#temporals.format(order.createdAt, 'dd MMM yyyy HH:mm')}"></td>
+                        <td><a class="link link-primary" th:href="@{'/admin/orders/' + ${order.id}}">View</a></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <p class="text-base-content/60" th:if="${page.content.isEmpty()}">No orders found.</p>
+    </main>
+</body>
+</html>

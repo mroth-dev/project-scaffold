@@ -2,19 +2,23 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Users</title>
+    <title>Users - Scaffold Shop</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
     <script th:src="@{/webjars/htmx.org/2.0.4/dist/htmx.min.js}"></script>
 </head>
-<body class="min-h-screen flex flex-col">
-    <main class="flex-1 container mx-auto px-4 md:px-8 max-w-4xl py-8">
+<body>
+    <div th:replace="~{fragments/nav :: nav}"></div>
+
+    <main class="container mx-auto px-4 md:px-8 max-w-5xl py-8">
+        <div th:replace="~{admin/fragments/nav :: adminNav(section='users')}"></div>
+
         <h1 class="text-2xl font-bold mb-6">Users</h1>
 
         <input type="search"
                name="query"
-               placeholder="Search by name..."
+               placeholder="Search by name or email..."
                autocomplete="off"
-               hx-get="/users/table"
+               hx-get="/admin/users/table"
                hx-trigger="keyup changed delay:300ms, search"
                hx-target="#user-table-body"
                hx-swap="outerHTML"
@@ -27,26 +31,29 @@
                         <th>ID</th>
                         <th>Name</th>
                         <th>Email</th>
-                        <th>Date of Birth</th>
-                        <th>Gender</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Joined</th>
                     </tr>
                 </thead>
                 <tbody id="user-table-body" th:fragment="userTable">
                     <tr th:each="user : ${users}">
                         <td th:text="${user.id}"></td>
-                        <td th:text="${user.firstName}"></td>
+                        <td th:text="${user.firstName + ' ' + user.lastName}"></td>
                         <td th:text="${user.email}"></td>
-                        <td th:text="${user.birthDate}"></td>
-                        <td th:text="${user.gender}"></td>
+                        <td><span class="badge badge-sm" th:text="${user.role}"></span></td>
+                        <td>
+                            <span class="badge badge-sm" th:classappend="${user.status.name() == 'ACTIVE'} ? 'badge-success' : 'badge-neutral'"
+                                  th:text="${user.status}"></span>
+                        </td>
+                        <td th:text="${#temporals.format(user.createdAt, 'dd MMM yyyy')}"></td>
                     </tr>
                     <tr th:if="${users.isEmpty()}">
-                        <td colspan="5" class="text-base-content/60">No users found.</td>
+                        <td colspan="6" class="text-base-content/60">No users found.</td>
                     </tr>
                 </tbody>
             </table>
         </div>
     </main>
-
-    <div th:replace="~{fragments/footer :: footer}"></div>
 </body>
 </html>

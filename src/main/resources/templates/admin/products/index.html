@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Products - Scaffold Shop</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <script th:src="@{/webjars/htmx.org/2.0.4/dist/htmx.min.js}"></script>
+</head>
+<body>
+    <div th:replace="~{fragments/nav :: nav}"></div>
+
+    <main class="container mx-auto px-4 md:px-8 max-w-6xl py-8">
+        <div th:replace="~{admin/fragments/nav :: adminNav(section='products')}"></div>
+
+        <div class="flex items-center justify-between mb-6">
+            <h1 class="text-2xl font-bold">Products</h1>
+            <a class="btn btn-primary" th:href="@{/admin/products/new}">New product</a>
+        </div>
+
+        <form class="mb-4" th:action="@{/admin/products}" method="get">
+            <input type="search" name="query" placeholder="Search products..." autocomplete="off"
+                   th:value="${query}" class="input w-full max-w-sm">
+        </form>
+
+        <div class="overflow-x-auto">
+            <table class="table">
+                <thead>
+                    <tr><th>ID</th><th>Name</th><th>SKU</th><th>Price</th><th>Active</th><th>Variations</th><th></th></tr>
+                </thead>
+                <tbody>
+                    <tr th:each="product : ${page.content}">
+                        <td th:text="${product.id}"></td>
+                        <td th:text="${product.name}"></td>
+                        <td th:text="${product.sku}"></td>
+                        <td th:text="${'£' + product.basePrice}"></td>
+                        <td>
+                            <span class="badge badge-sm" th:classappend="${product.active} ? 'badge-success' : 'badge-neutral'"
+                                  th:text="${product.active} ? 'Active' : 'Inactive'"></span>
+                        </td>
+                        <td th:text="${product.variations.size()}"></td>
+                        <td class="flex gap-2">
+                            <a class="link link-primary" th:href="@{'/admin/products/' + ${product.id} + '/edit'}">Edit</a>
+                            <form th:action="@{'/admin/products/' + ${product.id} + '/delete'}" method="post"
+                                  onsubmit="return confirm('Delete this product?');">
+                                <button type="submit" class="link link-error">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    <tr th:if="${page.content.isEmpty()}">
+                        <td colspan="7" class="text-base-content/60">No products found.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</body>
+</html>

@@ -26,6 +26,7 @@
                 <div tabindex="0" role="button" class="btn btn-ghost" th:text="${currentUserEmail}"></div>
                 <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-10 w-48 p-2 shadow">
                     <li><a th:href="@{/orders}">My Orders</a></li>
+                    <li th:if="${isAdminOrManager}"><a th:href="@{/admin}">Admin</a></li>
                     <li>
                         <form th:action="@{/logout}" method="post">
                             <button type="submit" class="w-full text-left">Logout</button>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${product != null} ? 'Edit Product - Scaffold Shop' : 'New Product - Scaffold Shop'"></title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <script th:src="@{/webjars/htmx.org/2.0.4/dist/htmx.min.js}"></script>
+</head>
+<body>
+    <div th:replace="~{fragments/nav :: nav}"></div>
+
+    <main class="container mx-auto px-4 md:px-8 max-w-4xl py-8">
+        <div th:replace="~{admin/fragments/nav :: adminNav(section='products')}"></div>
+
+        <p class="mb-4"><a class="link link-hover" th:href="@{/admin/products}">&larr; Back to products</a></p>
+
+        <h1 class="text-2xl font-bold mb-6" th:text="${product != null} ? 'Edit Product' : 'New Product'"></h1>
+
+        <form th:action="${product != null} ? @{'/admin/products/' + ${product.id}} : @{/admin/products}" method="post"
+              class="flex flex-col gap-4 max-w-2xl">
+
+            <label class="form-control">
+                <span class="label-text">Name</span>
+                <input type="text" name="name" required class="input w-full" th:value="${product != null} ? ${product.name} : ''">
+            </label>
+
+            <label class="form-control">
+                <span class="label-text">Description</span>
+                <textarea name="description" class="textarea w-full" th:text="${product != null} ? ${product.description} : ''"></textarea>
+            </label>
+
+            <div class="grid grid-cols-2 gap-4">
+                <label class="form-control">
+                    <span class="label-text">SKU</span>
+                    <input type="text" name="sku" required class="input w-full" th:value="${product != null} ? ${product.sku} : ''">
+                </label>
+                <label class="form-control flex-row items-center gap-2 mt-6">
+                    <input type="checkbox" name="active" value="true" class="checkbox"
+                           th:checked="${product == null or product.active}">
+                    <span class="label-text">Active</span>
+                </label>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <label class="form-control">
+                    <span class="label-text">Base price</span>
+                    <input type="number" step="0.01" min="0" name="basePrice" required class="input w-full"
+                           th:value="${product != null} ? ${product.basePrice} : ''">
+                </label>
+                <label class="form-control">
+                    <span class="label-text">RRP</span>
+                    <input type="number" step="0.01" min="0" name="rrp" class="input w-full"
+                           th:value="${product != null and product.rrp != null} ? ${product.rrp} : ''">
+                </label>
+            </div>
+
+            <h2 class="text-lg font-semibold mt-4">Variations</h2>
+            <div class="overflow-x-auto">
+                <table class="table">
+                    <thead>
+                        <tr><th>Size</th><th>Color</th><th>SKU</th><th>Stock</th><th>Price adj.</th><th></th></tr>
+                    </thead>
+                    <tbody id="variation-rows">
+                        <tr th:each="variation : ${product != null ? product.variations : {}}">
+                            <td><input type="text" name="variationSize" class="input input-sm w-full" th:value="${variation.size}"></td>
+                            <td><input type="text" name="variationColor" class="input input-sm w-full" th:value="${variation.color}"></td>
+                            <td><input type="text" name="variationSku" class="input input-sm w-full" th:value="${variation.sku}"></td>
+                            <td><input type="number" min="0" name="variationInventory" class="input input-sm w-20" th:value="${variation.inventoryCount}"></td>
+                            <td><input type="number" step="0.01" name="variationPriceAdjustment" class="input input-sm w-24" th:value="${variation.priceAdjustment}"></td>
+                            <td><button type="button" class="btn btn-ghost btn-sm" onclick="this.closest('tr').remove()">Remove</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <button type="button" class="btn btn-sm mt-2" onclick="addVariationRow()">Add variation</button>
+            </div>
+
+            <div class="flex gap-2 mt-4">
+                <button type="submit" class="btn btn-primary" th:text="${product != null} ? 'Save changes' : 'Create product'"></button>
+                <a class="btn btn-ghost" th:href="@{/admin/products}">Cancel</a>
+            </div>
+        </form>
+    </main>
+
+    <template id="variation-row-template">
+        <tr>
+            <td><input type="text" name="variationSize" class="input input-sm w-full"></td>
+            <td><input type="text" name="variationColor" class="input input-sm w-full"></td>
+            <td><input type="text" name="variationSku" class="input input-sm w-full"></td>
+            <td><input type="number" min="0" name="variationInventory" class="input input-sm w-20"></td>
+            <td><input type="number" step="0.01" name="variationPriceAdjustment" class="input input-sm w-24"></td>
+            <td><button type="button" class="btn btn-ghost btn-sm" onclick="this.closest('tr').remove()">Remove</button></td>
+        </tr>
+    </template>
+    <script>
+        function addVariationRow() {
+            const template = document.getElementById('variation-row-template');
+            document.getElementById('variation-rows').appendChild(template.content.cloneNode(true));
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Audit Log - Scaffold Shop</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <script th:src="@{/webjars/htmx.org/2.0.4/dist/htmx.min.js}"></script>
+</head>
+<body>
+    <div th:replace="~{fragments/nav :: nav}"></div>
+
+    <main class="container mx-auto px-4 md:px-8 max-w-6xl py-8">
+        <div th:replace="~{admin/fragments/nav :: adminNav(section='audit')}"></div>
+
+        <h1 class="text-2xl font-bold mb-6">Audit Log</h1>
+
+        <form class="flex flex-wrap items-end gap-2 mb-4" th:action="@{/admin/audit}" method="get">
+            <label class="form-control">
+                <span class="label-text">Entity type</span>
+                <input type="text" name="entityType" placeholder="PRODUCT, ORDER, USER..." th:value="${entityType}" class="input input-sm">
+            </label>
+            <label class="form-control">
+                <span class="label-text">Entity ID</span>
+                <input type="number" name="entityId" th:value="${entityId}" class="input input-sm w-28">
+            </label>
+            <label class="form-control">
+                <span class="label-text">Event type</span>
+                <input type="text" name="eventType" placeholder="CREATE, UPDATE, DELETE..." th:value="${eventType}" class="input input-sm">
+            </label>
+            <label class="form-control">
+                <span class="label-text">User ID</span>
+                <input type="number" name="userId" th:value="${userId}" class="input input-sm w-28">
+            </label>
+            <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+            <a class="btn btn-ghost btn-sm" th:href="@{/admin/audit}">Clear</a>
+        </form>
+
+        <div class="overflow-x-auto" th:unless="${page.content.isEmpty()}">
+            <table class="table">
+                <thead>
+                    <tr><th>Time</th><th>Entity</th><th>Event</th><th>User</th><th>IP</th><th>Details</th></tr>
+                </thead>
+                <tbody>
+                    <tr th:each="event : ${page.content}">
+                        <td th:text="${#temporals.format(event.timestamp, 'dd MMM yyyy HH:mm:ss')}"></td>
+                        <td th:text="${event.entityType} + (${event.entityId} != null ? ' #' + ${event.entityId} : '')"></td>
+                        <td><span class="badge badge-sm" th:text="${event.eventType}"></span></td>
+                        <td th:text="${event.userId}"></td>
+                        <td th:text="${event.ipAddress}"></td>
+                        <td class="max-w-xs truncate" th:text="${event.details}"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <p class="text-base-content/60" th:if="${page.content.isEmpty()}">No audit events found.</p>
+
+        <div class="flex justify-center items-center gap-4 mt-8" th:if="${page.totalPages > 1}">
+            <a class="btn btn-outline btn-sm" th:if="${page.hasPrevious()}"
+               th:href="@{/admin/audit(entityType=${entityType}, entityId=${entityId}, eventType=${eventType}, userId=${userId}, page=${page.number - 1})}">Previous</a>
+            <span class="text-sm text-base-content/60" th:text="'Page ' + ${page.number + 1} + ' of ' + ${page.totalPages}"></span>
+            <a class="btn btn-outline btn-sm" th:if="${page.hasNext()}"
+               th:href="@{/admin/audit(entityType=${entityType}, entityId=${entityId}, eventType=${eventType}, userId=${userId}, page=${page.number + 1})}">Next</a>
+        </div>
+    </main>
+</body>
+</html>

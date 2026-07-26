@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${category != null} ? 'Edit Category - Scaffold Shop' : 'New Category - Scaffold Shop'"></title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <script th:src="@{/webjars/htmx.org/2.0.4/dist/htmx.min.js}"></script>
+</head>
+<body>
+    <div th:replace="~{fragments/nav :: nav}"></div>
+
+    <main class="container mx-auto px-4 md:px-8 max-w-2xl py-8">
+        <div th:replace="~{admin/fragments/nav :: adminNav(section='categories')}"></div>
+
+        <p class="mb-4"><a class="link link-hover" th:href="@{/admin/categories}">&larr; Back to categories</a></p>
+
+        <h1 class="text-2xl font-bold mb-6" th:text="${category != null} ? 'Edit Category' : 'New Category'"></h1>
+
+        <form th:action="${category != null} ? @{'/admin/categories/' + ${category.id}} : @{/admin/categories}" method="post"
+              class="flex flex-col gap-4">
+
+            <label class="form-control">
+                <span class="label-text">Name</span>
+                <input type="text" name="name" required class="input w-full" th:value="${category != null} ? ${category.name} : ''">
+            </label>
+
+            <label class="form-control">
+                <span class="label-text">Slug</span>
+                <input type="text" name="slug" required class="input w-full" th:value="${category != null} ? ${category.slug} : ''">
+            </label>
+
+            <label class="form-control">
+                <span class="label-text">Description</span>
+                <textarea name="description" class="textarea w-full" th:text="${category != null} ? ${category.description} : ''"></textarea>
+            </label>
+
+            <div class="grid grid-cols-2 gap-4">
+                <label class="form-control">
+                    <span class="label-text">Parent category</span>
+                    <select name="parentId" class="select w-full">
+                        <option value="">None (top level)</option>
+                        <option th:each="option : ${categoryOptions}" th:value="${option.id}" th:text="${option.label}"
+                                th:selected="${category != null and category.parentId == option.id}"
+                                th:disabled="${category != null and category.id == option.id}"></option>
+                    </select>
+                </label>
+                <label class="form-control">
+                    <span class="label-text">Sort order</span>
+                    <input type="number" name="sortOrder" class="input w-full"
+                           th:value="${category != null} ? ${category.sortOrder} : 0">
+                </label>
+            </div>
+
+            <div class="flex gap-2 mt-4">
+                <button type="submit" class="btn btn-primary" th:text="${category != null} ? 'Save changes' : 'Create category'"></button>
+                <a class="btn btn-ghost" th:href="@{/admin/categories}">Cancel</a>
+            </div>
+        </form>
+    </main>
+</body>
+</html>

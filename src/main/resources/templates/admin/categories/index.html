@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Categories - Scaffold Shop</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <script th:src="@{/webjars/htmx.org/2.0.4/dist/htmx.min.js}"></script>
+</head>
+<body>
+    <div th:replace="~{fragments/nav :: nav}"></div>
+
+    <main class="container mx-auto px-4 md:px-8 max-w-4xl py-8">
+        <div th:replace="~{admin/fragments/nav :: adminNav(section='categories')}"></div>
+
+        <div class="flex items-center justify-between mb-6">
+            <h1 class="text-2xl font-bold">Categories</h1>
+            <a class="btn btn-primary" th:href="@{/admin/categories/new}">New category</a>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="table">
+                <thead>
+                    <tr><th>Name</th><th>Slug</th><th>Sort</th><th></th></tr>
+                </thead>
+                <tbody>
+                    <th:block th:replace="~{this :: categoryRows(${tree}, 0)}"></th:block>
+                    <tr th:if="${tree.isEmpty()}">
+                        <td colspan="4" class="text-base-content/60">No categories yet.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <th:block th:fragment="categoryRows(nodes, depth)">
+        <th:block th:each="node : ${nodes}">
+            <tr>
+                <td th:text="${'— '.repeat(depth) + node.name}"></td>
+                <td th:text="${node.slug}"></td>
+                <td th:text="${node.sortOrder}"></td>
+                <td class="flex gap-2">
+                    <a class="link link-primary" th:href="@{'/admin/categories/' + ${node.id} + '/edit'}">Edit</a>
+                    <form th:action="@{'/admin/categories/' + ${node.id} + '/delete'}" method="post"
+                          onsubmit="return confirm('Delete this category?');">
+                        <button type="submit" class="link link-error">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            <th:block th:replace="~{this :: categoryRows(${node.children}, ${depth + 1})}"></th:block>
+        </th:block>
+    </th:block>
+</body>
+</html>
