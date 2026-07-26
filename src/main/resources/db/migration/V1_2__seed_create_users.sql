@@ -1,0 +1,1 @@
+INSERT INTO users (id, first_name, last_name, email, birth_date, gender, password, role) VALUES (1, 'Sir', 'Admin', 'admin@mail.com', '1999-08-30', 'MALE','password', 'ADMIN');

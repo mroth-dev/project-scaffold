@@ -2,6 +2,8 @@ package com.example.scaffold.user;
 
 import java.util.List;
 
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
@@ -18,10 +20,12 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final CacheManager cacheManager;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, CacheManager cacheManager) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.cacheManager = cacheManager;
     }
 
     public List<UserDto> getUsers() {
@@ -93,7 +97,6 @@ public class UserService {
         log.debug("Cache evicted for user deletion: {}", id);
     }
 
-    @Cacheable(value = CacheConfig.USER_CACHE, key = "#id")
     private User findUserOrThrow(Long id) {
         log.debug("Finding user by id: {}", id);
         return userRepository.findById(id).orElseThrow(() -> new NotFoundException("User", id));
@@ -133,23 +136,31 @@ public class UserService {
      */
     public void warmupUserCache() {
         log.info("Starting user cache warmup...");
-        
+
         try {
+            Cache userCache = cacheManager.getCache(CacheConfig.USER_CACHE);
+            if (userCache == null) {
+                log.warn("User cache '{}' is not available; skipping warmup", CacheConfig.USER_CACHE);
+                return;
+            }
+
             // Preload active users (limit to avoid memory issues)
             List<User> activeUsers = userRepository.findByStatusOrderByCreatedAtDesc(
                 AccountStatus.ACTIVE
             ).stream()
             .limit(100) // Limit to 100 most recent active users
             .toList();
-            
-            // Cache individual users
+
+            // Populate the cache directly (matching @Cacheable's `key = "#id"` on getUser)
+            // rather than calling getUser(id), since that self-invocation would bypass
+            // the caching proxy entirely.
             for (User user : activeUsers) {
-                UserDto userDto = toDto(user);
+                userCache.put(user.getId(), toDto(user));
                 log.debug("Preloaded user to cache: {}", user.getId());
             }
-            
+
             log.info("User cache warmup completed. Preloaded {} users", activeUsers.size());
-            
+
         } catch (Exception e) {
             log.error("Error during user cache warmup: {}", e.getMessage(), e);
         }

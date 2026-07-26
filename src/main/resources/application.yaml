@@ -71,9 +71,24 @@ management:
   endpoint:
     health:
       show-details: when_authorized
+      probes:
+        enabled: true # exposes /actuator/health/liveness and /actuator/health/readiness for load balancers
+      group:
+        readiness:
+          include: readinessState,db,redis
   health:
     redis:
       enabled: true
+    db:
+      enabled: true
+
+# OpenAPI / Swagger UI
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
 
 # Application Configuration
 app:

@@ -27,3 +27,9 @@ Show tables
 ## Flyway
 Run migrations for development
 `./mvnw clean flyway:migrate -Dflyway.configFiles=flyway.conf`
+
+## Health
+Swagger Endpoint `/swagger-ui/index.html`
+Actuator Health `/actuator/health/*`
+- `/liveness` - UP/DOWN
+- `/readiness` - components health ie DB/Redis

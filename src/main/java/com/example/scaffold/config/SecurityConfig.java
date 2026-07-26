@@ -39,6 +39,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/categories", "/api/categories/**").permitAll() // Temporarily permit all for development
                         .requestMatchers("/users/**", "/webjars/**", "/css/**", "/js/**").permitAll()
                         .requestMatchers("/actuator/health/**").permitAll()
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         // Public web pages - browsing and cart don't require an account;
                         // checkout enforces authentication itself (redirects to /login)
                         .requestMatchers("/", "/login", "/register").permitAll()

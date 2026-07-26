@@ -11,10 +11,7 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
@@ -28,19 +25,21 @@ import com.example.scaffold.config.CacheConfig;
 import com.example.scaffold.exception.NotFoundException;
 
 /**
- * Test class for UserService with cache behavior validation
+ * Test class for UserService with cache behavior validation.
+ *
+ * UserService is registered as a real Spring bean (not manually {@code new}'d) so
+ * that {@code @Cacheable}/{@code @CacheEvict} are actually applied through the AOP
+ * proxy - without this, "cache hit" assertions would pass or fail independently of
+ * whether caching is really wired up.
  */
-@SpringBootTest
-@SpringJUnitConfig
-@ExtendWith(MockitoExtension.class)
-@EnableCaching
+@SpringJUnitConfig(UserServiceTest.CacheTestConfig.class)
 class UserServiceTest {
 
     @Configuration
     @EnableCaching
-    static class TestConfig {
+    static class CacheTestConfig {
         @Bean
-        public CacheManager cacheManager() {
+        CacheManager cacheManager() {
             return new ConcurrentMapCacheManager(
                 CacheConfig.USER_CACHE,
                 CacheConfig.USER_BY_EMAIL_CACHE,
@@ -49,30 +48,43 @@ class UserServiceTest {
         }
 
         @Bean
-        public PasswordEncoder passwordEncoder() {
+        PasswordEncoder passwordEncoder() {
             return new BCryptPasswordEncoder();
+        }
+
+        @Bean
+        UserRepository userRepository() {
+            return mock(UserRepository.class);
+        }
+
+        @Bean
+        UserService userService(UserRepository userRepository, PasswordEncoder passwordEncoder,
+                CacheManager cacheManager) {
+            return new UserService(userRepository, passwordEncoder, cacheManager);
         }
     }
 
-    @Mock
+    @Autowired
+    private UserService userService;
+
+    @Autowired
     private UserRepository userRepository;
 
-    private UserService userService;
+    @Autowired
     private CacheManager cacheManager;
-    private PasswordEncoder passwordEncoder;
 
     private User testUser;
     private UserRequest testUserRequest;
 
     @BeforeEach
     void setUp() {
-        cacheManager = new ConcurrentMapCacheManager(
-            CacheConfig.USER_CACHE,
-            CacheConfig.USER_BY_EMAIL_CACHE,
-            CacheConfig.USER_SEARCH_CACHE
-        );
-        passwordEncoder = new BCryptPasswordEncoder();
-        userService = new UserService(userRepository, passwordEncoder);
+        reset(userRepository);
+        cacheManager.getCacheNames().forEach(name -> {
+            var cache = cacheManager.getCache(name);
+            if (cache != null) {
+                cache.clear();
+            }
+        });
 
         // Create test user
         testUser = new User();
@@ -106,7 +118,7 @@ class UserServiceTest {
 
         // When - First call
         UserDto result1 = userService.getUser(1L);
-        
+
         // Then
         assertNotNull(result1);
         assertEquals(testUser.getId(), result1.id());
@@ -129,7 +141,7 @@ class UserServiceTest {
 
         // When - First call
         UserDto result1 = userService.getUserByEmail("test@example.com");
-        
+
         // Then
         assertNotNull(result1);
         assertEquals(testUser.getEmail(), result1.email());
@@ -153,7 +165,7 @@ class UserServiceTest {
 
         // When - First call
         List<UserDto> result1 = userService.searchUsers(query);
-        
+
         // Then
         assertNotNull(result1);
         assertEquals(1, result1.size());
@@ -178,7 +190,7 @@ class UserServiceTest {
 
         // When - First call
         List<UserDto> result1 = userService.searchUsers(query);
-        
+
         // Then
         assertNotNull(result1);
         assertTrue(result1.isEmpty());
@@ -197,6 +209,7 @@ class UserServiceTest {
     void testUpdateUser_CacheEviction() {
         // Given
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
         when(userRepository.save(any(User.class))).thenReturn(testUser);
 
         // First, populate the cache
@@ -204,18 +217,22 @@ class UserServiceTest {
         userService.getUserByEmail("test@example.com");
         verify(userRepository, times(1)).findById(1L);
 
-        // When - Update user (should evict caches)
+        // When - Update user (should evict caches). updateUser() loads the entity
+        // to mutate via a direct, uncached repository call, so this alone accounts
+        // for a second findById(1L) regardless of what the cache holds.
         UserDto updatedUser = userService.updateUser(1L, testUserRequest);
 
         // Then
         assertNotNull(updatedUser);
         verify(userRepository, times(1)).save(any(User.class));
-
-        // When - Get user again (should hit repository as cache was evicted)
-        userService.getUser(1L);
-        
-        // Then - Repository should be called again
         verify(userRepository, times(2)).findById(1L);
+
+        // When - Get user again (should hit repository as the cache was evicted,
+        // rather than reusing the stale pre-update entry)
+        userService.getUser(1L);
+
+        // Then - Repository should be called a third time
+        verify(userRepository, times(3)).findById(1L);
     }
 
     @Test
@@ -236,9 +253,9 @@ class UserServiceTest {
 
         // When - Try to get user again (should hit repository as cache was evicted)
         when(userRepository.findById(1L)).thenReturn(Optional.empty());
-        
+
         assertThrows(NotFoundException.class, () -> userService.getUser(1L));
-        
+
         // Then - Repository should be called again
         verify(userRepository, times(2)).findById(1L);
     }
@@ -280,6 +297,12 @@ class UserServiceTest {
 
         // Then
         verify(userRepository, times(1)).findByStatusOrderByCreatedAtDesc(AccountStatus.ACTIVE);
+
+        // And - the user cache should now be pre-populated, so a subsequent
+        // getUser() call must not hit the repository at all
+        UserDto cached = userService.getUser(1L);
+        assertEquals(testUser.getEmail(), cached.email());
+        verify(userRepository, never()).findById(1L);
     }
 
     @Test
@@ -287,7 +310,7 @@ class UserServiceTest {
         // Given - populate caches first
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
-        
+
         userService.getUser(1L);
         userService.getUserByEmail("test@example.com");
 
@@ -297,7 +320,7 @@ class UserServiceTest {
         // Then - Next calls should hit repository again
         userService.getUser(1L);
         userService.getUserByEmail("test@example.com");
-        
+
         verify(userRepository, times(2)).findById(1L);
         verify(userRepository, times(2)).findByEmail("test@example.com");
     }
@@ -318,7 +341,7 @@ class UserServiceTest {
         when(userRepository.findByEmail("nonexistent@example.com")).thenReturn(Optional.empty());
 
         // When & Then
-        assertThrows(RuntimeException.class, () -> userService.getUserByEmail("nonexistent@example.com"));
+        assertThrows(NotFoundException.class, () -> userService.getUserByEmail("nonexistent@example.com"));
         verify(userRepository, times(1)).findByEmail("nonexistent@example.com");
     }
 

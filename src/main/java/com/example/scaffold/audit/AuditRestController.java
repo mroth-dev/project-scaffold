@@ -17,29 +17,37 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.scaffold.config.OpenApiConfig;
 import com.example.scaffold.config.RateLimit;
 import com.example.scaffold.exception.ValidationException;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/api/audit")
 @Slf4j
+@Tag(name = "Audit", description = "Audit trail queries (ADMIN/MANAGER, or the user's own history)")
+@SecurityRequirement(name = OpenApiConfig.BEARER_AUTH)
 public class AuditRestController {
-    
+
     private final AuditEventRepository auditEventRepository;
-    
+
     @Autowired
     public AuditRestController(AuditEventRepository auditEventRepository) {
         this.auditEventRepository = auditEventRepository;
     }
-    
+
     /**
      * Get audit events with filtering and pagination
      */
     @GetMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     @RateLimit(requests = 50, window = 60)
+    @Operation(summary = "Search audit events",
+            description = "Filter by entity type/id, event type, user id and time range")
     public ResponseEntity<Page<AuditEvent>> getAuditEvents(
             @RequestParam(required = false) String entityType,
             @RequestParam(required = false) Long entityId,
@@ -80,6 +88,7 @@ public class AuditRestController {
     @GetMapping("/entity/{entityType}/{entityId}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     @RateLimit(requests = 100, window = 60)
+    @Operation(summary = "Get the audit history for one entity")
     public ResponseEntity<Page<AuditEvent>> getEntityAuditHistory(
             @PathVariable String entityType,
             @PathVariable Long entityId,
@@ -102,6 +111,7 @@ public class AuditRestController {
     @GetMapping("/user/{userId}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or (hasRole('USER') and #userId == authentication.principal.id)")
     @RateLimit(requests = 100, window = 60)
+    @Operation(summary = "Get a user's audit history")
     public ResponseEntity<Page<AuditEvent>> getUserAuditHistory(
             @PathVariable Long userId,
             @RequestParam(defaultValue = "0") int page,
@@ -122,6 +132,7 @@ public class AuditRestController {
     @GetMapping("/user/{userId}/recent")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or (hasRole('USER') and #userId == authentication.principal.id)")
     @RateLimit(requests = 200, window = 60)
+    @Operation(summary = "Get a user's audit events from the last 24 hours")
     public ResponseEntity<?> getRecentUserActivity(@PathVariable Long userId) {
         LocalDateTime since = LocalDateTime.now().minusDays(1);
         var recentEvents = auditEventRepository.findRecentEventsByUser(userId, since);
@@ -135,6 +146,7 @@ public class AuditRestController {
     @GetMapping("/stats")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     @RateLimit(requests = 10, window = 60)
+    @Operation(summary = "Get aggregate audit event counts by entity type")
     public ResponseEntity<?> getAuditStatistics() {
         long totalEvents = auditEventRepository.count();
         long userEvents = auditEventRepository.countByEntityType("USER");
@@ -144,7 +156,7 @@ public class AuditRestController {
         var stats = new AuditStatistics(totalEvents, userEvents, productEvents, orderEvents);
         return ResponseEntity.ok(stats);
     }
-    
+
     /**
      * Parse date time string with flexible format support
      */
