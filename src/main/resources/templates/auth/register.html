@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Register - Scaffold Shop</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <script th:src="@{/webjars/htmx.org/2.0.4/dist/htmx.min.js}"></script>
+</head>
+<body>
+    <div th:replace="~{fragments/nav :: nav}"></div>
+
+    <main class="container narrow">
+        <h1>Create an account</h1>
+
+        <p class="error" th:if="${error}" th:text="${error}"></p>
+
+        <form method="post" th:action="@{/register}" class="stacked-form">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email"
+                   th:value="${form != null ? form.email() : ''}"
+                   hx-get="/register/email-check"
+                   hx-trigger="blur, keyup changed delay:500ms"
+                   hx-target="#email-feedback"
+                   hx-swap="innerHTML"
+                   hx-params="email"
+                   required autofocus>
+            <div id="email-feedback" th:insert="~{auth/fragments/email-feedback :: emailFeedback}"></div>
+
+            <label for="firstName">First name</label>
+            <input type="text" id="firstName" name="firstName" th:value="${form != null ? form.firstName() : ''}">
+
+            <label for="lastName">Last name</label>
+            <input type="text" id="lastName" name="lastName" th:value="${form != null ? form.lastName() : ''}">
+
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" minlength="8" required>
+            <p class="hint">At least 8 characters.</p>
+
+            <button type="submit">Register</button>
+        </form>
+
+        <p>Already have an account? <a th:href="@{/login}">Log in</a></p>
+    </main>
+</body>
+</html>

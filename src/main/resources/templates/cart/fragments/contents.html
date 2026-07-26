@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <div th:fragment="cartContents">
+        <table class="cart-table" th:unless="${lines.isEmpty()}">
+            <thead>
+                <tr><th>Item</th><th>Quantity</th><th>Unit price</th><th>Subtotal</th><th></th></tr>
+            </thead>
+            <tbody>
+                <tr th:each="line : ${lines}">
+                    <td>
+                        <span th:text="${line.variation.product.name}"></span>
+                        <span class="sku" th:text="'(' + ${line.variation.sku} + ')'"></span>
+                    </td>
+                    <td th:text="${line.quantity}"></td>
+                    <td th:text="${'£' + line.unitPrice}"></td>
+                    <td th:text="${'£' + line.subtotal}"></td>
+                    <td>
+                        <form th:action="@{'/cart/items/' + ${line.variation.id} + '/remove'}" method="post"
+                              th:attr="hx-post=@{'/cart/items/' + ${line.variation.id} + '/remove'}"
+                              hx-target="#cart-contents" hx-swap="innerHTML">
+                            <button type="submit" class="link-button">Remove</button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr><td colspan="3">Total</td><td th:text="${'£' + total}"></td><td></td></tr>
+            </tfoot>
+        </table>
+
+        <p th:if="${lines.isEmpty()}">Your cart is empty. <a th:href="@{/products}">Browse products</a>.</p>
+
+        <form th:if="${!lines.isEmpty()}" th:action="@{/cart/checkout}" method="post">
+            <button type="submit">Checkout</button>
+        </form>
+    </div>
+</body>
+</html>

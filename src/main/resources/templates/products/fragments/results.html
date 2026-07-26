@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <section th:fragment="productResults" id="product-results">
+        <div class="product-grid">
+            <a class="product-card" th:each="product : ${page.content}" th:href="@{'/products/' + ${product.id}}">
+                <img th:if="${!product.images.isEmpty()}" th:src="${product.images[0].thumbnailUrl ?: product.images[0].url}" th:alt="${product.name}">
+                <div class="product-card-body">
+                    <h3 th:text="${product.name}"></h3>
+                    <p class="sku" th:text="${product.sku}"></p>
+                    <p class="price" th:text="${'£' + product.basePrice}"></p>
+                    <p class="badge" th:classappend="${product.active} ? 'badge-active' : 'badge-inactive'"
+                       th:text="${product.active} ? 'In stock' : 'Unavailable'"></p>
+                </div>
+            </a>
+            <p th:if="${page.content.isEmpty()}">No products found.</p>
+        </div>
+
+        <nav class="pagination" th:if="${page.totalPages > 1}">
+            <button th:if="${page.hasPrevious()}"
+                    th:attr="hx-get=@{/products/list(query=${query}, page=${page.number - 1})}"
+                    hx-target="#product-results" hx-swap="outerHTML">Previous</button>
+            <span th:text="'Page ' + ${page.number + 1} + ' of ' + ${page.totalPages}"></span>
+            <button th:if="${page.hasNext()}"
+                    th:attr="hx-get=@{/products/list(query=${query}, page=${page.number + 1})}"
+                    hx-target="#product-results" hx-swap="outerHTML">Next</button>
+        </nav>
+    </section>
+</body>
+</html>

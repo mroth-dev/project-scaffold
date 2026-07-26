@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>My Orders - Scaffold Shop</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <script th:src="@{/webjars/htmx.org/2.0.4/dist/htmx.min.js}"></script>
+</head>
+<body>
+    <div th:replace="~{fragments/nav :: nav}"></div>
+
+    <main class="container">
+        <h1>My Orders</h1>
+
+        <table class="cart-table" th:unless="${page.content.isEmpty()}">
+            <thead>
+                <tr><th>Order</th><th>Status</th><th>Total</th><th>Placed</th><th></th></tr>
+            </thead>
+            <tbody>
+                <tr th:each="order : ${page.content}">
+                    <td th:text="'#' + ${order.id}"></td>
+                    <td><span class="badge" th:text="${order.status}"></span></td>
+                    <td th:text="${'£' + order.totalAmount}"></td>
+                    <td th:text="${#temporals.format(order.createdAt, 'dd MMM yyyy HH:mm')}"></td>
+                    <td><a th:href="@{'/orders/' + ${order.id}}">View</a></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p th:if="${page.content.isEmpty()}">You haven't placed any orders yet. <a th:href="@{/products}">Start shopping</a>.</p>
+    </main>
+</body>
+</html>

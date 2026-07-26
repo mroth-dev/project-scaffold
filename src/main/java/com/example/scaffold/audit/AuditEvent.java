@@ -2,6 +2,8 @@ package com.example.scaffold.audit;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.ColumnTransformer;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -46,6 +48,7 @@ public class AuditEvent {
     private LocalDateTime timestamp;
     
     @Column(name = "ip_address", columnDefinition = "INET")
+    @ColumnTransformer(write = "?::inet")
     private String ipAddress;
     
     @Column(name = "user_agent")

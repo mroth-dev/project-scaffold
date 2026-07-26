@@ -13,6 +13,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.example.scaffold.security.JwtAuthenticationFilter;
+import com.example.scaffold.security.WebAwareAuthenticationEntryPoint;
 
 @Configuration
 @EnableWebSecurity
@@ -38,6 +39,11 @@ public class SecurityConfig {
                         .requestMatchers("/api/categories", "/api/categories/**").permitAll() // Temporarily permit all for development
                         .requestMatchers("/users/**", "/webjars/**", "/css/**", "/js/**").permitAll()
                         .requestMatchers("/actuator/health/**").permitAll()
+                        // Public web pages - browsing and cart don't require an account;
+                        // checkout enforces authentication itself (redirects to /login)
+                        .requestMatchers("/", "/login", "/register").permitAll()
+                        .requestMatchers("/products", "/products/**").permitAll()
+                        .requestMatchers("/cart", "/cart/**").permitAll()
                         // Protected endpoints
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/manager/**").hasAnyRole("ADMIN", "MANAGER")
@@ -46,10 +52,19 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/orders/*/status").hasAnyRole("ADMIN", "MANAGER")
                         .requestMatchers(HttpMethod.GET, "/api/orders").hasAnyRole("ADMIN", "MANAGER")
                         .requestMatchers("/api/orders/**").authenticated()
+                        .requestMatchers("/orders", "/orders/**").authenticated()
                         // All other requests require authentication
                         .anyRequest().authenticated())
+                .exceptionHandling(ex -> ex.authenticationEntryPoint(new WebAwareAuthenticationEntryPoint()))
+                // Spring Security wires up a default /logout handler regardless; point it at
+                // our JWT cookie instead of leaving a second, unreachable controller method.
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .deleteCookies(JwtAuthenticationFilter.AUTH_COOKIE_NAME)
+                        .logoutSuccessUrl("/login")
+                        .permitAll())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-        
+
         return http.build();
     }
 
