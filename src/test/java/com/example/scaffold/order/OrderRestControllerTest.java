@@ -27,13 +27,17 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.example.scaffold.config.RateLimitConfig;
+import com.example.scaffold.config.RateLimitService;
 import com.example.scaffold.config.SecurityConfig;
+import com.example.scaffold.security.CustomUserDetailsService;
 import com.example.scaffold.security.CustomUserDetailsService.CustomUserPrincipal;
+import com.example.scaffold.security.JwtTokenProvider;
 
 import tools.jackson.databind.ObjectMapper;
 
 @WebMvcTest(OrderRestController.class)
-@Import(SecurityConfig.class)
+@Import({SecurityConfig.class, JwtTokenProvider.class})
 class OrderRestControllerTest {
 
     @Autowired
@@ -44,6 +48,17 @@ class OrderRestControllerTest {
 
     @MockitoBean
     private OrderService orderService;
+
+    @MockitoBean
+    private CustomUserDetailsService customUserDetailsService;
+
+    // RateLimitingFilter sits in the security chain; rateLimitConfig.isEnabled()
+    // defaults to false when mocked, so it's a no-op here.
+    @MockitoBean
+    private RateLimitService rateLimitService;
+
+    @MockitoBean
+    private RateLimitConfig rateLimitConfig;
 
     private Authentication customer(long id) {
         CustomUserPrincipal principal = new CustomUserPrincipal(id, "customer" + id + "@example.com", "hash",

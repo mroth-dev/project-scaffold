@@ -2,7 +2,7 @@ package com.example.scaffold.config;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -10,17 +10,21 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Redis-based rate limiting service
- * 
+ *
  * This service implements sliding window rate limiting using Redis counters
- * with automatic expiration.
+ * with automatic expiration. Uses StringRedisTemplate (plain string
+ * serialization) rather than the JSON-typed RedisTemplate used for caching -
+ * counters are incremented with a raw Redis INCR, and reading them back
+ * through a JSON-aware value serializer produces an Integer, not the String
+ * this service expects.
  */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class RateLimitService {
 
-    private final RedisTemplate<String, Object> redisTemplate;
-    
+    private final StringRedisTemplate redisTemplate;
+
     private static final String RATE_LIMIT_KEY_PREFIX = "rate_limit:";
 
     /**
@@ -36,7 +40,7 @@ public class RateLimitService {
         
         try {
             // Get current count
-            String countStr = (String) redisTemplate.opsForValue().get(redisKey);
+            String countStr = redisTemplate.opsForValue().get(redisKey);
             int currentCount = countStr != null ? Integer.parseInt(countStr) : 0;
             
             if (currentCount >= maxRequests) {
@@ -75,7 +79,7 @@ public class RateLimitService {
         String redisKey = RATE_LIMIT_KEY_PREFIX + key;
         
         try {
-            String countStr = (String) redisTemplate.opsForValue().get(redisKey);
+            String countStr = redisTemplate.opsForValue().get(redisKey);
             int currentCount = countStr != null ? Integer.parseInt(countStr) : 0;
             return Math.max(0, maxRequests - currentCount);
         } catch (Exception e) {

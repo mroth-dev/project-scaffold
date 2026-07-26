@@ -21,9 +21,11 @@ import com.example.scaffold.security.WebAwareAuthenticationEntryPoint;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final RateLimitingFilter rateLimitingFilter;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter, RateLimitingFilter rateLimitingFilter) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.rateLimitingFilter = rateLimitingFilter;
     }
 
     @Bean
@@ -64,7 +66,10 @@ public class SecurityConfig {
                         .deleteCookies(JwtAuthenticationFilter.AUTH_COOKIE_NAME)
                         .logoutSuccessUrl("/login")
                         .permitAll())
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                // Runs after JWT auth so an authenticated principal is already on the
+                // SecurityContext, letting rate limits key off the user instead of just the IP.
+                .addFilterAfter(rateLimitingFilter, JwtAuthenticationFilter.class);
 
         return http.build();
     }

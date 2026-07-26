@@ -25,13 +25,17 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.example.scaffold.config.RateLimitConfig;
+import com.example.scaffold.config.RateLimitService;
 import com.example.scaffold.config.SecurityConfig;
 import com.example.scaffold.exception.NotFoundException;
+import com.example.scaffold.security.CustomUserDetailsService;
+import com.example.scaffold.security.JwtTokenProvider;
 
 import tools.jackson.databind.ObjectMapper;
 
 @WebMvcTest(ProductRestController.class)
-@Import(SecurityConfig.class)
+@Import({SecurityConfig.class, JwtTokenProvider.class})
 class ProductRestControllerTest {
 
     @Autowired
@@ -42,6 +46,17 @@ class ProductRestControllerTest {
 
     @MockitoBean
     private ProductService productService;
+
+    @MockitoBean
+    private CustomUserDetailsService customUserDetailsService;
+
+    // RateLimitingFilter sits in the security chain; rateLimitConfig.isEnabled()
+    // defaults to false when mocked, so it's a no-op here.
+    @MockitoBean
+    private RateLimitService rateLimitService;
+
+    @MockitoBean
+    private RateLimitConfig rateLimitConfig;
 
     private ProductDto sampleProduct() {
         return new ProductDto(1L, "T-Shirt", "Cotton crew neck t-shirt", "TSHIRT-001",

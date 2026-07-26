@@ -111,7 +111,7 @@ app:
     
   # Rate Limiting Configuration
   rate-limit:
-    default:
+    default-settings:
       requests: ${RATE_LIMIT_DEFAULT_REQUESTS:100}
       window: ${RATE_LIMIT_DEFAULT_WINDOW:60}
     auth:

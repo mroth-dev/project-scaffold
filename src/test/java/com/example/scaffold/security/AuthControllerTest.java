@@ -15,6 +15,8 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.example.scaffold.config.RateLimitConfig;
+import com.example.scaffold.config.RateLimitService;
 import com.example.scaffold.config.SecurityConfig;
 
 import tools.jackson.databind.ObjectMapper;
@@ -34,6 +36,14 @@ class AuthControllerTest {
 
     @MockitoBean
     private CustomUserDetailsService customUserDetailsService;
+
+    // RateLimitingFilter sits in the security chain; rateLimitConfig.isEnabled()
+    // defaults to false when mocked, so it's a no-op here.
+    @MockitoBean
+    private RateLimitService rateLimitService;
+
+    @MockitoBean
+    private RateLimitConfig rateLimitConfig;
 
     @Test
     void login_ValidCredentials_ReturnsToken() throws Exception {

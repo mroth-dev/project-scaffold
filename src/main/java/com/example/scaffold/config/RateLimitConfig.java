@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,6 +21,11 @@ import java.util.Map;
 @Configuration
 @ConfigurationProperties(prefix = "app.rate-limit")
 public class RateLimitConfig {
+
+    /**
+     * Master switch for rate limiting enforcement
+     */
+    private boolean enabled = true;
 
     /**
      * Default rate limiting settings
@@ -46,7 +51,7 @@ public class RateLimitConfig {
      * Rate limiting service bean
      */
     @Bean
-    public RateLimitService rateLimitService(RedisTemplate<String, Object> redisTemplate) {
+    public RateLimitService rateLimitService(StringRedisTemplate redisTemplate) {
         RateLimitService service = new RateLimitService(redisTemplate);
         log.info("Rate limiting service configured with default limit: {} requests per {} seconds", 
                 defaultSettings.getRequests(), defaultSettings.getWindow());

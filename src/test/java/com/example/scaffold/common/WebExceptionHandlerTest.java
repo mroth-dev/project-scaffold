@@ -21,6 +21,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.example.scaffold.config.RateLimitConfig;
+import com.example.scaffold.config.RateLimitService;
 import com.example.scaffold.config.SecurityConfig;
 import com.example.scaffold.exception.NotFoundException;
 import com.example.scaffold.order.OrderDto;
@@ -48,6 +50,14 @@ class WebExceptionHandlerTest {
 
     @MockitoBean
     private CustomUserDetailsService customUserDetailsService;
+
+    // RateLimitingFilter sits in the security chain; rateLimitConfig.isEnabled()
+    // defaults to false when mocked, so it's a no-op here.
+    @MockitoBean
+    private RateLimitService rateLimitService;
+
+    @MockitoBean
+    private RateLimitConfig rateLimitConfig;
 
     private Authentication customer(long id) {
         CustomUserPrincipal principal = new CustomUserPrincipal(id, "customer" + id + "@example.com", "hash",

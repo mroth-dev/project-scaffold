@@ -111,7 +111,10 @@ app:
   # Rate Limiting Configuration
   rate-limit:
     enabled: ${RATE_LIMIT_ENABLED:true}
-    default:
+    # Property key must be "default-settings" (kebab-case for the defaultSettings
+    # field) - "default" is a reserved word and can't be a Java identifier, and
+    # relaxed binding won't fuzzy-match "default" to "defaultSettings".
+    default-settings:
       requests: ${RATE_LIMIT_DEFAULT_REQUESTS:100}
       window: ${RATE_LIMIT_DEFAULT_WINDOW:60} # seconds
     auth:
@@ -120,12 +123,14 @@ app:
     api:
       requests: ${RATE_LIMIT_API_REQUESTS:1000}
       window: ${RATE_LIMIT_API_WINDOW:60} # 1 minute
-    # Custom endpoint patterns
+    # Custom endpoint patterns. Map keys need bracket-escaping for Boot's relaxed
+    # binder to accept the slashes ("/api/auth/login" isn't a valid unbracketed
+    # property-name segment) - without the brackets these entries silently never bind.
     endpoints:
-      "/api/users/register":
+      "[/api/users/register]":
         requests: 3
         window: 3600 # 1 hour
-      "/api/auth/login":
+      "[/api/auth/login]":
         requests: 10
         window: 900 # 15 minutes
 
