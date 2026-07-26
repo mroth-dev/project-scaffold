@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -40,15 +41,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (StringUtils.hasText(token) && jwtTokenProvider.validateToken(token)) {
             String email = jwtTokenProvider.getEmailFromToken(token);
 
-            UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
+            try {
+                UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
 
-            if (userDetails != null) {
                 UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+            } catch (UsernameNotFoundException e) {
+                // Token is well-formed and signed, but no longer maps to a real user
+                // (e.g. account deleted after the cookie was issued). Treat the request
+                // as anonymous instead of letting the lookup failure become an
+                // AuthenticationException that redirects even public pages to /login.
+                SecurityContextHolder.clearContext();
             }
         }
 

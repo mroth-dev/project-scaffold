@@ -2,21 +2,31 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
     <nav class="site-nav" th:fragment="nav">
-        <a class="brand" th:href="@{/}">Scaffold Shop</a>
-        <a th:href="@{/products}">Products</a>
-        <a th:href="@{/cart}">Cart (<span id="nav-cart-count" th:text="${cartItemCount}">0</span>)</a>
-        <span class="nav-spacer"></span>
-        <span th:if="${authenticated}">
-            <a th:href="@{/orders}">My Orders</a>
-            <span class="nav-user" th:text="${currentUserEmail}"></span>
-            <form th:action="@{/logout}" method="post" class="nav-inline-form">
-                <button type="submit" class="link-button">Logout</button>
-            </form>
-        </span>
-        <span th:unless="${authenticated}">
-            <a th:href="@{/login}">Login</a>
-            <a th:href="@{/register}">Register</a>
-        </span>
+        <div class="nav-group">
+            <a class="brand" th:href="@{/}">Scaffold Shop</a>
+            <a th:href="@{/products}">Products</a>
+        </div>
+
+        <form class="nav-search" th:action="@{/products}" method="get">
+            <input type="search" name="query" placeholder="Search products..." th:value="${query}" autocomplete="off">
+        </form>
+
+        <div class="nav-group">
+            <a th:href="@{/cart}">Cart (<span id="nav-cart-count" th:text="${cartItemCount}">0</span>)</a>
+            <details class="nav-user-menu" th:if="${authenticated}">
+                <summary class="nav-user" th:text="${currentUserEmail}"></summary>
+                <div class="nav-user-menu-items">
+                    <a th:href="@{/orders}">My Orders</a>
+                    <form th:action="@{/logout}" method="post" class="nav-inline-form">
+                        <button type="submit" class="link-button">Logout</button>
+                    </form>
+                </div>
+            </details>
+            <span th:unless="${authenticated}">
+                <a th:href="@{/login}">Login</a>
+                <a th:href="@{/register}">Register</a>
+            </span>
+        </div>
     </nav>
 </body>
 </html>

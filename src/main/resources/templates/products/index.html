@@ -12,16 +12,6 @@
     <main class="container">
         <h1>Products</h1>
 
-        <input type="search"
-               name="query"
-               placeholder="Search products..."
-               autocomplete="off"
-               th:value="${query}"
-               hx-get="/products/list"
-               hx-trigger="keyup changed delay:300ms, search"
-               hx-target="#product-results"
-               hx-swap="outerHTML" />
-
         <div id="product-results" th:replace="~{products/fragments/results :: productResults}"></div>
     </main>
 </body>

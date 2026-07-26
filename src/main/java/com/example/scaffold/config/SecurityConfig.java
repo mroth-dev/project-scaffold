@@ -34,29 +34,33 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // Public endpoints
-                        .requestMatchers("/api/auth/**").permitAll()
-                        // Temporarily permit all for development
-                        .requestMatchers("/api/users", "/api/users/**").permitAll()
-                        .requestMatchers("/api/products", "/api/products/**").permitAll()
-                        .requestMatchers("/api/categories", "/api/categories/**").permitAll()
-                        .requestMatchers("/users/**", "/webjars/**", "/css/**", "/js/**").permitAll()
-                        .requestMatchers("/actuator/health/**").permitAll()
-                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                        // Public web pages - browsing and cart don't require an account;
+                        // Public endpoints - browsing and cart don't require an account
                         // checkout enforces authentication itself (redirects to /login)
-                        .requestMatchers("/", "/login", "/register").permitAll()
-                        .requestMatchers("/products", "/products/**").permitAll()
+                        .requestMatchers("/api/auth/**").permitAll()
+                        // unauth customer endpoints
+                        .requestMatchers("/", "/login", "/register", "/register/**").permitAll()
                         .requestMatchers("/cart", "/cart/**").permitAll()
-                        // Protected endpoints
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/manager/**").hasAnyRole("ADMIN", "MANAGER")
+                        .requestMatchers("/api/categories", "/api/categories/**").permitAll()
+                        .requestMatchers("/api/products", "/api/products/**").permitAll()
+                        .requestMatchers("/products", "/products/**").permitAll()
+                        // auth customers endpoints
                         // Orders contain customer data - require authentication; listing all
-                        // orders and changing status are restricted to staff
+                        // orders and changing status are restricted to staff. These must be
+                        // declared before the general /api/orders/** rule below since Spring
+                        // Security's authorizeHttpRequests matches on a first-match-wins basis.
                         .requestMatchers(HttpMethod.PUT, "/api/orders/*/status").hasAnyRole("ADMIN", "MANAGER")
                         .requestMatchers(HttpMethod.GET, "/api/orders").hasAnyRole("ADMIN", "MANAGER")
                         .requestMatchers("/api/orders/**").authenticated()
                         .requestMatchers("/orders", "/orders/**").authenticated()
+                        // TODO - Temporarily permit all for development
+                        .requestMatchers("/users/**", "/webjars/**", "/css/**", "/js/**").permitAll()
+                        // Protected endpoints
+                        .requestMatchers("/api/users", "/api/users/**").hasAnyRole("ADMIN", "MANAGER")
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/manager/**").hasAnyRole("ADMIN", "MANAGER")
+                        // Admin/Dev endpoints
+                        .requestMatchers("/actuator/health/**").hasAnyRole("ADMIN", "DEVELOPER")
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").hasAnyRole("ADMIN", "DEVELOPER")
                         // All other requests require authentication
                         .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(new WebAwareAuthenticationEntryPoint()))

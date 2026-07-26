@@ -36,7 +36,7 @@ public class RateLimitConfig {
     /**
      * Authentication endpoint rate limiting settings
      */
-    private RateLimitSettings auth = new RateLimitSettings(5, 300);
+    private RateLimitSettings auth = new RateLimitSettings(10, 300);
 
     /**
      * API endpoint rate limiting settings
