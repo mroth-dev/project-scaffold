@@ -6,7 +6,7 @@ Basic Project Scaffold working through some general consideration for a starting
 
 `./mvnw clean package`
 
-`./mvnw spring-boot:run`
+`./mvnw spring-boot:run -q`
 
 *This will fail due to the DB connections* 
 
@@ -27,3 +27,9 @@ Show tables
 ## Flyway
 Run migrations for development
 `./mvnw clean flyway:migrate -Dflyway.configFiles=flyway.conf`
+
+## Health
+Swagger Endpoint `/swagger-ui/index.html`
+Actuator Health `/actuator/health/*`
+- `/liveness` - UP/DOWN
+- `/readiness` - components health ie DB/Redis

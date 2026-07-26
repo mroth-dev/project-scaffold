@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${product.name} + ' - Scaffold Shop'"></title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <script th:src="@{/webjars/htmx.org/2.0.4/dist/htmx.min.js}"></script>
+</head>
+<body>
+    <div th:replace="~{fragments/nav :: nav}"></div>
+
+    <main class="container">
+        <p><a th:href="@{/products}">&larr; Back to products</a></p>
+
+        <div class="product-detail">
+            <div class="product-images">
+                <img th:each="image : ${product.images}" th:src="${image.url}" th:alt="${image.altText}">
+                <p th:if="${product.images.isEmpty()}">No images available.</p>
+            </div>
+
+            <div class="product-info">
+                <h1 th:text="${product.name}"></h1>
+                <p class="sku" th:text="'SKU: ' + ${product.sku}"></p>
+                <p th:text="${product.description}"></p>
+                <p class="price">
+                    <span th:text="${'£' + product.basePrice}"></span>
+                    <span class="rrp" th:if="${product.rrp != null}" th:text="${'£' + product.rrp}"></span>
+                </p>
+
+                <h2>Choose an option</h2>
+                <table class="variation-table">
+                    <thead>
+                        <tr><th>Size</th><th>Color</th><th>Price</th><th>Stock</th><th></th></tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="variation : ${product.variations}">
+                            <td th:text="${variation.size}"></td>
+                            <td th:text="${variation.color}"></td>
+                            <td th:text="${'£' + (product.basePrice + variation.priceAdjustment)}"></td>
+                            <td th:text="${variation.inventoryCount > 0 ? variation.inventoryCount + ' left' : 'Out of stock'}"></td>
+                            <td>
+                                <form th:action="@{/cart/items}" method="post"
+                                      hx-post="/cart/items" hx-target="#nav-cart-count" hx-swap="innerHTML">
+                                    <input type="hidden" name="variationId" th:value="${variation.id}">
+                                    <input type="number" name="quantity" value="1" min="1" th:max="${variation.inventoryCount}" style="width:4rem">
+                                    <button type="submit" th:disabled="${variation.inventoryCount == 0}">Add to cart</button>
+                                </form>
+                            </td>
+                        </tr>
+                        <tr th:if="${product.variations.isEmpty()}">
+                            <td colspan="5">No purchasable options for this product yet.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

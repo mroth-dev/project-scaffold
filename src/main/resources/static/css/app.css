@@ -1,0 +1,279 @@
+body {
+    font-family: system-ui, sans-serif;
+    margin: 2rem;
+    color: #1a1a1a;
+    background-color: #ffffff;
+}
+
+.container {
+    max-width: 960px;
+    margin: 0 auto;
+}
+
+.container.narrow {
+    max-width: 420px;
+}
+
+a {
+    color: #1a56db;
+}
+
+button, input[type="submit"] {
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    border: 1px solid #1a56db;
+    background-color: #1a56db;
+    color: #ffffff;
+    border-radius: 4px;
+}
+
+button:disabled {
+    background-color: #999;
+    border-color: #999;
+    cursor: not-allowed;
+}
+
+.link-button {
+    background: none;
+    border: none;
+    color: #1a56db;
+    padding: 0;
+    text-decoration: underline;
+    font-size: inherit;
+}
+
+.error {
+    color: #b91c1c;
+}
+
+.hint {
+    color: #666;
+    font-size: 0.85rem;
+    margin-top: -0.5rem;
+}
+
+/* Nav */
+.site-nav {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 2rem;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 2rem;
+}
+
+.site-nav .brand {
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.site-nav a {
+    text-decoration: none;
+}
+
+.nav-group {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.nav-group:last-child {
+    margin-left: auto;
+}
+
+.nav-search {
+    flex: 1;
+    max-width: 24rem;
+    margin: 0 1rem;
+}
+
+.nav-search input {
+    width: 100%;
+}
+
+.nav-user-menu {
+    position: relative;
+}
+
+.nav-user {
+    color: #666;
+    cursor: pointer;
+    list-style: none;
+}
+
+.nav-user::-webkit-details-marker {
+    display: none;
+}
+
+.nav-user::after {
+    content: "▾";
+    margin-left: 0.35rem;
+}
+
+.nav-user-menu-items {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 0.5rem);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 8rem;
+    padding: 0.75rem;
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.nav-inline-form {
+    display: inline;
+}
+
+/* Forms */
+.stacked-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-width: 420px;
+}
+
+.stacked-form label {
+    font-weight: 600;
+    margin-top: 0.5rem;
+}
+
+.stacked-form input {
+    padding: 0.5rem;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+.stacked-form button {
+    margin-top: 1rem;
+}
+
+/* Product grid */
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.product-card {
+    display: block;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+}
+
+.product-card img {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    display: block;
+}
+
+.product-card-body {
+    padding: 0.75rem;
+}
+
+.product-card h3 {
+    margin: 0 0 0.25rem;
+    font-size: 1rem;
+}
+
+.sku {
+    color: #666;
+    font-size: 0.85rem;
+}
+
+.price {
+    font-weight: bold;
+}
+
+.price .rrp {
+    font-weight: normal;
+    color: #999;
+    text-decoration: line-through;
+    margin-left: 0.5rem;
+}
+
+.badge {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    background-color: #e5e7eb;
+}
+
+.badge-active {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+.badge-inactive {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+.pagination {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+/* Product detail */
+.product-detail {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.product-images img {
+    max-width: 320px;
+    display: block;
+    margin-bottom: 0.5rem;
+    border-radius: 6px;
+}
+
+.product-info {
+    flex: 1;
+    min-width: 280px;
+}
+
+.variation-table input[type="number"] {
+    padding: 0.25rem;
+}
+
+/* Cart / orders */
+.cart-table td, .cart-table th {
+    vertical-align: middle;
+}
+
+input[type="search"] {
+    display: block;
+    width: 100%;
+    padding: 0.5rem;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    text-align: left;
+    padding: 0.5rem;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #f5f5f5;
+}

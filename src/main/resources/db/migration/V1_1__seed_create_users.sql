@@ -1,1 +1,0 @@
-INSERT INTO users (id, name, email, dob, gender) VALUES (1, 'Sir Admin', 'admin@mail.com', '1999-08-30', 'male');
