@@ -1,32 +1,43 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
-    <nav class="site-nav" th:fragment="nav">
-        <div class="nav-group">
-            <a class="brand" th:href="@{/}">Scaffold Shop</a>
-            <a th:href="@{/products}">Products</a>
+    <div class="navbar bg-base-100 shadow-sm px-4 md:px-8 mb-8" th:fragment="nav">
+        <div class="navbar-start !w-auto gap-4">
+            <a class="btn btn-ghost text-lg px-2" th:href="@{/}">Scaffold Shop</a>
+            <a class="btn btn-ghost hidden sm:inline-flex" th:href="@{/products}">Products</a>
         </div>
 
-        <form class="nav-search" th:action="@{/products}" method="get">
-            <input type="search" name="query" placeholder="Search products..." th:value="${query}" autocomplete="off">
-        </form>
+        <div class="navbar-center !flex-1 gap-1">
+            <form class="w-full" th:action="@{/products}" method="get">
+                <input type="search" name="query" placeholder="Search products..." autocomplete="off"
+                       th:value="${query}" class="input w-full">
+            </form>
+        </div>
 
-        <div class="nav-group">
-            <a th:href="@{/cart}">Cart (<span id="nav-cart-count" th:text="${cartItemCount}">0</span>)</a>
-            <details class="nav-user-menu" th:if="${authenticated}">
-                <summary class="nav-user" th:text="${currentUserEmail}"></summary>
-                <div class="nav-user-menu-items">
-                    <a th:href="@{/orders}">My Orders</a>
-                    <form th:action="@{/logout}" method="post" class="nav-inline-form">
-                        <button type="submit" class="link-button">Logout</button>
-                    </form>
+        <div class="navbar-end !w-auto gap-2">
+            <a class="btn btn-ghost" th:href="@{/cart}">
+                <div class="indicator">
+                    <span class="indicator-item badge badge-secondary badge-xs" id="nav-cart-count"
+                          th:text="${cartItemCount}">0</span>
+                    <span class="pr-1">Cart</span>
                 </div>
-            </details>
-            <span th:unless="${authenticated}">
-                <a th:href="@{/login}">Login</a>
-                <a th:href="@{/register}">Register</a>
+            </a>
+            <div class="dropdown dropdown-end" th:if="${authenticated}">
+                <div tabindex="0" role="button" class="btn btn-ghost" th:text="${currentUserEmail}"></div>
+                <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-10 w-48 p-2 shadow">
+                    <li><a th:href="@{/orders}">My Orders</a></li>
+                    <li>
+                        <form th:action="@{/logout}" method="post">
+                            <button type="submit" class="w-full text-left">Logout</button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+            <span class="flex gap-2" th:unless="${authenticated}">
+                <a class="btn btn-ghost" th:href="@{/login}">Login</a>
+                <a class="btn btn-primary" th:href="@{/register}">Register</a>
             </span>
         </div>
-    </nav>
+    </div>
 </body>
 </html>

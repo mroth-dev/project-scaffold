@@ -9,22 +9,28 @@
 <body>
     <div th:replace="~{fragments/nav :: nav}"></div>
 
-    <main class="container narrow">
-        <h1>Log in</h1>
+    <main class="flex justify-center px-4">
+        <div class="card w-full max-w-sm bg-base-100 shadow-sm border border-base-300">
+            <div class="card-body">
+                <h1 class="card-title">Log in</h1>
 
-        <p class="error" th:if="${error}" th:text="${error}"></p>
+                <div role="alert" class="alert alert-error" th:if="${error}">
+                    <span th:text="${error}"></span>
+                </div>
 
-        <form method="post" th:action="@{/login}" class="stacked-form">
-            <label for="email">Email</label>
-            <input type="email" id="email" name="email" th:value="${email}" required autofocus>
+                <form method="post" th:action="@{/login}" class="flex flex-col gap-3">
+                    <label class="fieldset-label" for="email">Email</label>
+                    <input type="email" id="email" name="email" th:value="${email}" required autofocus class="input w-full">
 
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password" required>
+                    <label class="fieldset-label" for="password">Password</label>
+                    <input type="password" id="password" name="password" required class="input w-full">
 
-            <button type="submit">Log in</button>
-        </form>
+                    <button type="submit" class="btn btn-primary mt-2">Log in</button>
+                </form>
 
-        <p>Don't have an account? <a th:href="@{/register}">Register</a></p>
+                <p class="text-sm mt-2">Don't have an account? <a class="link link-primary" th:href="@{/register}">Register</a></p>
+            </div>
+        </div>
     </main>
 </body>
 </html>

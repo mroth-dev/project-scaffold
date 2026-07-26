@@ -32,6 +32,11 @@ public class ProductService {
         return products.map(this::toDto);
     }
 
+    public Page<ProductDto> getProductsByCategory(Long categoryId, Pageable pageable) {
+        log.debug("Fetching products in category: {} (not cached)", categoryId);
+        return productRepository.findByCategoriesId(categoryId, pageable).map(this::toDto);
+    }
+
     @Cacheable(value = CacheConfig.PRODUCT_CACHE, key = "#id")
     public ProductDto getProduct(Long id) {
         log.debug("Fetching product by id: {}", id);

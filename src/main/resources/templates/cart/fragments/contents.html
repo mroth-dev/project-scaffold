@@ -2,37 +2,39 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
     <div th:fragment="cartContents">
-        <table class="cart-table" th:unless="${lines.isEmpty()}">
-            <thead>
-                <tr><th>Item</th><th>Quantity</th><th>Unit price</th><th>Subtotal</th><th></th></tr>
-            </thead>
-            <tbody>
-                <tr th:each="line : ${lines}">
-                    <td>
-                        <span th:text="${line.variation.product.name}"></span>
-                        <span class="sku" th:text="'(' + ${line.variation.sku} + ')'"></span>
-                    </td>
-                    <td th:text="${line.quantity}"></td>
-                    <td th:text="${'£' + line.unitPrice}"></td>
-                    <td th:text="${'£' + line.subtotal}"></td>
-                    <td>
-                        <form th:action="@{'/cart/items/' + ${line.variation.id} + '/remove'}" method="post"
-                              th:attr="hx-post=@{'/cart/items/' + ${line.variation.id} + '/remove'}"
-                              hx-target="#cart-contents" hx-swap="innerHTML">
-                            <button type="submit" class="link-button">Remove</button>
-                        </form>
-                    </td>
-                </tr>
-            </tbody>
-            <tfoot>
-                <tr><td colspan="3">Total</td><td th:text="${'£' + total}"></td><td></td></tr>
-            </tfoot>
-        </table>
+        <div class="overflow-x-auto" th:unless="${lines.isEmpty()}">
+            <table class="table">
+                <thead>
+                    <tr><th>Item</th><th>Quantity</th><th>Unit price</th><th>Subtotal</th><th></th></tr>
+                </thead>
+                <tbody>
+                    <tr th:each="line : ${lines}">
+                        <td>
+                            <span th:text="${line.variation.product.name}"></span>
+                            <span class="text-xs text-base-content/60" th:text="'(' + ${line.variation.sku} + ')'"></span>
+                        </td>
+                        <td th:text="${line.quantity}"></td>
+                        <td th:text="${'£' + line.unitPrice}"></td>
+                        <td th:text="${'£' + line.subtotal}"></td>
+                        <td>
+                            <form th:action="@{'/cart/items/' + ${line.variation.id} + '/remove'}" method="post"
+                                  th:attr="hx-post=@{'/cart/items/' + ${line.variation.id} + '/remove'}"
+                                  hx-target="#cart-contents" hx-swap="innerHTML">
+                                <button type="submit" class="btn btn-ghost btn-sm text-error">Remove</button>
+                            </form>
+                        </td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr class="font-bold"><td colspan="3">Total</td><td th:text="${'£' + total}"></td><td></td></tr>
+                </tfoot>
+            </table>
+        </div>
 
-        <p th:if="${lines.isEmpty()}">Your cart is empty. <a th:href="@{/products}">Browse products</a>.</p>
+        <p class="text-base-content/60" th:if="${lines.isEmpty()}">Your cart is empty. <a class="link link-primary" th:href="@{/products}">Browse products</a>.</p>
 
-        <form th:if="${!lines.isEmpty()}" th:action="@{/cart/checkout}" method="post">
-            <button type="submit">Checkout</button>
+        <form class="mt-6" th:if="${!lines.isEmpty()}" th:action="@{/cart/checkout}" method="post">
+            <button type="submit" class="btn btn-primary">Checkout</button>
         </form>
     </div>
 </body>

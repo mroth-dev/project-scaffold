@@ -1,6 +1,12 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
-    <span th:fragment="statusBadge" class="badge" th:text="${order.status}"></span>
+    <span th:fragment="statusBadge"
+          th:with="statusClass=${
+              order.status.name() == 'DELIVERED' ? 'badge-success' :
+              (order.status.name() == 'CANCELLED' ? 'badge-error' :
+              (order.status.name() == 'SHIPPED' ? 'badge-info' :
+              (order.status.name() == 'PROCESSING' ? 'badge-warning' : 'badge-neutral')))}"
+          th:class="'badge badge-sm ' + ${statusClass}" th:text="${order.status}"></span>
 </body>
 </html>

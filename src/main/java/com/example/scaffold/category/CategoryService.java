@@ -1,5 +1,6 @@
 package com.example.scaffold.category;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -49,7 +50,7 @@ public class CategoryService {
                 .filter(category -> category.getParent() == null)
                 .sorted(Comparator.comparingInt(Category::getSortOrder))
                 .map(root -> toTreeDto(root, childrenByParentId))
-                .toList();
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     public List<CategoryDto> getChildren(Long parentId) {
@@ -148,7 +149,7 @@ public class CategoryService {
         List<CategoryTreeDto> children = childrenByParentId.getOrDefault(category.getId(), List.of()).stream()
                 .sorted(Comparator.comparingInt(Category::getSortOrder))
                 .map(child -> toTreeDto(child, childrenByParentId))
-                .toList();
+                .collect(Collectors.toCollection(ArrayList::new));
         return new CategoryTreeDto(
                 category.getId(), category.getName(), category.getSlug(), category.getSortOrder(), children);
     }
