@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.cache.annotation.CacheEvict;
@@ -11,12 +12,15 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.scaffold.config.CacheConfig;
 import com.example.scaffold.exception.NotFoundException;
 import com.example.scaffold.product.Product;
 import com.example.scaffold.product.ProductRepository;
 import com.example.scaffold.product.ProductSummaryDto;
+import com.example.scaffold.storage.ImageStorageService;
+import com.example.scaffold.storage.StoredImage;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -24,12 +28,18 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class CategoryService {
 
+    private static final String THUMBNAIL_KEY_PREFIX = "categories/thumbnails";
+    private static final String PANEL_IMAGE_KEY_PREFIX = "categories/panels";
+
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
+    private final ImageStorageService imageStorageService;
 
-    public CategoryService(CategoryRepository categoryRepository, ProductRepository productRepository) {
+    public CategoryService(CategoryRepository categoryRepository, ProductRepository productRepository,
+            ImageStorageService imageStorageService) {
         this.categoryRepository = categoryRepository;
         this.productRepository = productRepository;
+        this.imageStorageService = imageStorageService;
     }
 
     @Cacheable(value = CacheConfig.CATEGORY_CACHE, key = "#id")
@@ -119,6 +129,47 @@ public class CategoryService {
         productRepository.save(product);
     }
 
+    @CacheEvict(value = CacheConfig.CATEGORY_CACHE, allEntries = true)
+    public void uploadThumbnail(Long categoryId, MultipartFile file) {
+        log.debug("Uploading thumbnail image for category {}", categoryId);
+        Category category = findCategoryOrThrow(categoryId);
+        deleteIfPresent(category.getThumbnailImageKey());
+        category.setThumbnailImageKey(imageStorageService.store(THUMBNAIL_KEY_PREFIX, file));
+        categoryRepository.save(category);
+    }
+
+    @CacheEvict(value = CacheConfig.CATEGORY_CACHE, allEntries = true)
+    public void uploadPanelImage(Long categoryId, MultipartFile file) {
+        log.debug("Uploading panel image for category {}", categoryId);
+        Category category = findCategoryOrThrow(categoryId);
+        deleteIfPresent(category.getPanelImageKey());
+        category.setPanelImageKey(imageStorageService.store(PANEL_IMAGE_KEY_PREFIX, file));
+        categoryRepository.save(category);
+    }
+
+    public StoredImage getThumbnail(Long categoryId) {
+        return getImage(categoryId, Category::getThumbnailImageKey);
+    }
+
+    public StoredImage getPanelImage(Long categoryId) {
+        return getImage(categoryId, Category::getPanelImageKey);
+    }
+
+    private StoredImage getImage(Long categoryId, Function<Category, String> keyExtractor) {
+        Category category = findCategoryOrThrow(categoryId);
+        String key = keyExtractor.apply(category);
+        if (key == null) {
+            throw new NotFoundException("Image for category", categoryId);
+        }
+        return imageStorageService.retrieve(key);
+    }
+
+    private void deleteIfPresent(String key) {
+        if (key != null) {
+            imageStorageService.delete(key);
+        }
+    }
+
     private Category findCategoryOrThrow(Long id) {
         return categoryRepository.findById(id).orElseThrow(() -> new NotFoundException("Category", id));
     }
@@ -175,8 +226,14 @@ public class CategoryService {
                 category.getDescription(),
                 category.getParent() != null ? category.getParent().getId() : null,
                 category.getSortOrder(),
+                imageUrl(category.getId(), category.getThumbnailImageKey(), "thumbnail"),
+                imageUrl(category.getId(), category.getPanelImageKey(), "panel-image"),
                 category.getCreatedAt(),
                 category.getUpdatedAt());
+    }
+
+    private static String imageUrl(Long categoryId, String imageKey, String imageType) {
+        return imageKey != null ? "/categories/" + categoryId + "/" + imageType : null;
     }
 
     private ProductSummaryDto toProductSummaryDto(Product product) {

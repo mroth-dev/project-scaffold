@@ -5,6 +5,11 @@ spring:
   application:
     name: scaffold
 
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+
   # Docker-specific database configuration
   datasource:
     url: jdbc:postgresql://postgres:5432/${POSTGRES_DB}?sslmode=disable&currentSchema=public
@@ -104,11 +109,21 @@ logging:
 
 # Application-specific configuration
 app:
+  # Object storage (Garage, S3-compatible) for uploaded images. Always port
+  # 3900 here - that's Garage's container-internal S3 API port, independent
+  # of whatever host port GARAGE_S3_PORT maps it to.
+  storage:
+    endpoint: http://garage:3900
+    access-key: ${GARAGE_ACCESS_KEY}
+    secret-key: ${GARAGE_SECRET_KEY}
+    bucket: ${GARAGE_BUCKET}
+    region: garage
+
   # JWT Configuration
   jwt:
     secret: ${JWT_SECRET:mySecretKey123456789012345678901234567890}
     expiration: ${JWT_EXPIRATION:86400000}  # 24 hours
-    
+
   # Rate Limiting Configuration
   rate-limit:
     default-settings:

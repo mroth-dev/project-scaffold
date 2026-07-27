@@ -57,7 +57,7 @@ class CategoryRestControllerTest {
 
     private CategoryDto sampleCategory() {
         return new CategoryDto(
-                1L, "Clothing", "clothing", "Apparel", null, 0, LocalDateTime.now(), LocalDateTime.now());
+                1L, "Clothing", "clothing", "Apparel", null, 0, null, null, LocalDateTime.now(), LocalDateTime.now());
     }
 
     @Test

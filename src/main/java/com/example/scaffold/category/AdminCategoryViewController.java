@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Server-rendered category management for the admin section. Delegates to
@@ -62,6 +63,18 @@ public class AdminCategoryViewController {
     public String delete(@PathVariable Long categoryId) {
         categoryService.deleteCategory(categoryId);
         return "redirect:/admin/categories";
+    }
+
+    @PostMapping("/{categoryId}/thumbnail")
+    public String uploadThumbnail(@PathVariable Long categoryId, @RequestParam("file") MultipartFile file) {
+        categoryService.uploadThumbnail(categoryId, file);
+        return "redirect:/admin/categories/" + categoryId + "/edit";
+    }
+
+    @PostMapping("/{categoryId}/panel-image")
+    public String uploadPanelImage(@PathVariable Long categoryId, @RequestParam("file") MultipartFile file) {
+        categoryService.uploadPanelImage(categoryId, file);
+        return "redirect:/admin/categories/" + categoryId + "/edit";
     }
 
     private CategoryRequest toRequest(String name, String slug, String description, String parentId,

@@ -7,6 +7,11 @@ spring:
   application:
     name: scaffold
 
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+
   web:
     error:
       # Business/validation errors are handled explicitly by ApiExceptionHandler
@@ -94,6 +99,14 @@ springdoc:
 
 # Application Configuration
 app:
+  # Object storage (Garage, S3-compatible) for uploaded images
+  storage:
+    endpoint: ${GARAGE_ENDPOINT:http://localhost:3900}
+    access-key: ${GARAGE_ACCESS_KEY:garage_access_key}
+    secret-key: ${GARAGE_SECRET_KEY:garage_secret_key}
+    bucket: ${GARAGE_BUCKET:category-images}
+    region: garage
+
   # JWT Configuration
   jwt:
     secret: ${JWT_SECRET:mySecretKey123456789012345678901234567890} # Should be externalized in production

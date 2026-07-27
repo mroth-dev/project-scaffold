@@ -9,6 +9,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      garage:
+        condition: service_healthy
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - POSTGRES_DB=${POSTGRES_DB}
@@ -16,6 +18,10 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - REDIS_PASSWORD=${REDIS_PASSWORD}
       - JWT_SECRET=${JWT_SECRET:-myVerySecureJWTSecretKey123456789012345678901234567890}
+      - GARAGE_S3_PORT=${GARAGE_S3_PORT}
+      - GARAGE_ACCESS_KEY=${GARAGE_ACCESS_KEY}
+      - GARAGE_SECRET_KEY=${GARAGE_SECRET_KEY}
+      - GARAGE_BUCKET=${GARAGE_BUCKET}
     ports:
       - "8000:8000"
     networks:
@@ -38,10 +44,19 @@ services:
       file: docker-compose.yml
       service: redis
 
+  garage:
+    extends:
+      file: docker-compose.yml
+      service: garage
+
 volumes:
   postgres_data:
     driver: local
   redis_data:
+    driver: local
+  garage_meta:
+    driver: local
+  garage_data:
     driver: local
 
 networks:

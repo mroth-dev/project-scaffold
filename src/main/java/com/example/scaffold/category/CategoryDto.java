@@ -9,6 +9,8 @@ public record CategoryDto(
         String description,
         Long parentId,
         int sortOrder,
+        String thumbnailImageUrl,
+        String panelImageUrl,
         LocalDateTime createdAt,
         LocalDateTime updatedAt) {
 }

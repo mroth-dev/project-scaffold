@@ -23,6 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.example.scaffold.exception.NotFoundException;
 import com.example.scaffold.product.Product;
 import com.example.scaffold.product.ProductRepository;
+import com.example.scaffold.storage.ImageStorageService;
 
 @ExtendWith(MockitoExtension.class)
 class CategoryServiceTest {
@@ -33,6 +34,9 @@ class CategoryServiceTest {
     @Mock
     private ProductRepository productRepository;
 
+    @Mock
+    private ImageStorageService imageStorageService;
+
     private CategoryService categoryService;
 
     private Category root;
@@ -40,7 +44,7 @@ class CategoryServiceTest {
 
     @BeforeEach
     void setUp() {
-        categoryService = new CategoryService(categoryRepository, productRepository);
+        categoryService = new CategoryService(categoryRepository, productRepository, imageStorageService);
 
         root = new Category();
         root.setId(1L);

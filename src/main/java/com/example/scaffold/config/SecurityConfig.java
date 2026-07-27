@@ -43,6 +43,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/categories", "/api/categories/**").permitAll()
                         .requestMatchers("/api/products", "/api/products/**").permitAll()
                         .requestMatchers("/products", "/products/**").permitAll()
+                        .requestMatchers("/categories/*/thumbnail", "/categories/*/panel-image").permitAll()
                         // auth customers endpoints
                         // Orders contain customer data - require authentication; listing all
                         // orders and changing status are restricted to staff. These must be

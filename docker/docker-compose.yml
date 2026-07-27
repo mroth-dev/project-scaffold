@@ -43,10 +43,42 @@ services:
       retries: 3
       start_period: 40s
 
+  # Single-node Garage cluster exposing an S3-compatible API. Used as object
+  # storage for uploaded images (e.g. category thumbnails/panel images) - the
+  # app talks to it via the AWS S3 SDK with a custom endpoint override.
+  #
+  # The image ships as a single static binary with no shell, so the
+  # first-run bucket/key bootstrap can't run as an in-container compose
+  # service - run `./garage-init.sh` from the host once this container is
+  # up (see README).
+  garage:
+    image: dxflrs/garage:v2.3.0
+    container_name: ecommerce-garage
+    volumes:
+      - garage_meta:/var/lib/garage/meta
+      - garage_data:/var/lib/garage/data
+      - ./garage.toml:/etc/garage.toml:ro
+    ports:
+      - "${GARAGE_S3_PORT}:3900"
+      - "${GARAGE_ADMIN_PORT}:3903"
+    networks:
+      - ecommerce-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "/garage", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
 volumes:
   postgres_data:
     driver: local
   redis_data:
+    driver: local
+  garage_meta:
+    driver: local
+  garage_data:
     driver: local
 
 networks:

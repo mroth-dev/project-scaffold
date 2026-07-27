@@ -56,6 +56,47 @@
                 <a class="btn btn-ghost" th:href="@{/admin/categories}">Cancel</a>
             </div>
         </form>
+
+        <div th:if="${category != null}" class="mt-10">
+            <h2 class="text-lg font-semibold mb-4">Images</h2>
+            <div class="grid grid-cols-2 gap-6">
+                <div>
+                    <p class="label-text mb-2">Thumbnail</p>
+                    <img th:if="${category.thumbnailImageUrl != null}" th:src="${category.thumbnailImageUrl}"
+                         alt="Category thumbnail" class="w-32 h-32 object-cover rounded-box border border-base-300 mb-3">
+                    <p th:if="${category.thumbnailImageUrl == null}" class="text-base-content/60 mb-3">No thumbnail uploaded.</p>
+                    <form th:action="@{'/admin/categories/' + ${category.id} + '/thumbnail'}" method="post"
+                          enctype="multipart/form-data" class="flex items-center gap-2">
+                        <input type="file" name="file" id="thumbnail-file" accept="image/*" required class="hidden">
+                        <button type="button" class="btn btn-sm"
+                                onclick="document.getElementById('thumbnail-file').click()">Upload</button>
+                    </form>
+                </div>
+
+                <div>
+                    <p class="label-text mb-2">Panel image</p>
+                    <img th:if="${category.panelImageUrl != null}" th:src="${category.panelImageUrl}"
+                         alt="Category panel image" class="w-full h-32 object-cover rounded-box border border-base-300 mb-3">
+                    <p th:if="${category.panelImageUrl == null}" class="text-base-content/60 mb-3">No panel image uploaded.</p>
+                    <form th:action="@{'/admin/categories/' + ${category.id} + '/panel-image'}" method="post"
+                          enctype="multipart/form-data" class="flex items-center gap-2">
+                        <input type="file" name="file" id="panel-image-file" accept="image/*" required class="hidden">
+                        <button type="button" class="btn btn-sm"
+                                onclick="document.getElementById('panel-image-file').click()">Upload</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            document.querySelectorAll('input[type=file]').forEach(function (input) {
+                input.addEventListener('change', function () {
+                    if (input.files.length > 0) {
+                        input.closest('form').submit();
+                    }
+                });
+            });
+        </script>
     </main>
 </body>
 </html>

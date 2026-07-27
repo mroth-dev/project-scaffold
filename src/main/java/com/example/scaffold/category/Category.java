@@ -55,6 +55,12 @@ public class Category {
     @Column(name = "sort_order", nullable = false)
     private int sortOrder;
 
+    @Column(name = "thumbnail_image_key")
+    private String thumbnailImageKey;
+
+    @Column(name = "panel_image_key")
+    private String panelImageKey;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
