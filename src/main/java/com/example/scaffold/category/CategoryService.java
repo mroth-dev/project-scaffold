@@ -60,6 +60,19 @@ public class CategoryService {
                 .toList();
     }
 
+    public List<CategoryOption> getFlattenedOptions() {
+        return flattenOptions(getCategoryTree(), 0);
+    }
+
+    private List<CategoryOption> flattenOptions(List<CategoryTreeDto> nodes, int depth) {
+        List<CategoryOption> options = new ArrayList<>();
+        for (CategoryTreeDto node : nodes) {
+            options.add(new CategoryOption(node.id(), "— ".repeat(depth) + node.name()));
+            options.addAll(flattenOptions(node.children(), depth + 1));
+        }
+        return options;
+    }
+
     public Page<ProductSummaryDto> getProductsInCategory(Long categoryId, Pageable pageable) {
         log.debug("Fetching products in category: {}", categoryId);
         return productRepository.findByCategoriesId(categoryId, pageable).map(this::toProductSummaryDto);

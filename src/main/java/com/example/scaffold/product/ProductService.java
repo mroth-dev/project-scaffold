@@ -2,6 +2,8 @@ package com.example.scaffold.product;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -12,6 +14,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.example.scaffold.category.CategoryRepository;
+import com.example.scaffold.category.CategorySummaryDto;
 import com.example.scaffold.config.CacheConfig;
 import com.example.scaffold.exception.NotFoundException;
 
@@ -22,9 +26,11 @@ import lombok.extern.slf4j.Slf4j;
 public class ProductService {
 
     private final ProductRepository productRepository;
+    private final CategoryRepository categoryRepository;
 
-    public ProductService(ProductRepository productRepository) {
+    public ProductService(ProductRepository productRepository, CategoryRepository categoryRepository) {
         this.productRepository = productRepository;
+        this.categoryRepository = categoryRepository;
     }
 
     public Page<ProductDto> searchProducts(String query, Pageable pageable) {
@@ -89,6 +95,7 @@ public class ProductService {
         }
         syncImages(product, request.images());
         syncVariations(product, request.variations());
+        syncCategories(product, request.categoryIds());
     }
 
     private void syncImages(Product product, List<ProductImageRequest> imageRequests) {
@@ -138,6 +145,14 @@ public class ProductService {
         product.getVariations().addAll(reconciled);
     }
 
+    private void syncCategories(Product product, List<Long> categoryIds) {
+        if (categoryIds == null || categoryIds.isEmpty()) {
+            product.getCategories().clear();
+            return;
+        }
+        product.setCategories(new HashSet<>(categoryRepository.findAllById(categoryIds)));
+    }
+
     private ProductDto toDto(Product product) {
         List<ProductImageDto> images = product.getImages().stream()
                 .map(image -> new ProductImageDto(
@@ -156,6 +171,10 @@ public class ProductService {
                         variation.getInventoryCount(),
                         variation.getPriceAdjustment()))
                 .toList();
+        List<CategorySummaryDto> categories = product.getCategories().stream()
+                .map(category -> new CategorySummaryDto(category.getId(), category.getName()))
+                .sorted(Comparator.comparing(CategorySummaryDto::name))
+                .toList();
         return new ProductDto(
                 product.getId(),
                 product.getName(),
@@ -166,6 +185,7 @@ public class ProductService {
                 product.isActive(),
                 images,
                 variations,
+                categories,
                 product.getCreatedAt(),
                 product.getUpdatedAt());
     }

@@ -28,6 +28,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import com.example.scaffold.category.CategoryRepository;
 import com.example.scaffold.exception.NotFoundException;
 
 @ExtendWith(MockitoExtension.class)
@@ -36,6 +37,9 @@ class ProductServiceTest {
     @Mock
     private ProductRepository productRepository;
 
+    @Mock
+    private CategoryRepository categoryRepository;
+
     private ProductService productService;
 
     private Product testProduct;
@@ -43,7 +47,7 @@ class ProductServiceTest {
 
     @BeforeEach
     void setUp() {
-        productService = new ProductService(productRepository);
+        productService = new ProductService(productRepository, categoryRepository);
 
         testProduct = new Product();
         testProduct.setId(1L);
@@ -65,7 +69,8 @@ class ProductServiceTest {
                 true,
                 List.of(new ProductImageRequest(
                         "http://example.com/image.jpg", "http://example.com/thumb.jpg", "Front view", 0)),
-                List.of(new ProductVariationRequest("M", "Blue", "TSHIRT-001-M-BLUE", 10, BigDecimal.ZERO)));
+                List.of(new ProductVariationRequest("M", "Blue", "TSHIRT-001-M-BLUE", 10, BigDecimal.ZERO)),
+                List.of());
     }
 
     @Test
@@ -115,6 +120,7 @@ class ProductServiceTest {
                 new BigDecimal("34.99"),
                 new BigDecimal("24.99"),
                 false,
+                List.of(),
                 List.of(),
                 List.of());
 

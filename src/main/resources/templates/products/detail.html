@@ -9,7 +9,7 @@
 <body class="min-h-screen flex flex-col">
     <div th:replace="~{fragments/nav :: nav}"></div>
 
-    <main class="flex-1 container mx-auto px-4 md:px-8 max-w-6xl">
+    <main class="flex-1 container mx-auto px-4 md:px-8 max-w-7xl">
         <p class="mb-4"><a class="link link-hover" th:href="@{/products}">&larr; Back to products</a></p>
 
         <div class="flex flex-col md:flex-row gap-8">
@@ -24,45 +24,147 @@
                 <p class="text-sm text-base-content/60" th:text="'SKU: ' + ${product.sku}"></p>
                 <p class="mt-4" th:text="${product.description}"></p>
                 <p class="mt-4 text-xl font-bold">
-                    <span th:text="${'£' + product.basePrice}"></span>
+                    <span id="price-value" th:text="${'£' + product.basePrice}"></span>
                     <span class="text-base font-normal line-through text-base-content/40 ml-2"
                           th:if="${product.rrp != null}" th:text="${'£' + product.rrp}"></span>
                 </p>
 
-                <h2 class="text-lg font-semibold mt-8 mb-2">Choose an option</h2>
-                <div class="overflow-x-auto">
-                    <table class="table">
-                        <thead>
-                            <tr><th>Size</th><th>Color</th><th>Price</th><th>Stock</th><th></th></tr>
-                        </thead>
-                        <tbody>
-                            <tr th:each="variation : ${product.variations}">
-                                <td th:text="${variation.size}"></td>
-                                <td th:text="${variation.color}"></td>
-                                <td th:text="${'£' + (product.basePrice + variation.priceAdjustment)}"></td>
-                                <td>
-                                    <span class="badge badge-sm" th:classappend="${variation.inventoryCount > 0} ? 'badge-success' : 'badge-error'"
-                                          th:text="${variation.inventoryCount > 0 ? variation.inventoryCount + ' left' : 'Out of stock'}"></span>
-                                </td>
-                                <td>
-                                    <form class="flex items-center gap-2" th:action="@{/cart/items}" method="post"
-                                          hx-post="/cart/items" hx-target="#nav-cart-count" hx-swap="innerHTML">
-                                        <input type="hidden" name="variationId" th:value="${variation.id}">
-                                        <input type="number" name="quantity" value="1" min="1" th:max="${variation.inventoryCount}"
-                                               class="input input-sm w-16">
-                                        <button type="submit" class="btn btn-primary btn-sm" th:disabled="${variation.inventoryCount == 0}">Add to cart</button>
-                                    </form>
-                                </td>
-                            </tr>
-                            <tr th:if="${product.variations.isEmpty()}">
-                                <td colspan="5" class="text-base-content/60">No purchasable options for this product yet.</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div th:if="${!product.variations.isEmpty()}">
+                    <div th:each="variation : ${product.variations}" class="variation-data hidden"
+                         th:attr="data-variation-id=${variation.id},data-color=${variation.color},data-size=${variation.size},data-price=${product.basePrice + variation.priceAdjustment},data-stock=${variation.inventoryCount}"></div>
+
+                    <h2 class="text-lg font-semibold mt-8 mb-2">Color</h2>
+                    <div class="flex flex-wrap gap-2" id="color-row"></div>
+
+                    <h2 class="text-lg font-semibold mt-6 mb-2">Size</h2>
+                    <div class="flex flex-wrap gap-2" id="size-row"></div>
+
+                    <div class="mt-4" id="stock-status"></div>
+
+                    <form class="mt-4" th:action="@{/cart/items}" method="post"
+                          hx-post="/cart/items" hx-target="#nav-cart-count" hx-swap="innerHTML">
+                        <input type="hidden" name="variationId" id="variation-id-input" value="">
+                        <button type="submit" class="btn btn-primary" id="add-to-cart-btn">Add to cart</button>
+                    </form>
                 </div>
+                <p class="mt-8 text-base-content/60" th:if="${product.variations.isEmpty()}">No purchasable options for this product yet.</p>
             </div>
         </div>
     </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var data = Array.from(document.querySelectorAll('.variation-data')).map(function (el) {
+                return {
+                    id: el.dataset.variationId,
+                    color: el.dataset.color,
+                    size: el.dataset.size,
+                    price: el.dataset.price,
+                    stock: parseInt(el.dataset.stock, 10)
+                };
+            });
+
+            if (data.length === 0) {
+                return;
+            }
+
+            var colorRow = document.getElementById('color-row');
+            var sizeRow = document.getElementById('size-row');
+            var variationIdInput = document.getElementById('variation-id-input');
+            var addToCartBtn = document.getElementById('add-to-cart-btn');
+            var stockStatus = document.getElementById('stock-status');
+            var priceValue = document.getElementById('price-value');
+
+            var colors = [];
+            data.forEach(function (v) {
+                if (colors.indexOf(v.color) === -1) {
+                    colors.push(v.color);
+                }
+            });
+
+            var basePriceText = priceValue.textContent;
+            var selectedColor = colors[0];
+            var selectedVariation = null;
+
+            function selectVariation(v) {
+                selectedVariation = v;
+                variationIdInput.value = v.id;
+                priceValue.textContent = '£' + v.price;
+
+                var badgeClass = 'badge-success';
+                var text = 'In stock';
+                if (v.stock === 0) {
+                    badgeClass = 'badge-error';
+                    text = 'Out of stock';
+                } else if (v.stock < 15) {
+                    badgeClass = 'badge-warning';
+                    text = 'Low stock';
+                }
+                stockStatus.innerHTML = '<span class="badge badge-sm ' + badgeClass + '">' + text + '</span>';
+                addToCartBtn.disabled = v.stock === 0;
+            }
+
+            function clearSelection() {
+                selectedVariation = null;
+                variationIdInput.value = '';
+                priceValue.textContent = basePriceText;
+                stockStatus.innerHTML = '';
+                addToCartBtn.disabled = true;
+            }
+
+            function renderColors() {
+                colorRow.innerHTML = '';
+                colors.forEach(function (color) {
+                    var btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'btn btn-sm' + (color === selectedColor ? ' btn-primary' : '');
+                    btn.textContent = color;
+                    btn.addEventListener('click', function () {
+                        selectedColor = color;
+                        renderColors();
+                        renderSizes(true);
+                    });
+                    colorRow.appendChild(btn);
+                });
+            }
+
+            function renderSizes(preserveOnly) {
+                var sizesForColor = data.filter(function (v) { return v.color === selectedColor; });
+
+                var target = sizesForColor.find(function (v) {
+                    return selectedVariation && v.size === selectedVariation.size;
+                });
+                if (target) {
+                    selectVariation(target);
+                } else if (preserveOnly) {
+                    clearSelection();
+                } else {
+                    target = sizesForColor.find(function (v) { return v.stock > 0; }) || sizesForColor[0];
+                    selectVariation(target);
+                }
+
+                sizeRow.innerHTML = '';
+                sizesForColor.forEach(function (v) {
+                    var btn = document.createElement('button');
+                    btn.type = 'button';
+                    var isSelected = selectedVariation ? v.id === selectedVariation.id : false;
+                    btn.className = 'btn btn-sm' + (isSelected ? ' btn-primary' : '') + (v.stock === 0 ? ' btn-disabled' : '');
+                    btn.textContent = v.size;
+                    if (v.stock === 0) {
+                        btn.disabled = true;
+                    }
+                    btn.addEventListener('click', function () {
+                        selectVariation(v);
+                        renderSizes();
+                    });
+                    sizeRow.appendChild(btn);
+                });
+            }
+
+            renderColors();
+            renderSizes();
+        });
+    </script>
 
     <div th:replace="~{fragments/footer :: footer}"></div>
 </body>

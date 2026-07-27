@@ -16,5 +16,6 @@ public record ProductRequest(
         @NotNull @PositiveOrZero BigDecimal basePrice,
         Boolean active,
         @Valid List<ProductImageRequest> images,
-        @Valid List<ProductVariationRequest> variations) {
+        @Valid List<ProductVariationRequest> variations,
+        List<Long> categoryIds) {
 }

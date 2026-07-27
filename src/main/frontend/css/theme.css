@@ -1,0 +1,41 @@
+/*
+ * Brand swatch.
+ *
+ * Change the colors below to re-brand the site. Everything else (spacing,
+ * radii, component styles) comes from daisyUI and stays untouched.
+ *
+ * Values use the oklch() color function: oklch(lightness chroma hue).
+ *   - lightness: 0% (black) to 100% (white)
+ *   - chroma: 0 (grey) to ~0.4 (very saturated)
+ *   - hue: 0-360 degrees on the color wheel
+ *
+ * The site ships with two themes, "light" and "dark". "light" is the
+ * default; "dark" is applied automatically when the visitor's OS/browser
+ * is set to a dark color scheme (no toggle or JavaScript required).
+ */
+
+@plugin "daisyui/theme" {
+  name: "light";
+  default: true;
+  color-scheme: light;
+
+  --color-primary: oklch(45% 0.22 262);
+  --color-primary-content: oklch(95% 0.02 262);
+  --color-secondary: oklch(58% 0.16 216);
+  --color-secondary-content: oklch(96% 0.02 216);
+  --color-accent: oklch(70% 0.13 197);
+  --color-accent-content: oklch(30% 0.05 197);
+}
+
+@plugin "daisyui/theme" {
+  name: "dark";
+  prefersdark: true;
+  color-scheme: dark;
+
+  --color-primary: oklch(62% 0.2 262);
+  --color-primary-content: oklch(97% 0.02 262);
+  --color-secondary: oklch(68% 0.14 216);
+  --color-secondary-content: oklch(97% 0.02 216);
+  --color-accent: oklch(75% 0.12 197);
+  --color-accent-content: oklch(30% 0.05 197);
+}

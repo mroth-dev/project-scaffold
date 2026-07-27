@@ -64,7 +64,7 @@ class ApiExceptionHandlerTest {
 
     @Test
     void validationFailureReturnsFieldLevelDetails() throws Exception {
-        ProductRequest invalid = new ProductRequest("", null, "", null, null, null, null, null);
+        ProductRequest invalid = new ProductRequest("", null, "", null, null, null, null, null, null);
 
         mockMvc.perform(post("/api/products")
                         .contentType(MediaType.APPLICATION_JSON)

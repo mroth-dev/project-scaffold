@@ -9,7 +9,7 @@
 <body>
     <div th:replace="~{fragments/nav :: nav}"></div>
 
-    <main class="container mx-auto px-4 md:px-8 max-w-4xl py-8">
+    <main class="container mx-auto px-4 md:px-8 max-w-7xl py-8">
         <div th:replace="~{admin/fragments/nav :: adminNav(section='products')}"></div>
 
         <p class="mb-4"><a class="link link-hover" th:href="@{/admin/products}">&larr; Back to products</a></p>
@@ -52,6 +52,16 @@
                     <input type="number" step="0.01" min="0" name="rrp" class="input w-full"
                            th:value="${product != null and product.rrp != null} ? ${product.rrp} : ''">
                 </label>
+            </div>
+
+            <h2 class="text-lg font-semibold mt-4">Categories</h2>
+            <div class="flex flex-wrap gap-3">
+                <label class="label cursor-pointer gap-2 justify-start" th:each="option : ${categoryOptions}">
+                    <input type="checkbox" name="categoryIds" class="checkbox checkbox-sm" th:value="${option.id}"
+                           th:checked="${product != null and #lists.contains(product.categories.![id], option.id)}">
+                    <span class="label-text" th:text="${option.label}"></span>
+                </label>
+                <p class="text-base-content/60" th:if="${categoryOptions.isEmpty()}">No categories yet.</p>
             </div>
 
             <h2 class="text-lg font-semibold mt-4">Variations</h2>

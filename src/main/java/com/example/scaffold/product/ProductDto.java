@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.example.scaffold.category.CategorySummaryDto;
+
 public record ProductDto(
         Long id,
         String name,
@@ -14,6 +16,7 @@ public record ProductDto(
         boolean active,
         List<ProductImageDto> images,
         List<ProductVariationDto> variations,
+        List<CategorySummaryDto> categories,
         LocalDateTime createdAt,
         LocalDateTime updatedAt) {
 }

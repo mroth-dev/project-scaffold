@@ -1,5 +1,6 @@
 package com.example.scaffold.user;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -11,6 +12,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
 
     List<User> findByStatusOrderByCreatedAtDesc(AccountStatus status);
+
+    long countByRole(UserRole role);
+
+    long countByRoleAndCreatedAtGreaterThanEqual(UserRole role, LocalDateTime since);
 
     @Query("SELECT u FROM User u WHERE "
            + "LOWER(u.firstName) LIKE LOWER(CONCAT('%', :query, '%')) OR "

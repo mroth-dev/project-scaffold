@@ -1,8 +1,5 @@
 package com.example.scaffold.category;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,14 +31,14 @@ public class AdminCategoryViewController {
 
     @GetMapping("/new")
     public String newForm(Model model) {
-        model.addAttribute("categoryOptions", flattenOptions(categoryService.getCategoryTree(), 0));
+        model.addAttribute("categoryOptions", categoryService.getFlattenedOptions());
         return "admin/categories/form";
     }
 
     @GetMapping("/{categoryId}/edit")
     public String editForm(@PathVariable Long categoryId, Model model) {
         model.addAttribute("category", categoryService.getCategory(categoryId));
-        model.addAttribute("categoryOptions", flattenOptions(categoryService.getCategoryTree(), 0));
+        model.addAttribute("categoryOptions", categoryService.getFlattenedOptions());
         return "admin/categories/form";
     }
 
@@ -72,17 +69,5 @@ public class AdminCategoryViewController {
         Long parsedParentId = parentId == null || parentId.isBlank() ? null : Long.valueOf(parentId);
         Integer parsedSortOrder = sortOrder == null || sortOrder.isBlank() ? null : Integer.valueOf(sortOrder);
         return new CategoryRequest(name, slug, description, parsedParentId, parsedSortOrder);
-    }
-
-    private List<CategoryOption> flattenOptions(List<CategoryTreeDto> nodes, int depth) {
-        List<CategoryOption> options = new ArrayList<>();
-        for (CategoryTreeDto node : nodes) {
-            options.add(new CategoryOption(node.id(), "— ".repeat(depth) + node.name()));
-            options.addAll(flattenOptions(node.children(), depth + 1));
-        }
-        return options;
-    }
-
-    public record CategoryOption(Long id, String label) {
     }
 }

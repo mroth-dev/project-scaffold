@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.example.scaffold.category.CategoryService;
+
 /**
  * Server-rendered product management for the admin section. Delegates to
  * {@link ProductService} for the same create/update/delete logic the REST
@@ -25,9 +27,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class AdminProductViewController {
 
     private final ProductService productService;
+    private final CategoryService categoryService;
 
-    public AdminProductViewController(ProductService productService) {
+    public AdminProductViewController(ProductService productService, CategoryService categoryService) {
         this.productService = productService;
+        this.categoryService = categoryService;
     }
 
     @GetMapping
@@ -39,12 +43,14 @@ public class AdminProductViewController {
 
     @GetMapping("/new")
     public String newForm(Model model) {
+        model.addAttribute("categoryOptions", categoryService.getFlattenedOptions());
         return "admin/products/form";
     }
 
     @GetMapping("/{productId}/edit")
     public String editForm(@PathVariable Long productId, Model model) {
         model.addAttribute("product", productService.getProduct(productId));
+        model.addAttribute("categoryOptions", categoryService.getFlattenedOptions());
         return "admin/products/form";
     }
 
@@ -85,10 +91,22 @@ public class AdminProductViewController {
             List<String> variationColor,
             List<String> variationSku,
             List<String> variationInventory,
-            List<String> variationPriceAdjustment) {
+            List<String> variationPriceAdjustment,
+            List<String> categoryIds) {
 
         ProductRequest toRequest(List<ProductImageRequest> images) {
-            return new ProductRequest(name, description, sku, rrp, basePrice, active, images, toVariations());
+            return new ProductRequest(
+                    name, description, sku, rrp, basePrice, active, images, toVariations(), toCategoryIds());
+        }
+
+        private List<Long> toCategoryIds() {
+            if (categoryIds == null) {
+                return List.of();
+            }
+            return categoryIds.stream()
+                    .filter(id -> id != null && !id.isBlank())
+                    .map(Long::valueOf)
+                    .toList();
         }
 
         private List<ProductVariationRequest> toVariations() {

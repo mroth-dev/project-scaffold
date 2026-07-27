@@ -64,7 +64,7 @@ class ProductRestControllerTest {
                 List.of(new ProductImageDto(
                         1L, "http://example.com/image.jpg", "http://example.com/thumb.jpg", "Front view", 0)),
                 List.of(new ProductVariationDto(1L, "M", "Blue", "TSHIRT-001-M-BLUE", 10, BigDecimal.ZERO)),
-                LocalDateTime.now(), LocalDateTime.now());
+                List.of(), LocalDateTime.now(), LocalDateTime.now());
     }
 
     @Test
@@ -99,7 +99,7 @@ class ProductRestControllerTest {
     void createProductReturns201() throws Exception {
         ProductRequest request = new ProductRequest("T-Shirt", "Cotton crew neck t-shirt", "TSHIRT-001",
                 new BigDecimal("29.99"), new BigDecimal("19.99"), true,
-                List.of(), List.of());
+                List.of(), List.of(), List.of());
         given(productService.createProduct(any(ProductRequest.class))).willReturn(sampleProduct());
 
         mockMvc.perform(post("/api/products")
@@ -111,7 +111,7 @@ class ProductRestControllerTest {
 
     @Test
     void createProductReturns400WhenInvalid() throws Exception {
-        ProductRequest invalid = new ProductRequest("", null, "", null, null, null, null, null);
+        ProductRequest invalid = new ProductRequest("", null, "", null, null, null, null, null, null);
 
         mockMvc.perform(post("/api/products")
                         .contentType(MediaType.APPLICATION_JSON)

@@ -9,7 +9,7 @@
 <body class="min-h-screen flex flex-col">
     <div th:replace="~{fragments/nav :: nav}"></div>
 
-    <main class="flex-1 container mx-auto px-4 md:px-8 max-w-6xl">
+    <main class="flex-1 container mx-auto m-1 px-4 md:px-8 max-w-7xl">
         <section th:if="${!carouselProducts.isEmpty()}" class="carousel w-full h-80 rounded-box">
             <div class="carousel-item relative w-full" th:each="product, iter : ${carouselProducts}" th:id="'slide' + ${iter.index}">
                 <a class="w-full" th:href="@{'/products/' + ${product.id}}">
