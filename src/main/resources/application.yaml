@@ -114,6 +114,10 @@ app:
     header: ${JWT_HEADER:Authorization}
     prefix: ${JWT_PREFIX:Bearer }
 
+  # Inventory Configuration
+  inventory:
+    low-stock-threshold: ${LOW_STOCK_THRESHOLD:5}
+
   # Cache Configuration
   cache:
     ttl:

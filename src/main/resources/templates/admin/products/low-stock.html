@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Low Stock - Scaffold Shop</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <script th:src="@{/webjars/htmx.org/2.0.4/dist/htmx.min.js}"></script>
+</head>
+<body>
+    <div th:replace="~{fragments/nav :: nav}"></div>
+
+    <main class="container mx-auto px-4 md:px-8 max-w-7xl py-8">
+        <div th:replace="~{admin/fragments/nav :: adminNav(section='products')}"></div>
+
+        <div class="flex items-center justify-between mb-6">
+            <h1 class="text-2xl font-bold">Low Stock</h1>
+            <a class="link link-primary" th:href="@{/admin/products}">&larr; Back to products</a>
+        </div>
+
+        <div class="overflow-x-auto" th:unless="${page.content.isEmpty()}">
+            <table class="table">
+                <thead>
+                    <tr><th>Product</th><th>SKU</th><th>Size</th><th>Color</th><th>Stock</th><th></th></tr>
+                </thead>
+                <tbody>
+                    <tr th:each="item : ${page.content}">
+                        <td th:text="${item.productName}"></td>
+                        <td th:text="${item.sku}"></td>
+                        <td th:text="${item.size}"></td>
+                        <td th:text="${item.color}"></td>
+                        <td>
+                            <span class="badge badge-sm" th:classappend="${item.inventoryCount == 0} ? 'badge-error' : 'badge-warning'"
+                                  th:text="${item.inventoryCount}"></span>
+                        </td>
+                        <td><a class="link link-primary" th:href="@{'/admin/products/' + ${item.productId} + '/edit'}">Edit</a></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <p class="text-base-content/60" th:if="${page.content.isEmpty()}">No low stock items right now.</p>
+
+        <div class="flex justify-center items-center gap-4 mt-8" th:if="${page.totalPages > 1}">
+            <a class="btn btn-outline btn-sm" th:if="${page.hasPrevious()}"
+               th:href="@{/admin/products/low-stock(page=${page.number - 1})}">Previous</a>
+            <span class="text-sm text-base-content/60" th:text="'Page ' + ${page.number + 1} + ' of ' + ${page.totalPages}"></span>
+            <a class="btn btn-outline btn-sm" th:if="${page.hasNext()}"
+               th:href="@{/admin/products/low-stock(page=${page.number + 1})}">Next</a>
+        </div>
+    </main>
+</body>
+</html>

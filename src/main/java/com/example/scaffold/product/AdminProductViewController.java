@@ -41,6 +41,12 @@ public class AdminProductViewController {
         return "admin/products/index";
     }
 
+    @GetMapping("/low-stock")
+    public String lowStock(Pageable pageable, Model model) {
+        model.addAttribute("page", productService.getLowStockItems(pageable));
+        return "admin/products/low-stock";
+    }
+
     @GetMapping("/new")
     public String newForm(Model model) {
         model.addAttribute("categoryOptions", categoryService.getFlattenedOptions());

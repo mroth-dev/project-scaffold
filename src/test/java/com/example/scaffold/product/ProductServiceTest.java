@@ -40,6 +40,9 @@ class ProductServiceTest {
     @Mock
     private CategoryRepository categoryRepository;
 
+    @Mock
+    private ProductVariationRepository productVariationRepository;
+
     private ProductService productService;
 
     private Product testProduct;
@@ -47,7 +50,7 @@ class ProductServiceTest {
 
     @BeforeEach
     void setUp() {
-        productService = new ProductService(productRepository, categoryRepository);
+        productService = new ProductService(productRepository, categoryRepository, productVariationRepository);
 
         testProduct = new Product();
         testProduct.setId(1L);

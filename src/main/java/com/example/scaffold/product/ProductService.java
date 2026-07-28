@@ -8,9 +8,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -27,10 +29,18 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
+    private final ProductVariationRepository productVariationRepository;
 
-    public ProductService(ProductRepository productRepository, CategoryRepository categoryRepository) {
+    @Value("${app.inventory.low-stock-threshold:5}")
+    private int lowStockThreshold;
+
+    public ProductService(
+            ProductRepository productRepository,
+            CategoryRepository categoryRepository,
+            ProductVariationRepository productVariationRepository) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
+        this.productVariationRepository = productVariationRepository;
     }
 
     public Page<ProductDto> searchProducts(String query, Pageable pageable) {
@@ -78,6 +88,35 @@ public class ProductService {
         }
         productRepository.deleteById(id);
         log.debug("Cache evicted for product deletion: {}", id);
+    }
+
+    public long countLowStock() {
+        return productVariationRepository.countByInventoryCountLessThanEqual(lowStockThreshold);
+    }
+
+    public List<LowStockItemDto> getLowStockPreview(int limit) {
+        return productVariationRepository
+                .findByInventoryCountLessThanEqualOrderByInventoryCountAsc(lowStockThreshold, PageRequest.of(0, limit))
+                .map(this::toLowStockDto)
+                .getContent();
+    }
+
+    public Page<LowStockItemDto> getLowStockItems(Pageable pageable) {
+        return productVariationRepository
+                .findByInventoryCountLessThanEqualOrderByInventoryCountAsc(lowStockThreshold, pageable)
+                .map(this::toLowStockDto);
+    }
+
+    private LowStockItemDto toLowStockDto(ProductVariation variation) {
+        Product product = variation.getProduct();
+        return new LowStockItemDto(
+                product.getId(),
+                product.getName(),
+                variation.getId(),
+                variation.getSku(),
+                variation.getSize(),
+                variation.getColor(),
+                variation.getInventoryCount());
     }
 
     private Product findProductOrThrow(Long id) {
