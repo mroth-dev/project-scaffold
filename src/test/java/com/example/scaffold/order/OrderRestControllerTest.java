@@ -75,8 +75,8 @@ class OrderRestControllerTest {
     private OrderDto sampleOrder(Long id, Long customerId) {
         OrderItemDto item = new OrderItemDto(1L, 1L, "T-Shirt", "TSHIRT-001-M-WHITE", 2, new BigDecimal("19.99"),
                 new BigDecimal("39.98"));
-        return new OrderDto(id, customerId, OrderStatus.PENDING, new BigDecimal("39.98"), List.of(item),
-                LocalDateTime.now(), LocalDateTime.now());
+        return new OrderDto(id, customerId, OrderStatus.PENDING, new BigDecimal("39.98"), null, BigDecimal.ZERO,
+                List.of(item), LocalDateTime.now(), LocalDateTime.now());
     }
 
     @Test
@@ -158,8 +158,8 @@ class OrderRestControllerTest {
     void updateStatusAllowedForAdmin() throws Exception {
         OrderStatusUpdateRequest request = new OrderStatusUpdateRequest(OrderStatus.CONFIRMED);
         given(orderService.updateOrderStatus(eq(10L), eq(OrderStatus.CONFIRMED)))
-                .willReturn(new OrderDto(10L, 1L, OrderStatus.CONFIRMED, new BigDecimal("39.98"), List.of(),
-                        LocalDateTime.now(), LocalDateTime.now()));
+                .willReturn(new OrderDto(10L, 1L, OrderStatus.CONFIRMED, new BigDecimal("39.98"), null,
+                        BigDecimal.ZERO, List.of(), LocalDateTime.now(), LocalDateTime.now()));
 
         mockMvc.perform(put("/api/orders/10/status")
                         .with(authentication(admin(99L)))

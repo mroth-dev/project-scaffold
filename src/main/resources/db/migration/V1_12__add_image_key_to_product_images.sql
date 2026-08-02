@@ -1,0 +1,2 @@
+ALTER TABLE product_images ALTER COLUMN url DROP NOT NULL;
+ALTER TABLE product_images ADD COLUMN image_key VARCHAR(500);

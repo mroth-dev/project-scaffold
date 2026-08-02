@@ -15,11 +15,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.scaffold.category.CategoryRepository;
 import com.example.scaffold.category.CategorySummaryDto;
 import com.example.scaffold.config.CacheConfig;
 import com.example.scaffold.exception.NotFoundException;
+import com.example.scaffold.storage.ImageStorageService;
+import com.example.scaffold.storage.StoredImage;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,9 +30,12 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class ProductService {
 
+    private static final String IMAGE_KEY_PREFIX = "products";
+
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final ProductVariationRepository productVariationRepository;
+    private final ImageStorageService imageStorageService;
 
     @Value("${app.inventory.low-stock-threshold:5}")
     private int lowStockThreshold;
@@ -37,10 +43,12 @@ public class ProductService {
     public ProductService(
             ProductRepository productRepository,
             CategoryRepository categoryRepository,
-            ProductVariationRepository productVariationRepository) {
+            ProductVariationRepository productVariationRepository,
+            ImageStorageService imageStorageService) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
         this.productVariationRepository = productVariationRepository;
+        this.imageStorageService = imageStorageService;
     }
 
     public Page<ProductDto> searchProducts(String query, Pageable pageable) {
@@ -88,6 +96,51 @@ public class ProductService {
         }
         productRepository.deleteById(id);
         log.debug("Cache evicted for product deletion: {}", id);
+    }
+
+    @CacheEvict(value = CacheConfig.PRODUCT_CACHE, key = "#productId")
+    public ProductDto addImages(Long productId, List<MultipartFile> files) {
+        log.debug("Uploading {} image(s) for product {}", files.size(), productId);
+        Product product = findProductOrThrow(productId);
+        int nextSortOrder = product.getImages().stream().mapToInt(ProductImage::getSortOrder).max().orElse(-1) + 1;
+        for (MultipartFile file : files) {
+            if (file.isEmpty()) {
+                continue;
+            }
+            ProductImage image = new ProductImage();
+            image.setProduct(product);
+            image.setImageKey(imageStorageService.store(IMAGE_KEY_PREFIX, file));
+            image.setSortOrder(nextSortOrder++);
+            product.getImages().add(image);
+        }
+        return toDto(productRepository.save(product));
+    }
+
+    @CacheEvict(value = CacheConfig.PRODUCT_CACHE, key = "#productId")
+    public void deleteImage(Long productId, Long imageId) {
+        log.debug("Deleting image {} for product {}", imageId, productId);
+        Product product = findProductOrThrow(productId);
+        ProductImage image = product.getImages().stream()
+                .filter(candidate -> candidate.getId().equals(imageId))
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException("ProductImage", imageId));
+        product.getImages().remove(image);
+        productRepository.save(product);
+        if (image.getImageKey() != null) {
+            imageStorageService.delete(image.getImageKey());
+        }
+    }
+
+    public StoredImage getImage(Long productId, Long imageId) {
+        Product product = findProductOrThrow(productId);
+        ProductImage image = product.getImages().stream()
+                .filter(candidate -> candidate.getId().equals(imageId))
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException("ProductImage", imageId));
+        if (image.getImageKey() == null) {
+            throw new NotFoundException("Image for product", productId);
+        }
+        return imageStorageService.retrieve(image.getImageKey());
     }
 
     public long countLowStock() {
@@ -138,10 +191,10 @@ public class ProductService {
     }
 
     private void syncImages(Product product, List<ProductImageRequest> imageRequests) {
-        product.getImages().clear();
         if (imageRequests == null) {
             return;
         }
+        product.getImages().clear();
         for (ProductImageRequest imageRequest : imageRequests) {
             ProductImage image = new ProductImage();
             image.setProduct(product);
@@ -196,8 +249,8 @@ public class ProductService {
         List<ProductImageDto> images = product.getImages().stream()
                 .map(image -> new ProductImageDto(
                         image.getId(),
-                        image.getUrl(),
-                        image.getThumbnailUrl(),
+                        imageUrl(product.getId(), image),
+                        image.getImageKey() != null ? imageUrl(product.getId(), image) : image.getThumbnailUrl(),
                         image.getAltText(),
                         image.getSortOrder()))
                 .toList();
@@ -227,5 +280,11 @@ public class ProductService {
                 categories,
                 product.getCreatedAt(),
                 product.getUpdatedAt());
+    }
+
+    private static String imageUrl(Long productId, ProductImage image) {
+        return image.getImageKey() != null
+                ? "/products/" + productId + "/images/" + image.getId()
+                : image.getUrl();
     }
 }

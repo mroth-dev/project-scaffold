@@ -55,14 +55,25 @@
             </div>
 
             <h2 class="text-lg font-semibold mt-4">Categories</h2>
-            <div class="flex flex-wrap gap-3">
-                <label class="label cursor-pointer gap-2 justify-start" th:each="option : ${categoryOptions}">
-                    <input type="checkbox" name="categoryIds" class="checkbox checkbox-sm" th:value="${option.id}"
-                           th:checked="${product != null and #lists.contains(product.categories.![id], option.id)}">
-                    <span class="label-text" th:text="${option.label}"></span>
-                </label>
-                <p class="text-base-content/60" th:if="${categoryOptions.isEmpty()}">No categories yet.</p>
+            <div class="dropdown w-full max-w-sm" th:unless="${categoryOptions.isEmpty()}">
+                <div tabindex="0" role="button" class="btn btn-outline w-full justify-between font-normal">
+                    <span id="category-dropdown-label" class="truncate">Select categories</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" class="shrink-0 opacity-60"
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m6 9 6 6 6-6"/>
+                    </svg>
+                </div>
+                <div tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-10 w-full p-2 shadow max-h-64 overflow-y-auto flex-nowrap">
+                    <label class="flex items-center gap-2 pr-3 py-1.5 rounded-btn cursor-pointer hover:bg-base-200 has-[:checked]:bg-primary has-[:checked]:text-primary-content"
+                           th:each="option : ${categoryOptions}"
+                           th:style="${'padding-left:' + (12 + option.depth * 16) + 'px'}">
+                        <input type="checkbox" name="categoryIds" class="hidden category-checkbox" th:value="${option.id}"
+                               th:checked="${product != null and #lists.contains(product.categories.![id], option.id)}">
+                        <span th:text="${option.label}"></span>
+                    </label>
+                </div>
             </div>
+            <p class="text-base-content/60" th:if="${categoryOptions.isEmpty()}">No categories yet.</p>
 
             <h2 class="text-lg font-semibold mt-4">Variations</h2>
             <div class="overflow-x-auto">
@@ -89,6 +100,24 @@
                 <a class="btn btn-ghost" th:href="@{/admin/products}">Cancel</a>
             </div>
         </form>
+
+        <div th:if="${product != null}" class="mt-10 max-w-2xl">
+            <h2 class="text-lg font-semibold mb-3">Images</h2>
+            <div class="flex flex-wrap gap-4 mb-3" th:unless="${product.images.isEmpty()}">
+                <div class="relative" th:each="image : ${product.images}">
+                    <img th:src="${image.url}" alt="Product image" class="w-24 h-24 object-cover rounded-box border border-base-300">
+                    <form th:action="@{'/admin/products/' + ${product.id} + '/images/' + ${image.id} + '/delete'}" method="post"
+                          onsubmit="return confirm('Remove this image?');" class="absolute -top-2 -right-2">
+                        <button type="submit" class="btn btn-circle btn-error btn-xs" aria-label="Remove image">&times;</button>
+                    </form>
+                </div>
+            </div>
+            <p class="text-base-content/60 mb-3" th:if="${product.images.isEmpty()}">No images uploaded yet.</p>
+            <form th:action="@{'/admin/products/' + ${product.id} + '/images'}" method="post" enctype="multipart/form-data">
+                <input type="file" name="files" id="product-images-file" accept="image/*" multiple required class="hidden">
+                <button type="button" class="btn btn-sm" onclick="document.getElementById('product-images-file').click()">Upload images</button>
+            </form>
+        </div>
     </main>
 
     <template id="variation-row-template">
@@ -106,6 +135,36 @@
             const template = document.getElementById('variation-row-template');
             document.getElementById('variation-rows').appendChild(template.content.cloneNode(true));
         }
+
+        const imagesInput = document.getElementById('product-images-file');
+        if (imagesInput) {
+            imagesInput.addEventListener('change', function () {
+                if (imagesInput.files.length > 0) {
+                    imagesInput.closest('form').submit();
+                }
+            });
+        }
+
+        function updateCategoryDropdownLabel() {
+            const label = document.getElementById('category-dropdown-label');
+            if (!label) {
+                return;
+            }
+            const checked = document.querySelectorAll('.category-checkbox:checked');
+            if (checked.length === 0) {
+                label.textContent = 'Select categories';
+            } else if (checked.length <= 2) {
+                label.textContent = Array.from(checked)
+                        .map(function (input) { return input.closest('label').querySelector('span').textContent; })
+                        .join(', ');
+            } else {
+                label.textContent = checked.length + ' categories selected';
+            }
+        }
+        document.querySelectorAll('.category-checkbox').forEach(function (checkbox) {
+            checkbox.addEventListener('change', updateCategoryDropdownLabel);
+        });
+        updateCategoryDropdownLabel();
     </script>
 </body>
 </html>

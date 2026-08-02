@@ -9,6 +9,8 @@ public record OrderDto(
         Long customerId,
         OrderStatus status,
         BigDecimal totalAmount,
+        String promotionCode,
+        BigDecimal discountAmount,
         List<OrderItemDto> items,
         LocalDateTime createdAt,
         LocalDateTime updatedAt) {

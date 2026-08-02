@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.scaffold.category.CategoryService;
 
@@ -68,11 +69,9 @@ public class AdminProductViewController {
 
     @PostMapping("/{productId}")
     public String update(@PathVariable Long productId, @ModelAttribute ProductFormParams form) {
-        List<ProductImageRequest> existingImages = productService.getProduct(productId).images().stream()
-                .map(image -> new ProductImageRequest(image.url(), image.thumbnailUrl(), image.altText(),
-                        image.sortOrder()))
-                .toList();
-        productService.updateProduct(productId, form.toRequest(existingImages));
+        // Images are managed separately via the upload/delete endpoints below, so
+        // passing null here leaves them untouched (see ProductService#syncImages).
+        productService.updateProduct(productId, form.toRequest(null));
         return "redirect:/admin/products";
     }
 
@@ -80,6 +79,18 @@ public class AdminProductViewController {
     public String delete(@PathVariable Long productId) {
         productService.deleteProduct(productId);
         return "redirect:/admin/products";
+    }
+
+    @PostMapping("/{productId}/images")
+    public String uploadImages(@PathVariable Long productId, @RequestParam("files") List<MultipartFile> files) {
+        productService.addImages(productId, files);
+        return "redirect:/admin/products/" + productId + "/edit";
+    }
+
+    @PostMapping("/{productId}/images/{imageId}/delete")
+    public String deleteImage(@PathVariable Long productId, @PathVariable Long imageId) {
+        productService.deleteImage(productId, imageId);
+        return "redirect:/admin/products/" + productId + "/edit";
     }
 
     /**

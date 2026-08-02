@@ -21,6 +21,10 @@
                   th:insert="~{orders/fragments/status-badge :: statusBadge}"></span>
         </p>
         <p class="text-base-content/60" th:text="'Placed ' + ${#temporals.format(order.createdAt, 'dd MMM yyyy HH:mm')}"></p>
+        <p class="mt-1" th:if="${order.promotionCode != null}">
+            <span class="badge badge-outline font-mono" th:text="${order.promotionCode}"></span>
+            <span class="text-success text-sm" th:text="'-£' + ${order.discountAmount} + ' discount applied'"></span>
+        </p>
         <p class="font-bold mt-1" th:text="'Total: £' + ${order.totalAmount}"></p>
 
         <div class="overflow-x-auto mt-6">

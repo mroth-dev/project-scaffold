@@ -1,4 +1,4 @@
 package com.example.scaffold.category;
 
-public record CategoryOption(Long id, String label) {
+public record CategoryOption(Long id, String label, int depth) {
 }

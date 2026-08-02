@@ -27,7 +27,6 @@ public class ProductImage {
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
-    @Column(nullable = false)
     private String url;
 
     @Column(name = "thumbnail_url")
@@ -38,4 +37,7 @@ public class ProductImage {
 
     @Column(name = "sort_order", nullable = false)
     private int sortOrder;
+
+    @Column(name = "image_key")
+    private String imageKey;
 }

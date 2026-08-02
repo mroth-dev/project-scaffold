@@ -77,7 +77,7 @@ public class CategoryService {
     private List<CategoryOption> flattenOptions(List<CategoryTreeDto> nodes, int depth) {
         List<CategoryOption> options = new ArrayList<>();
         for (CategoryTreeDto node : nodes) {
-            options.add(new CategoryOption(node.id(), "— ".repeat(depth) + node.name()));
+            options.add(new CategoryOption(node.id(), node.name(), depth));
             options.addAll(flattenOptions(node.children(), depth + 1));
         }
         return options;

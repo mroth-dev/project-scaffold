@@ -25,10 +25,44 @@
                         </td>
                     </tr>
                 </tbody>
-                <tfoot>
-                    <tr class="font-bold"><td colspan="3">Total</td><td th:text="${'£' + total}"></td><td></td></tr>
-                </tfoot>
             </table>
+
+            <div class="mt-6 max-w-sm ml-auto">
+                <div th:if="${promotionCode == null}" class="mb-4">
+                    <form th:action="@{/cart/promotion}" method="post" hx-post="/cart/promotion"
+                          hx-target="#cart-contents" hx-swap="innerHTML" class="flex gap-2">
+                        <input type="text" name="code" placeholder="Promo code" autocomplete="off"
+                               class="input input-sm flex-1 uppercase">
+                        <button type="submit" class="btn btn-sm">Apply</button>
+                    </form>
+                    <p class="text-error text-sm mt-1" th:if="${promotionError != null}" th:text="${promotionError}"></p>
+                </div>
+
+                <div th:if="${promotionCode != null}" class="mb-4 flex items-center justify-between gap-2">
+                    <div>
+                        <span class="badge badge-outline font-mono" th:text="${promotionCode}"></span>
+                        <span class="text-sm text-base-content/60" th:if="${promotion != null}">applied</span>
+                        <p class="text-error text-sm mt-1" th:if="${promotionError != null}" th:text="${promotionError}"></p>
+                    </div>
+                    <form th:action="@{/cart/promotion/remove}" method="post" hx-post="/cart/promotion/remove"
+                          hx-target="#cart-contents" hx-swap="innerHTML">
+                        <button type="submit" class="link link-error text-sm">Remove</button>
+                    </form>
+                </div>
+
+                <div class="flex justify-between text-sm" th:if="${discount.signum() > 0}">
+                    <span>Subtotal</span>
+                    <span th:text="${'£' + subtotal}"></span>
+                </div>
+                <div class="flex justify-between text-sm text-success" th:if="${discount.signum() > 0}">
+                    <span>Discount</span>
+                    <span th:text="${'-£' + discount}"></span>
+                </div>
+                <div class="flex justify-between font-bold text-lg mt-1">
+                    <span>Total</span>
+                    <span th:text="${'£' + total}"></span>
+                </div>
+            </div>
         </div>
 
         <p class="text-base-content/60" th:if="${lines.isEmpty()}">Your cart is empty. <a class="link link-primary" th:href="@{/products}">Browse products</a>.</p>

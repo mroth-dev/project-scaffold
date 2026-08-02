@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${promotion != null} ? 'Edit Promotion - Scaffold Shop' : 'New Promotion - Scaffold Shop'"></title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <script th:src="@{/webjars/htmx.org/2.0.4/dist/htmx.min.js}"></script>
+</head>
+<body>
+    <div th:replace="~{fragments/nav :: nav}"></div>
+
+    <main class="container mx-auto px-4 md:px-8 max-w-7xl py-8">
+        <div th:replace="~{admin/fragments/nav :: adminNav(section='promotions')}"></div>
+
+        <p class="mb-4"><a class="link link-hover" th:href="@{/admin/promotions}">&larr; Back to promotions</a></p>
+
+        <h1 class="text-2xl font-bold mb-6" th:text="${promotion != null} ? 'Edit Promotion' : 'New Promotion'"></h1>
+
+        <form th:action="${promotion != null} ? @{'/admin/promotions/' + ${promotion.id}} : @{/admin/promotions}" method="post"
+              class="flex flex-col gap-4 max-w-2xl">
+
+            <div class="grid grid-cols-2 gap-4">
+                <label class="form-control">
+                    <span class="label-text">Name</span>
+                    <input type="text" name="name" required class="input w-full" th:value="${promotion != null} ? ${promotion.name} : ''">
+                </label>
+                <label class="form-control">
+                    <span class="label-text">Code</span>
+                    <input type="text" name="code" required class="input w-full font-mono uppercase"
+                           th:value="${promotion != null} ? ${promotion.code} : ''">
+                </label>
+            </div>
+
+            <label class="form-control">
+                <span class="label-text">Description</span>
+                <textarea name="description" class="textarea w-full" th:text="${promotion != null} ? ${promotion.description} : ''"></textarea>
+            </label>
+
+            <h2 class="text-lg font-semibold mt-2">Discount</h2>
+            <div class="flex gap-4">
+                <label class="label cursor-pointer gap-2 justify-start" th:each="t : ${types}">
+                    <input type="radio" name="type" class="radio radio-sm promotion-type-input" th:value="${t}"
+                           th:checked="${promotion != null} ? ${promotion.type == t} : ${t.name() == 'PERCENTAGE'}">
+                    <span class="label-text" th:text="${t}"></span>
+                </label>
+            </div>
+            <label class="form-control max-w-xs" id="value-field">
+                <span class="label-text" id="value-label">Value (£ off)</span>
+                <input type="number" step="0.01" min="0" name="value" id="value-input" class="input w-full"
+                       th:value="${promotion != null and promotion.value != null} ? ${promotion.value} : ''">
+            </label>
+
+            <h2 class="text-lg font-semibold mt-2">Active window</h2>
+            <div class="grid grid-cols-2 gap-4">
+                <label class="form-control">
+                    <span class="label-text">Start date (blank = no restriction)</span>
+                    <input type="datetime-local" name="startDate" class="input w-full"
+                           th:value="${promotion != null and promotion.startDate != null} ? ${#temporals.format(promotion.startDate, 'yyyy-MM-dd''T''HH:mm')} : ''">
+                </label>
+                <label class="form-control">
+                    <span class="label-text">End date (blank = no restriction)</span>
+                    <input type="datetime-local" name="endDate" class="input w-full"
+                           th:value="${promotion != null and promotion.endDate != null} ? ${#temporals.format(promotion.endDate, 'yyyy-MM-dd''T''HH:mm')} : ''">
+                </label>
+            </div>
+
+            <h2 class="text-lg font-semibold mt-2">Limitations</h2>
+            <div class="grid grid-cols-3 gap-4">
+                <label class="form-control">
+                    <span class="label-text">Overall usage limit</span>
+                    <input type="number" min="1" name="usageLimit" placeholder="Unlimited" class="input w-full"
+                           th:value="${promotion != null and promotion.usageLimit != null} ? ${promotion.usageLimit} : ''">
+                </label>
+                <label class="form-control">
+                    <span class="label-text">Usage limit per customer</span>
+                    <input type="number" min="1" name="usageLimitPerCustomer" placeholder="Unlimited" class="input w-full"
+                           th:value="${promotion != null and promotion.usageLimitPerCustomer != null} ? ${promotion.usageLimitPerCustomer} : ''">
+                </label>
+                <label class="form-control">
+                    <span class="label-text">Minimum purchase (£)</span>
+                    <input type="number" step="0.01" min="0" name="minimumPurchaseAmount" placeholder="None" class="input w-full"
+                           th:value="${promotion != null and promotion.minimumPurchaseAmount != null} ? ${promotion.minimumPurchaseAmount} : ''">
+                </label>
+            </div>
+
+            <label class="form-control flex-row items-center gap-2 mt-2">
+                <input type="checkbox" name="active" value="true" class="checkbox"
+                       th:checked="${promotion == null or promotion.active}">
+                <span class="label-text">Active</span>
+            </label>
+
+            <p class="text-sm text-base-content/60" th:if="${promotion != null}"
+               th:text="'Redeemed ' + ${promotion.usageCount} + ' time(s) so far.'"></p>
+
+            <div class="flex gap-2 mt-4">
+                <button type="submit" class="btn btn-primary" th:text="${promotion != null} ? 'Save changes' : 'Create promotion'"></button>
+                <a class="btn btn-ghost" th:href="@{/admin/promotions}">Cancel</a>
+            </div>
+        </form>
+    </main>
+
+    <script>
+        function updateValueField() {
+            var selected = document.querySelector('.promotion-type-input:checked');
+            var field = document.getElementById('value-field');
+            var input = document.getElementById('value-input');
+            var label = document.getElementById('value-label');
+            if (!selected) {
+                return;
+            }
+            if (selected.value === 'FREE_SHIPPING') {
+                field.classList.add('hidden');
+                input.required = false;
+                input.removeAttribute('max');
+                input.value = '';
+            } else if (selected.value === 'PERCENTAGE') {
+                field.classList.remove('hidden');
+                input.required = true;
+                input.max = '100';
+                label.textContent = 'Value (%)';
+            } else {
+                field.classList.remove('hidden');
+                input.required = true;
+                input.removeAttribute('max');
+                label.textContent = 'Value (£ off)';
+            }
+        }
+        document.querySelectorAll('.promotion-type-input').forEach(function (radio) {
+            radio.addEventListener('change', updateValueField);
+        });
+        updateValueField();
+    </script>
+</body>
+</html>

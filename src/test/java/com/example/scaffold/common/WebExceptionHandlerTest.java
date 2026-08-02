@@ -66,8 +66,8 @@ class WebExceptionHandlerTest {
     }
 
     private OrderDto sampleOrder(Long id, Long customerId) {
-        return new OrderDto(id, customerId, OrderStatus.PENDING, new BigDecimal("10.00"), List.of(),
-                LocalDateTime.now(), LocalDateTime.now());
+        return new OrderDto(id, customerId, OrderStatus.PENDING, new BigDecimal("10.00"), null, BigDecimal.ZERO,
+                List.of(), LocalDateTime.now(), LocalDateTime.now());
     }
 
     @Test

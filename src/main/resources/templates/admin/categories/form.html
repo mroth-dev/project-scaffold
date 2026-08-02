@@ -39,7 +39,8 @@
                     <span class="label-text">Parent category</span>
                     <select name="parentId" class="select w-full">
                         <option value="">None (top level)</option>
-                        <option th:each="option : ${categoryOptions}" th:value="${option.id}" th:text="${option.label}"
+                        <option th:each="option : ${categoryOptions}" th:value="${option.id}"
+                                th:text="${'— '.repeat(option.depth) + option.label}"
                                 th:selected="${category != null and category.parentId == option.id}"
                                 th:disabled="${category != null and category.id == option.id}"></option>
                     </select>

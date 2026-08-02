@@ -13,6 +13,9 @@ import com.example.scaffold.config.CacheConfig;
 import com.example.scaffold.exception.NotFoundException;
 import com.example.scaffold.product.ProductVariation;
 import com.example.scaffold.product.ProductVariationRepository;
+import com.example.scaffold.promotion.PromotionQuote;
+import com.example.scaffold.promotion.PromotionRepository;
+import com.example.scaffold.promotion.PromotionService;
 import com.example.scaffold.user.User;
 import com.example.scaffold.user.UserRepository;
 
@@ -25,12 +28,17 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
     private final ProductVariationRepository productVariationRepository;
+    private final PromotionService promotionService;
+    private final PromotionRepository promotionRepository;
 
     public OrderService(OrderRepository orderRepository, UserRepository userRepository,
-            ProductVariationRepository productVariationRepository) {
+            ProductVariationRepository productVariationRepository, PromotionService promotionService,
+            PromotionRepository promotionRepository) {
         this.orderRepository = orderRepository;
         this.userRepository = userRepository;
         this.productVariationRepository = productVariationRepository;
+        this.promotionService = promotionService;
+        this.promotionRepository = promotionRepository;
     }
 
     public OrderDto createOrder(Long customerId, OrderRequest request) {
@@ -41,7 +49,7 @@ public class OrderService {
         Order order = new Order();
         order.setCustomer(customer);
 
-        BigDecimal total = BigDecimal.ZERO;
+        BigDecimal subtotal = BigDecimal.ZERO;
         for (OrderItemRequest itemRequest : request.items()) {
             ProductVariation variation = productVariationRepository.findById(itemRequest.productVariationId())
                     .orElseThrow(() -> new NotFoundException("ProductVariation", itemRequest.productVariationId()));
@@ -54,21 +62,38 @@ public class OrderService {
             productVariationRepository.save(variation);
 
             BigDecimal unitPrice = variation.getProduct().getBasePrice().add(variation.getPriceAdjustment());
-            BigDecimal subtotal = unitPrice.multiply(BigDecimal.valueOf(itemRequest.quantity()));
+            BigDecimal lineTotal = unitPrice.multiply(BigDecimal.valueOf(itemRequest.quantity()));
 
             OrderItem item = new OrderItem();
             item.setOrder(order);
             item.setProductVariation(variation);
             item.setQuantity(itemRequest.quantity());
             item.setUnitPrice(unitPrice);
-            item.setSubtotal(subtotal);
+            item.setSubtotal(lineTotal);
             order.getItems().add(item);
 
-            total = total.add(subtotal);
+            subtotal = subtotal.add(lineTotal);
         }
-        order.setTotalAmount(total);
+
+        BigDecimal discount = BigDecimal.ZERO;
+        PromotionQuote quote = null;
+        if (request.promotionCode() != null && !request.promotionCode().isBlank()) {
+            quote = promotionService.quote(request.promotionCode(), subtotal);
+            promotionService.assertCustomerCanRedeem(quote.promotionId(), customerId);
+            discount = quote.discountAmount();
+            Long promotionId = quote.promotionId();
+            order.setPromotion(promotionRepository.findById(promotionId)
+                    .orElseThrow(() -> new NotFoundException("Promotion", promotionId)));
+        }
+        order.setDiscountAmount(discount);
+        order.setTotalAmount(subtotal.subtract(discount));
 
         Order savedOrder = orderRepository.save(order);
+
+        if (quote != null) {
+            promotionService.redeem(quote.promotionId(), customerId, savedOrder);
+        }
+
         return toDto(savedOrder);
     }
 
@@ -136,6 +161,8 @@ public class OrderService {
                 order.getCustomer().getId(),
                 order.getStatus(),
                 order.getTotalAmount(),
+                order.getPromotion() != null ? order.getPromotion().getCode() : null,
+                order.getDiscountAmount(),
                 items,
                 order.getCreatedAt(),
                 order.getUpdatedAt());

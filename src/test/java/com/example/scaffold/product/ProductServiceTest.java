@@ -30,6 +30,7 @@ import org.springframework.data.domain.Pageable;
 
 import com.example.scaffold.category.CategoryRepository;
 import com.example.scaffold.exception.NotFoundException;
+import com.example.scaffold.storage.ImageStorageService;
 
 @ExtendWith(MockitoExtension.class)
 class ProductServiceTest {
@@ -43,6 +44,9 @@ class ProductServiceTest {
     @Mock
     private ProductVariationRepository productVariationRepository;
 
+    @Mock
+    private ImageStorageService imageStorageService;
+
     private ProductService productService;
 
     private Product testProduct;
@@ -50,7 +54,8 @@ class ProductServiceTest {
 
     @BeforeEach
     void setUp() {
-        productService = new ProductService(productRepository, categoryRepository, productVariationRepository);
+        productService = new ProductService(
+                productRepository, categoryRepository, productVariationRepository, imageStorageService);
 
         testProduct = new Product();
         testProduct.setId(1L);

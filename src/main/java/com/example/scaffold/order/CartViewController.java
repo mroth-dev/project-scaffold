@@ -15,8 +15,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.example.scaffold.exception.BusinessException;
 import com.example.scaffold.product.ProductVariation;
 import com.example.scaffold.product.ProductVariationRepository;
+import com.example.scaffold.promotion.PromotionQuote;
+import com.example.scaffold.promotion.PromotionService;
 import com.example.scaffold.security.CustomUserDetailsService.CustomUserPrincipal;
 
 @Controller
@@ -26,18 +29,19 @@ public class CartViewController {
     private final ShoppingCart cart;
     private final ProductVariationRepository productVariationRepository;
     private final OrderService orderService;
+    private final PromotionService promotionService;
 
     public CartViewController(ShoppingCart cart, ProductVariationRepository productVariationRepository,
-            OrderService orderService) {
+            OrderService orderService, PromotionService promotionService) {
         this.cart = cart;
         this.productVariationRepository = productVariationRepository;
         this.orderService = orderService;
+        this.promotionService = promotionService;
     }
 
     @GetMapping
     public String index(Model model) {
-        model.addAttribute("lines", buildCartLines());
-        model.addAttribute("total", cartTotal());
+        populateCartModel(model, null);
         return "cart/index";
     }
 
@@ -51,8 +55,27 @@ public class CartViewController {
     @PostMapping("/items/{variationId}/remove")
     public String removeItem(@PathVariable Long variationId, Model model) {
         cart.remove(variationId);
-        model.addAttribute("lines", buildCartLines());
-        model.addAttribute("total", cartTotal());
+        populateCartModel(model, null);
+        return "cart/fragments/contents :: cartContents";
+    }
+
+    @PostMapping("/promotion")
+    public String applyPromotion(@RequestParam String code, Model model) {
+        BigDecimal subtotal = cartSubtotal(buildCartLines());
+        try {
+            promotionService.quote(code, subtotal);
+            cart.setPromotionCode(code.trim().toUpperCase());
+            populateCartModel(model, null);
+        } catch (BusinessException ex) {
+            populateCartModel(model, ex.getMessage());
+        }
+        return "cart/fragments/contents :: cartContents";
+    }
+
+    @PostMapping("/promotion/remove")
+    public String removePromotion(Model model) {
+        cart.setPromotionCode(null);
+        populateCartModel(model, null);
         return "cart/fragments/contents :: cartContents";
     }
 
@@ -68,9 +91,34 @@ public class CartViewController {
         List<OrderItemRequest> items = cart.getItems().entrySet().stream()
                 .map(entry -> new OrderItemRequest(entry.getKey(), entry.getValue()))
                 .toList();
-        OrderDto order = orderService.createOrder(principal.getId(), new OrderRequest(items));
+        OrderDto order = orderService.createOrder(principal.getId(), new OrderRequest(items, cart.getPromotionCode()));
         cart.clear();
         return "redirect:/orders/" + order.id();
+    }
+
+    private void populateCartModel(Model model, String forcedPromotionError) {
+        List<CartLine> lines = buildCartLines();
+        BigDecimal subtotal = cartSubtotal(lines);
+
+        BigDecimal discount = BigDecimal.ZERO;
+        String promotionError = forcedPromotionError;
+        PromotionQuote promotion = null;
+        if (cart.getPromotionCode() != null) {
+            try {
+                promotion = promotionService.quote(cart.getPromotionCode(), subtotal);
+                discount = promotion.discountAmount();
+            } catch (BusinessException ex) {
+                promotionError = ex.getMessage();
+            }
+        }
+
+        model.addAttribute("lines", lines);
+        model.addAttribute("subtotal", subtotal);
+        model.addAttribute("discount", discount);
+        model.addAttribute("total", subtotal.subtract(discount));
+        model.addAttribute("promotion", promotion);
+        model.addAttribute("promotionCode", cart.getPromotionCode());
+        model.addAttribute("promotionError", promotionError);
     }
 
     private List<CartLine> buildCartLines() {
@@ -85,8 +133,8 @@ public class CartViewController {
         return lines;
     }
 
-    private BigDecimal cartTotal() {
-        return buildCartLines().stream().map(CartLine::subtotal).reduce(BigDecimal.ZERO, BigDecimal::add);
+    private BigDecimal cartSubtotal(List<CartLine> lines) {
+        return lines.stream().map(CartLine::subtotal).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     public record CartLine(ProductVariation variation, int quantity, BigDecimal unitPrice, BigDecimal subtotal) {

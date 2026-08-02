@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Promotions - Scaffold Shop</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <script th:src="@{/webjars/htmx.org/2.0.4/dist/htmx.min.js}"></script>
+</head>
+<body>
+    <div th:replace="~{fragments/nav :: nav}"></div>
+
+    <main class="container mx-auto px-4 md:px-8 max-w-7xl py-8">
+        <div th:replace="~{admin/fragments/nav :: adminNav(section='promotions')}"></div>
+
+        <div class="flex items-center justify-between mb-6">
+            <h1 class="text-2xl font-bold">Promotions</h1>
+            <a class="btn btn-primary" th:href="@{/admin/promotions/new}">New promotion</a>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Code</th><th>Name</th><th>Type</th><th>Value</th><th>Window</th>
+                        <th>Usage</th><th>Status</th><th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="promo : ${promotions}">
+                        <td><span class="font-mono" th:text="${promo.code}"></span></td>
+                        <td th:text="${promo.name}"></td>
+                        <td th:text="${promo.type}"></td>
+                        <td>
+                            <span th:if="${promo.type.name() == 'FIXED_AMOUNT'}" th:text="'£' + ${promo.value}"></span>
+                            <span th:if="${promo.type.name() == 'PERCENTAGE'}" th:text="${promo.value} + '%'"></span>
+                            <span th:if="${promo.type.name() == 'FREE_SHIPPING'}">&mdash;</span>
+                        </td>
+                        <td class="text-sm">
+                            <span th:if="${promo.startDate != null}" th:text="${#temporals.format(promo.startDate, 'dd MMM yyyy')}"></span>
+                            <span th:if="${promo.startDate == null}">Any time</span>
+                            &rarr;
+                            <span th:if="${promo.endDate != null}" th:text="${#temporals.format(promo.endDate, 'dd MMM yyyy')}"></span>
+                            <span th:if="${promo.endDate == null}">No end</span>
+                        </td>
+                        <td class="text-sm">
+                            <span th:text="${promo.usageCount}"></span> / <span th:text="${promo.usageLimit != null} ? ${promo.usageLimit} : '∞'"></span>
+                        </td>
+                        <td>
+                            <span class="badge badge-sm" th:classappend="${promo.active} ? 'badge-success' : 'badge-neutral'"
+                                  th:text="${promo.active} ? 'Active' : 'Inactive'"></span>
+                        </td>
+                        <td class="flex gap-2">
+                            <a class="link link-primary" th:href="@{'/admin/promotions/' + ${promo.id} + '/edit'}">Edit</a>
+                            <form th:action="@{'/admin/promotions/' + ${promo.id} + (${promo.active} ? '/deactivate' : '/activate')}" method="post">
+                                <button type="submit" class="link" th:text="${promo.active} ? 'Deactivate' : 'Activate'"></button>
+                            </form>
+                            <form th:action="@{'/admin/promotions/' + ${promo.id} + '/delete'}" method="post"
+                                  onsubmit="return confirm('Delete this promotion?');">
+                                <button type="submit" class="link link-error">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    <tr th:if="${promotions.isEmpty()}">
+                        <td colspan="8" class="text-base-content/60">No promotions yet.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</body>
+</html>

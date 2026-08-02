@@ -22,6 +22,8 @@ import com.example.scaffold.exception.NotFoundException;
 import com.example.scaffold.product.Product;
 import com.example.scaffold.product.ProductVariation;
 import com.example.scaffold.product.ProductVariationRepository;
+import com.example.scaffold.promotion.PromotionRepository;
+import com.example.scaffold.promotion.PromotionService;
 import com.example.scaffold.user.User;
 import com.example.scaffold.user.UserRepository;
 
@@ -37,6 +39,12 @@ class OrderServiceTest {
     @Mock
     private ProductVariationRepository productVariationRepository;
 
+    @Mock
+    private PromotionService promotionService;
+
+    @Mock
+    private PromotionRepository promotionRepository;
+
     private OrderService orderService;
 
     private User customer;
@@ -45,7 +53,8 @@ class OrderServiceTest {
 
     @BeforeEach
     void setUp() {
-        orderService = new OrderService(orderRepository, userRepository, productVariationRepository);
+        orderService = new OrderService(
+                orderRepository, userRepository, productVariationRepository, promotionService, promotionRepository);
 
         customer = new User();
         customer.setId(1L);

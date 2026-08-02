@@ -17,6 +17,7 @@ import org.springframework.web.context.annotation.SessionScope;
 public class ShoppingCart implements Serializable {
 
     private final Map<Long, Integer> items = new LinkedHashMap<>();
+    private String promotionCode;
 
     public void add(Long variationId, int quantity) {
         if (quantity <= 0) {
@@ -31,6 +32,15 @@ public class ShoppingCart implements Serializable {
 
     public void clear() {
         items.clear();
+        promotionCode = null;
+    }
+
+    public String getPromotionCode() {
+        return promotionCode;
+    }
+
+    public void setPromotionCode(String promotionCode) {
+        this.promotionCode = promotionCode;
     }
 
     public Map<Long, Integer> getItems() {
