@@ -37,13 +37,21 @@ public class SecurityConfig {
                         // Public endpoints - browsing and cart don't require an account
                         // checkout enforces authentication itself (redirects to /login)
                         .requestMatchers("/api/auth/**").permitAll()
+                        // The container forwards failed requests to /error on a fresh ERROR
+                        // dispatch, which OncePerRequestFilter (and so JwtAuthenticationFilter)
+                        // skips by default - leaving the context anonymous. Without this rule
+                        // every 500 on a signed-in page is denied and bounced to /login,
+                        // masking the real error as "you've been logged out".
+                        .requestMatchers("/error").permitAll()
                         // unauth customer endpoints
                         .requestMatchers("/", "/login", "/register", "/register/**").permitAll()
                         .requestMatchers("/cart", "/cart/**").permitAll()
                         .requestMatchers("/api/categories", "/api/categories/**").permitAll()
                         .requestMatchers("/api/products", "/api/products/**").permitAll()
                         .requestMatchers("/products", "/products/**").permitAll()
-                        .requestMatchers("/categories/*/thumbnail", "/categories/*/panel-image").permitAll()
+                        .requestMatchers("/categories", "/categories/**").permitAll()
+                        .requestMatchers("/new-in", "/new-in/**").permitAll()
+                        .requestMatchers("/search", "/search/**").permitAll()
                         // auth customers endpoints
                         // Orders contain customer data - require authentication; listing all
                         // orders and changing status are restricted to staff. These must be
@@ -53,6 +61,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/orders").hasAnyRole("ADMIN", "MANAGER")
                         .requestMatchers("/api/orders/**").authenticated()
                         .requestMatchers("/orders", "/orders/**").authenticated()
+                        .requestMatchers("/account", "/account/**").authenticated()
                         // TODO - Temporarily permit all for development
                         .requestMatchers("/users/**", "/webjars/**", "/css/**", "/js/**").permitAll()
                         // Admin management section (products, categories, orders, users, audit)

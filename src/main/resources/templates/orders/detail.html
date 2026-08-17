@@ -27,6 +27,14 @@
         </p>
         <p class="font-bold mt-1" th:text="'Total: £' + ${order.totalAmount}"></p>
 
+        <div class="mt-4 text-sm text-base-content/80" th:if="${order.shippingAddress.complete}">
+            <p class="font-semibold text-base-content">Shipping to</p>
+            <p th:text="${order.shippingAddress.line1}"></p>
+            <p th:if="${order.shippingAddress.line2}" th:text="${order.shippingAddress.line2}"></p>
+            <p th:text="${order.shippingAddress.city} + (${order.shippingAddress.region} != null ? ', ' + ${order.shippingAddress.region} : '')"></p>
+            <p th:text="${order.shippingAddress.postcode} + ', ' + ${order.shippingAddress.country}"></p>
+        </div>
+
         <div class="overflow-x-auto mt-6">
             <table class="table">
                 <thead>

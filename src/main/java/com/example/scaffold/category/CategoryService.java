@@ -48,6 +48,13 @@ public class CategoryService {
         return toDto(findCategoryOrThrow(id));
     }
 
+    @Cacheable(value = CacheConfig.CATEGORY_CACHE, key = "'slug:' + #slug")
+    public CategoryDto getCategoryBySlug(String slug) {
+        log.debug("Fetching category by slug: {}", slug);
+        return toDto(categoryRepository.findBySlugIgnoreCase(slug)
+                .orElseThrow(() -> new NotFoundException("Category not found with slug: " + slug)));
+    }
+
     @Cacheable(value = CacheConfig.CATEGORY_CACHE, key = "'tree'")
     public List<CategoryTreeDto> getCategoryTree() {
         log.debug("Building category tree");
@@ -70,6 +77,17 @@ public class CategoryService {
                 .toList();
     }
 
+    public List<CategorySummaryDto> getAncestors(Long categoryId) {
+        log.debug("Fetching ancestors of category: {}", categoryId);
+        List<CategorySummaryDto> ancestors = new ArrayList<>();
+        Category current = findCategoryOrThrow(categoryId).getParent();
+        while (current != null) {
+            ancestors.add(0, new CategorySummaryDto(current.getId(), current.getName(), current.getSlug()));
+            current = current.getParent();
+        }
+        return ancestors;
+    }
+
     public List<CategoryOption> getFlattenedOptions() {
         return flattenOptions(getCategoryTree(), 0);
     }
@@ -88,6 +106,7 @@ public class CategoryService {
         return productRepository.findByCategoriesId(categoryId, pageable).map(this::toProductSummaryDto);
     }
 
+    @CacheEvict(value = CacheConfig.CATEGORY_CACHE, allEntries = true)
     public CategoryDto createCategory(CategoryRequest request) {
         log.debug("Creating new category with slug: {}", request.slug());
         Category category = new Category();

@@ -2,167 +2,519 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title th:text="${product.name} + ' - Scaffold Shop'"></title>
+    <meta name="description" th:if="${product.description != null}" th:content="${product.description}">
     <link rel="stylesheet" th:href="@{/css/app.css}">
     <script th:src="@{/webjars/htmx.org/2.0.4/dist/htmx.min.js}"></script>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col bg-base-100">
     <div th:replace="~{fragments/nav :: nav}"></div>
 
     <main class="flex-1 container mx-auto px-4 md:px-8 max-w-7xl">
-        <p class="mb-4"><a class="link link-hover" th:href="@{/products}">&larr; Back to products</a></p>
 
-        <div class="flex flex-col md:flex-row gap-8">
-            <div class="flex flex-col gap-2 md:w-96 shrink-0">
-                <img th:each="image : ${product.images}" th:src="${image.url}" th:alt="${image.altText}"
-                     class="rounded-box w-full object-cover">
-                <p class="text-base-content/60" th:if="${product.images.isEmpty()}">No images available.</p>
+        <nav class="breadcrumbs font-label text-sm text-base-content/75 mb-6 md:mb-8" aria-label="Breadcrumb">
+            <ul>
+                <li><a class="hover:text-primary transition-colors" th:href="@{/}">Home</a></li>
+                <li><a class="hover:text-primary transition-colors" th:href="@{/new-in}">Shop</a></li>
+                <li th:if="${!product.categories.isEmpty()}">
+                    <a class="hover:text-primary transition-colors"
+                       th:href="@{'/categories/' + ${product.categories[0].slug}}"
+                       th:text="${product.categories[0].name}"></a>
+                </li>
+                <li class="text-base-content/85" aria-current="page">
+                    <span class="block max-w-[13ch] truncate sm:max-w-none" th:text="${product.name}"></span>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Two columns from md up: a single 4:5 image across a tablet width runs taller
+             than the viewport and buries the price and the buy button below two screens. -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-12 xl:gap-16">
+
+            <!-- Gallery: photography leads, fixed aspect so nothing shifts as images land -->
+            <div class="lg:col-span-7">
+                <div class="relative aspect-[4/5] rounded-box overflow-hidden bg-base-200"
+                     th:if="${!product.images.isEmpty()}">
+                    <img th:each="image, iStat : ${product.images}"
+                         th:src="${image.url}"
+                         th:alt="${image.altText != null ? image.altText : product.name}"
+                         th:attr="loading=${iStat.first ? 'eager' : 'lazy'},aria-hidden=${iStat.first ? 'false' : 'true'}"
+                         th:classappend="${iStat.first ? 'opacity-100' : 'opacity-0'}"
+                         class="gallery-image absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ease-out">
+                </div>
+
+                <div class="relative aspect-[4/5] rounded-box bg-base-200 flex items-center justify-center"
+                     th:if="${product.images.isEmpty()}">
+                    <span class="font-label text-xs tracking-[0.1em] uppercase text-base-content/75">No image</span>
+                </div>
+
+                <div class="mt-3 flex flex-wrap gap-3" id="gallery-thumbs"
+                     role="group" aria-label="Product images" th:if="${product.images.size() > 1}">
+                    <button th:each="image, iStat : ${product.images}" type="button"
+                            th:attr="aria-label='View image ' + ${iStat.count}"
+                            class="gallery-thumb w-20 aspect-[4/5] rounded-field overflow-hidden bg-base-200 ring-1 ring-base-content/60 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
+                        <img th:src="${image.thumbnailUrl != null ? image.thumbnailUrl : image.url}" alt=""
+                             loading="lazy" class="h-full w-full object-cover">
+                    </button>
+                </div>
             </div>
 
-            <div class="flex-1 min-w-0">
-                <h1 class="text-2xl font-bold" th:text="${product.name}"></h1>
-                <p class="text-sm text-base-content/60" th:text="'SKU: ' + ${product.sku}"></p>
-                <p class="mt-4" th:text="${product.description}"></p>
-                <p class="mt-4 text-xl font-bold">
-                    <span id="price-value" th:text="${'£' + product.basePrice}"></span>
-                    <span class="text-base font-normal line-through text-base-content/40 ml-2"
-                          th:if="${product.rrp != null}" th:text="${'£' + product.rrp}"></span>
-                </p>
+            <!-- Buy panel -->
+            <div class="lg:col-span-5">
+                <div id="buy-panel" class="animate-rise-in md:sticky md:top-8"
+                     th:attr="data-base-price=${product.basePrice},data-rrp=${product.rrp}">
 
-                <div th:if="${!product.variations.isEmpty()}">
-                    <div th:each="variation : ${product.variations}" class="variation-data hidden"
-                         th:attr="data-variation-id=${variation.id},data-color=${variation.color},data-size=${variation.size},data-price=${product.basePrice + variation.priceAdjustment},data-stock=${variation.inventoryCount}"></div>
+                    <h1 class="font-display text-3xl md:text-4xl font-black tracking-tight leading-[1.05] text-base-content text-balance"
+                        th:text="${product.name}"></h1>
 
-                    <h2 class="text-lg font-semibold mt-8 mb-2">Color</h2>
-                    <div class="flex flex-wrap gap-2" id="color-row"></div>
+                    <div class="mt-4 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                        <span id="price-value" class="font-display text-2xl font-bold tabular-nums text-base-content"
+                              th:text="${'£' + product.basePrice}"></span>
+                        <span class="font-label text-base tabular-nums line-through text-base-content/75"
+                              th:if="${product.rrp != null}" th:text="${'£' + product.rrp}"></span>
+                        <span id="price-saving"
+                              class="font-label rounded-field bg-primary/10 px-2 py-0.5 text-xs font-semibold tracking-[0.08em] uppercase text-primary"
+                              th:if="${product.rrp != null}"
+                              th:classappend="${product.rrp.compareTo(product.basePrice) > 0 ? '' : 'hidden'}"
+                              th:text="${'Save £' + product.rrp.subtract(product.basePrice)}"></span>
+                    </div>
 
-                    <h2 class="text-lg font-semibold mt-6 mb-2">Size</h2>
-                    <div class="flex flex-wrap gap-2" id="size-row"></div>
+                    <p class="font-label mt-5 max-w-[62ch] leading-relaxed text-base-content/80"
+                       th:if="${product.description != null}" th:text="${product.description}"></p>
 
-                    <div class="mt-4" id="stock-status"></div>
+                    <div class="mt-6 rounded-box border border-error/30 bg-error/10 px-4 py-3" th:unless="${product.active}">
+                        <p class="font-label text-sm font-semibold text-error">Withdrawn from the collection</p>
+                        <p class="font-label mt-0.5 text-sm text-base-content/75">This piece is no longer available to order.</p>
+                    </div>
 
-                    <form class="mt-4" th:action="@{/cart/items}" method="post"
-                          hx-post="/cart/items" hx-target="#nav-cart-count" hx-swap="innerHTML">
-                        <input type="hidden" name="variationId" id="variation-id-input" value="">
-                        <button type="submit" class="btn btn-primary" id="add-to-cart-btn">Add to cart</button>
-                    </form>
+                    <div th:if="${!product.variations.isEmpty() and product.active}">
+                        <div th:each="variation : ${product.variations}" class="variation-data hidden"
+                             th:attr="data-variation-id=${variation.id},data-color=${variation.color},data-color-hex=${variation.colorHex},data-size=${variation.size},data-sku=${variation.sku},data-price=${product.basePrice + variation.priceAdjustment},data-stock=${variation.inventoryCount}"></div>
+
+                        <div class="mt-8">
+                            <h2 class="font-label text-xs font-semibold tracking-[0.1em] uppercase text-base-content/75">Colour</h2>
+                            <div class="mt-3 flex flex-wrap items-center gap-1" id="color-row"
+                                 role="radiogroup" aria-label="Colour"></div>
+                        </div>
+
+                        <div class="mt-7">
+                            <h2 class="font-label text-xs font-semibold tracking-[0.1em] uppercase text-base-content/75">Size</h2>
+                            <div class="mt-3 flex flex-wrap gap-2" id="size-row"
+                                 role="radiogroup" aria-label="Size"></div>
+                        </div>
+
+                        <p id="stock-status" class="mt-5 hidden items-center gap-2 font-label text-sm text-base-content/75"
+                           role="status" aria-live="polite">
+                            <span id="stock-dot" class="inline-block size-1.5 rounded-full bg-primary" aria-hidden="true"></span>
+                            <span id="stock-text"></span>
+                        </p>
+
+                        <form class="mt-6" id="add-to-cart-form" th:action="@{/cart/items}" method="post"
+                              hx-post="/cart/items" hx-target="#nav-cart-count" hx-swap="innerHTML">
+                            <input type="hidden" name="variationId" id="variation-id-input" value="">
+                            <button type="submit" id="add-to-cart-btn"
+                                    class="font-label relative inline-flex h-12 w-full items-center justify-center rounded-field bg-primary text-sm font-semibold tracking-wide text-primary-content transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
+                                <span id="cart-spinner" class="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity">
+                                    <span class="loading loading-spinner loading-sm"></span>
+                                </span>
+                                <span id="add-to-cart-label" class="transition-opacity">Add to cart</span>
+                            </button>
+                        </form>
+
+                        <p id="cart-feedback" class="mt-3 hidden font-label text-sm text-base-content/80"
+                           role="status" aria-live="polite">
+                            Added to your cart.
+                            <a class="font-semibold text-primary underline underline-offset-4 hover:opacity-70 transition-opacity"
+                               th:href="@{/cart}">View cart</a>
+                        </p>
+
+                        <p id="cart-error" class="mt-3 hidden font-label text-sm text-error" role="alert">
+                            That didn&rsquo;t go through. Check the size is still available and try again.
+                        </p>
+                    </div>
+
+                    <div class="mt-8 rounded-box border border-dashed border-base-300 px-5 py-6"
+                         th:if="${product.variations.isEmpty() and product.active}">
+                        <p class="font-label text-sm font-semibold text-base-content/80">Not yet available to order</p>
+                        <p class="font-label mt-1 text-sm text-base-content/75">This piece has no sizes or colours in the catalogue yet.</p>
+                        <a class="font-label mt-4 inline-block text-sm font-semibold text-primary hover:opacity-70 transition-opacity"
+                           th:href="@{/new-in}">Browse the collection</a>
+                    </div>
+
+                    <dl class="mt-8 border-t border-base-content/10 pt-5 font-label text-sm">
+                        <div class="flex items-baseline justify-between gap-4 py-1">
+                            <dt class="text-base-content/75">Style code</dt>
+                            <dd class="text-base-content/80" th:text="${product.sku}"></dd>
+                        </div>
+                        <div class="hidden items-baseline justify-between gap-4 py-1" id="variant-sku-row">
+                            <dt class="text-base-content/75">Selected item</dt>
+                            <dd class="text-base-content/80" id="variant-sku"></dd>
+                        </div>
+                    </dl>
                 </div>
-                <p class="mt-8 text-base-content/60" th:if="${product.variations.isEmpty()}">No purchasable options for this product yet.</p>
             </div>
         </div>
     </main>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            var data = Array.from(document.querySelectorAll('.variation-data')).map(function (el) {
-                return {
-                    id: el.dataset.variationId,
-                    color: el.dataset.color,
-                    size: el.dataset.size,
-                    price: el.dataset.price,
-                    stock: parseInt(el.dataset.stock, 10)
-                };
-            });
+            initGallery();
+            initVariations();
+            initAddToCart();
 
-            if (data.length === 0) {
-                return;
-            }
-
-            var colorRow = document.getElementById('color-row');
-            var sizeRow = document.getElementById('size-row');
-            var variationIdInput = document.getElementById('variation-id-input');
-            var addToCartBtn = document.getElementById('add-to-cart-btn');
-            var stockStatus = document.getElementById('stock-status');
-            var priceValue = document.getElementById('price-value');
-
-            var colors = [];
-            data.forEach(function (v) {
-                if (colors.indexOf(v.color) === -1) {
-                    colors.push(v.color);
+            // htmx's own indicator styling is bypassed here so the busy and error
+            // states are driven by classes this page owns outright.
+            function initAddToCart() {
+                var form = document.getElementById('add-to-cart-form');
+                if (!form) {
+                    return;
                 }
-            });
+                var button = document.getElementById('add-to-cart-btn');
+                var spinner = document.getElementById('cart-spinner');
+                var label = document.getElementById('add-to-cart-label');
+                var feedback = document.getElementById('cart-feedback');
+                var error = document.getElementById('cart-error');
 
-            var basePriceText = priceValue.textContent;
-            var selectedColor = colors[0];
-            var selectedVariation = null;
-
-            function selectVariation(v) {
-                selectedVariation = v;
-                variationIdInput.value = v.id;
-                priceValue.textContent = '£' + v.price;
-
-                var badgeClass = 'badge-success';
-                var text = 'In stock';
-                if (v.stock === 0) {
-                    badgeClass = 'badge-error';
-                    text = 'Out of stock';
-                } else if (v.stock < 15) {
-                    badgeClass = 'badge-warning';
-                    text = 'Low stock';
+                function setBusy(busy) {
+                    spinner.classList.toggle('opacity-0', !busy);
+                    label.classList.toggle('opacity-0', busy);
+                    button.setAttribute('aria-busy', busy ? 'true' : 'false');
                 }
-                stockStatus.innerHTML = '<span class="badge badge-sm ' + badgeClass + '">' + text + '</span>';
-                addToCartBtn.disabled = v.stock === 0;
+
+                form.addEventListener('htmx:beforeRequest', function () {
+                    setBusy(true);
+                    feedback.classList.add('hidden');
+                    error.classList.add('hidden');
+                });
+
+                form.addEventListener('htmx:afterRequest', function (event) {
+                    setBusy(false);
+                    var ok = event.detail.successful;
+                    feedback.classList.toggle('hidden', !ok);
+                    error.classList.toggle('hidden', ok);
+                });
             }
 
-            function clearSelection() {
-                selectedVariation = null;
-                variationIdInput.value = '';
-                priceValue.textContent = basePriceText;
-                stockStatus.innerHTML = '';
-                addToCartBtn.disabled = true;
-            }
+            function initGallery() {
+                var thumbs = Array.prototype.slice.call(document.querySelectorAll('.gallery-thumb'));
+                if (thumbs.length < 2) {
+                    return;
+                }
+                var images = Array.prototype.slice.call(document.querySelectorAll('.gallery-image'));
 
-            function renderColors() {
-                colorRow.innerHTML = '';
-                colors.forEach(function (color) {
-                    var btn = document.createElement('button');
-                    btn.type = 'button';
-                    btn.className = 'btn btn-sm' + (color === selectedColor ? ' btn-primary' : '');
-                    btn.textContent = color;
-                    btn.addEventListener('click', function () {
-                        selectedColor = color;
-                        renderColors();
-                        renderSizes(true);
+                function show(index) {
+                    images.forEach(function (img, i) {
+                        var active = i === index;
+                        img.classList.toggle('opacity-100', active);
+                        img.classList.toggle('opacity-0', !active);
+                        img.setAttribute('aria-hidden', active ? 'false' : 'true');
                     });
-                    colorRow.appendChild(btn);
-                });
-            }
-
-            function renderSizes(preserveOnly) {
-                var sizesForColor = data.filter(function (v) { return v.color === selectedColor; });
-
-                var target = sizesForColor.find(function (v) {
-                    return selectedVariation && v.size === selectedVariation.size;
-                });
-                if (target) {
-                    selectVariation(target);
-                } else if (preserveOnly) {
-                    clearSelection();
-                } else {
-                    target = sizesForColor.find(function (v) { return v.stock > 0; }) || sizesForColor[0];
-                    selectVariation(target);
+                    thumbs.forEach(function (thumb, i) {
+                        var active = i === index;
+                        thumb.classList.toggle('ring-2', active);
+                        thumb.classList.toggle('ring-primary', active);
+                        thumb.classList.toggle('ring-1', !active);
+                        thumb.classList.toggle('ring-base-content/60', !active);
+                        thumb.setAttribute('aria-current', active ? 'true' : 'false');
+                    });
                 }
 
-                sizeRow.innerHTML = '';
-                sizesForColor.forEach(function (v) {
-                    var btn = document.createElement('button');
-                    btn.type = 'button';
-                    var isSelected = selectedVariation ? v.id === selectedVariation.id : false;
-                    btn.className = 'btn btn-sm' + (isSelected ? ' btn-primary' : '') + (v.stock === 0 ? ' btn-disabled' : '');
-                    btn.textContent = v.size;
-                    if (v.stock === 0) {
-                        btn.disabled = true;
+                thumbs.forEach(function (thumb, i) {
+                    thumb.addEventListener('click', function () {
+                        show(i);
+                    });
+                });
+                show(0);
+            }
+
+            function initVariations() {
+                var panel = document.getElementById('buy-panel');
+                var data = Array.prototype.slice.call(document.querySelectorAll('.variation-data')).map(function (el) {
+                    return {
+                        id: el.dataset.variationId,
+                        color: el.dataset.color,
+                        colorHex: el.dataset.colorHex,
+                        size: el.dataset.size,
+                        sku: el.dataset.sku,
+                        price: el.dataset.price,
+                        stock: parseInt(el.dataset.stock, 10)
+                    };
+                });
+
+                if (data.length === 0) {
+                    return;
+                }
+
+                // The service returns variations unordered, so without this the swatches,
+                // the sizes and the default selection all shuffle between page loads.
+                var SIZE_ORDER = ['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', '2XL', 'XXXL', '3XL'];
+                data.sort(function (a, b) {
+                    var byColor = String(a.color).localeCompare(String(b.color));
+                    if (byColor !== 0) {
+                        return byColor;
                     }
-                    btn.addEventListener('click', function () {
-                        selectVariation(v);
-                        renderSizes();
-                    });
-                    sizeRow.appendChild(btn);
+                    var rankA = SIZE_ORDER.indexOf(String(a.size).toUpperCase());
+                    var rankB = SIZE_ORDER.indexOf(String(b.size).toUpperCase());
+                    if (rankA === -1) { rankA = SIZE_ORDER.length; }
+                    if (rankB === -1) { rankB = SIZE_ORDER.length; }
+                    if (rankA !== rankB) {
+                        return rankA - rankB;
+                    }
+                    // Sizes outside the lettered scale (waist, shoe) sort numerically.
+                    var numA = parseFloat(a.size);
+                    var numB = parseFloat(b.size);
+                    if (!isNaN(numA) && !isNaN(numB) && numA !== numB) {
+                        return numA - numB;
+                    }
+                    return String(a.size).localeCompare(String(b.size));
                 });
-            }
 
-            renderColors();
-            renderSizes();
+                var colorRow = document.getElementById('color-row');
+                var sizeRow = document.getElementById('size-row');
+                var variationIdInput = document.getElementById('variation-id-input');
+                var addToCartBtn = document.getElementById('add-to-cart-btn');
+                var addToCartLabel = document.getElementById('add-to-cart-label');
+                var stockStatus = document.getElementById('stock-status');
+                var stockText = document.getElementById('stock-text');
+                var stockDot = document.getElementById('stock-dot');
+                var priceValue = document.getElementById('price-value');
+                var savingEl = document.getElementById('price-saving');
+                var variantSkuRow = document.getElementById('variant-sku-row');
+                var variantSku = document.getElementById('variant-sku');
+
+                var LOW_STOCK = 15;
+                var basePriceText = priceValue.textContent;
+                var basePrice = parseFloat(panel.dataset.basePrice);
+                var rrp = parseFloat(panel.dataset.rrp);
+
+                var colors = [];
+                var colorHexByName = {};
+                data.forEach(function (v) {
+                    if (colors.indexOf(v.color) === -1) {
+                        colors.push(v.color);
+                        colorHexByName[v.color] = v.colorHex;
+                    }
+                });
+
+                var selectedColor = colors[0];
+                var selectedVariation = null;
+
+                function money(value) {
+                    return value.toFixed(2);
+                }
+
+                function updateSaving(price) {
+                    if (!savingEl || isNaN(rrp)) {
+                        return;
+                    }
+                    var diff = Math.round((rrp - parseFloat(price)) * 100) / 100;
+                    savingEl.textContent = 'Save £' + money(diff);
+                    savingEl.classList.toggle('hidden', !(diff > 0));
+                }
+
+                // The dot carries the semantic colour; the wording stays at a legible
+                // neutral, because accent and error both fall under 4.5:1 on the cream base.
+                function setStock(text, dotTone) {
+                    stockDot.classList.remove('bg-error', 'bg-accent', 'bg-primary');
+                    stockDot.classList.add(dotTone);
+                    stockStatus.classList.remove('hidden');
+                    stockStatus.classList.add('flex');
+                    stockText.textContent = text;
+                }
+
+                function hideStock() {
+                    stockStatus.classList.remove('flex');
+                    stockStatus.classList.add('hidden');
+                    stockText.textContent = '';
+                }
+
+                function setAction(disabled, label) {
+                    addToCartBtn.disabled = disabled;
+                    addToCartLabel.textContent = label;
+                }
+
+                function selectVariation(v) {
+                    selectedVariation = v;
+                    variationIdInput.value = v.id;
+                    priceValue.textContent = '£' + v.price;
+                    updateSaving(v.price);
+
+                    variantSku.textContent = v.sku;
+                    variantSkuRow.classList.remove('hidden');
+                    variantSkuRow.classList.add('flex');
+
+                    if (v.stock === 0) {
+                        setStock('Out of stock', 'bg-error');
+                        setAction(true, 'Out of stock');
+                    } else if (v.stock < LOW_STOCK) {
+                        setStock(v.stock === 1 ? 'Only 1 left' : 'Only ' + v.stock + ' left', 'bg-accent');
+                        setAction(false, 'Add to cart');
+                    } else {
+                        setStock('In stock', 'bg-primary');
+                        setAction(false, 'Add to cart');
+                    }
+                }
+
+                function clearSelection() {
+                    selectedVariation = null;
+                    variationIdInput.value = '';
+                    priceValue.textContent = basePriceText;
+                    updateSaving(basePrice);
+                    variantSkuRow.classList.remove('flex');
+                    variantSkuRow.classList.add('hidden');
+                    hideStock();
+                    setAction(true, 'Select a size');
+                }
+
+                // Re-rendering a row destroys the focused button; put focus back on its replacement.
+                function preservingFocus(container, render) {
+                    var hadFocus = container.contains(document.activeElement);
+                    var key = hadFocus ? document.activeElement.dataset.key : null;
+                    render();
+                    if (!hadFocus) {
+                        return;
+                    }
+                    var next = (key && container.querySelector('[data-key="' + key + '"]')) ||
+                            container.querySelector('[tabindex="0"]');
+                    if (next) {
+                        next.focus();
+                    }
+                }
+
+                function renderColors() {
+                    colorRow.innerHTML = '';
+                    colors.forEach(function (color) {
+                        var hex = colorHexByName[color];
+                        var isSelected = color === selectedColor;
+                        var btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.dataset.key = color;
+                        btn.setAttribute('role', 'radio');
+                        btn.setAttribute('aria-checked', isSelected ? 'true' : 'false');
+                        btn.setAttribute('aria-label', color);
+                        btn.tabIndex = isSelected ? 0 : -1;
+
+                        if (hex) {
+                            btn.className = 'group flex size-11 items-center justify-center rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary';
+                            // Hairline edge always, so a near-white swatch still reads on the cream
+                            // page; the offset ring is reserved for the selected one.
+                            var dotBase = 'size-8 rounded-full inset-ring-1 inset-ring-base-content/60 transition-[box-shadow] duration-200';
+                            var dot = document.createElement('span');
+                            dot.className = isSelected
+                                    ? dotBase + ' ring-2 ring-primary ring-offset-2 ring-offset-base-100'
+                                    : dotBase + ' group-hover:ring-2 group-hover:ring-base-content/60 group-hover:ring-offset-2 group-hover:ring-offset-base-100';
+                            dot.style.backgroundColor = hex;
+                            btn.appendChild(dot);
+                        } else {
+                            btn.className = isSelected
+                                    ? 'font-label h-11 rounded-field border px-4 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary border-primary bg-primary text-primary-content'
+                                    : 'font-label h-11 rounded-field border px-4 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary border-base-content/60 text-base-content hover:border-base-content/90';
+                            btn.textContent = color;
+                        }
+
+                        btn.addEventListener('click', function () {
+                            if (color === selectedColor) {
+                                return;
+                            }
+                            selectedColor = color;
+                            preservingFocus(colorRow, renderColors);
+                            renderSizes(true);
+                        });
+                        colorRow.appendChild(btn);
+                    });
+                }
+
+                function renderSizes(preserveOnly) {
+                    var sizesForColor = data.filter(function (v) {
+                        return v.color === selectedColor;
+                    });
+
+                    var target = sizesForColor.find(function (v) {
+                        return selectedVariation && v.size === selectedVariation.size;
+                    });
+                    if (target) {
+                        selectVariation(target);
+                    } else if (preserveOnly) {
+                        clearSelection();
+                    } else {
+                        target = sizesForColor.find(function (v) {
+                            return v.stock > 0;
+                        }) || sizesForColor[0];
+                        selectVariation(target);
+                    }
+
+                    sizeRow.innerHTML = '';
+                    var firstSelectable = null;
+                    sizesForColor.forEach(function (v) {
+                        var isSelected = selectedVariation ? v.id === selectedVariation.id : false;
+                        var soldOut = v.stock === 0;
+                        var btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.dataset.key = v.id;
+                        btn.setAttribute('role', 'radio');
+                        btn.setAttribute('aria-checked', isSelected ? 'true' : 'false');
+
+                        if (soldOut) {
+                            btn.setAttribute('aria-disabled', 'true');
+                            btn.setAttribute('aria-label', v.size + ' — out of stock');
+                            btn.className = 'font-label h-11 min-w-14 rounded-field border px-3 text-sm font-semibold line-through transition-colors cursor-not-allowed focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary border-base-content/35 text-base-content/50';
+                        } else if (isSelected) {
+                            btn.className = 'font-label h-11 min-w-14 rounded-field border px-3 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary border-primary bg-primary text-primary-content';
+                        } else {
+                            btn.className = 'font-label h-11 min-w-14 rounded-field border px-3 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary border-base-content/60 text-base-content hover:border-base-content/90';
+                        }
+
+                        if (!soldOut && firstSelectable === null) {
+                            firstSelectable = btn;
+                        }
+                        btn.tabIndex = isSelected ? 0 : -1;
+                        btn.textContent = v.size;
+
+                        btn.addEventListener('click', function () {
+                            if (soldOut || (selectedVariation && selectedVariation.id === v.id)) {
+                                return;
+                            }
+                            selectVariation(v);
+                            preservingFocus(sizeRow, function () {
+                                renderSizes();
+                            });
+                        });
+                        sizeRow.appendChild(btn);
+                    });
+
+                    // Nothing selected (colour has no matching size): keep the group reachable by Tab.
+                    if (!sizeRow.querySelector('[tabindex="0"]')) {
+                        var fallback = firstSelectable || sizeRow.firstElementChild;
+                        if (fallback) {
+                            fallback.tabIndex = 0;
+                        }
+                    }
+                }
+
+                function wireRovingFocus(container) {
+                    container.addEventListener('keydown', function (event) {
+                        var forward = event.key === 'ArrowRight' || event.key === 'ArrowDown';
+                        var back = event.key === 'ArrowLeft' || event.key === 'ArrowUp';
+                        if (!forward && !back) {
+                            return;
+                        }
+                        var items = Array.prototype.slice.call(container.querySelectorAll('button'));
+                        var current = items.indexOf(document.activeElement);
+                        if (current === -1) {
+                            return;
+                        }
+                        event.preventDefault();
+                        items[(current + (forward ? 1 : -1) + items.length) % items.length].focus();
+                    });
+                }
+
+                wireRovingFocus(colorRow);
+                wireRovingFocus(sizeRow);
+
+                renderColors();
+                renderSizes();
+            }
         });
     </script>
 

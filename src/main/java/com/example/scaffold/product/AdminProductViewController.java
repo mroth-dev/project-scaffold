@@ -106,6 +106,7 @@ public class AdminProductViewController {
             boolean active,
             List<String> variationSize,
             List<String> variationColor,
+            List<String> variationColorHex,
             List<String> variationSku,
             List<String> variationInventory,
             List<String> variationPriceAdjustment,
@@ -137,13 +138,22 @@ public class AdminProductViewController {
                 Integer inventoryCount = parseInt(at(variationInventory, i));
                 BigDecimal priceAdjustment = parseDecimal(at(variationPriceAdjustment, i));
                 variations.add(new ProductVariationRequest(
-                        at(variationSize, i), at(variationColor, i), sku, inventoryCount, priceAdjustment));
+                        at(variationSize, i),
+                        at(variationColor, i),
+                        blankToNull(at(variationColorHex, i)),
+                        sku,
+                        inventoryCount,
+                        priceAdjustment));
             }
             return variations;
         }
 
         private static String at(List<String> values, int index) {
             return values != null && index < values.size() ? values.get(index) : null;
+        }
+
+        private static String blankToNull(String value) {
+            return value == null || value.isBlank() ? null : value;
         }
 
         private static Integer parseInt(String value) {

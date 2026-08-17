@@ -6,6 +6,7 @@ public record ProductVariationDto(
         Long id,
         String size,
         String color,
+        String colorHex,
         String sku,
         int inventoryCount,
         BigDecimal priceAdjustment) {

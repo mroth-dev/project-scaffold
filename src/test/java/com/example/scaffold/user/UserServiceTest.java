@@ -1,6 +1,7 @@
 package com.example.scaffold.user;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -31,6 +32,7 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import com.example.scaffold.config.CacheConfig;
 import com.example.scaffold.exception.NotFoundException;
+import com.example.scaffold.exception.ValidationException;
 
 /**
  * Test class for UserService with cache behavior validation.
@@ -81,6 +83,9 @@ class UserServiceTest {
     @Autowired
     private CacheManager cacheManager;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     private User testUser;
     private UserRequest testUserRequest;
 
@@ -102,6 +107,7 @@ class UserServiceTest {
         testUser.setLastName("Doe");
         testUser.setBirthDate(LocalDate.of(1990, 1, 1));
         testUser.setGender(Gender.MALE);
+        testUser.setPassword(passwordEncoder.encode("Password123"));
         testUser.setRole(UserRole.CUSTOMER);
         testUser.setStatus(AccountStatus.ACTIVE);
         testUser.setCreatedAt(LocalDateTime.now());
@@ -362,5 +368,90 @@ class UserServiceTest {
         assertThrows(NotFoundException.class, () -> userService.deleteUser(999L));
         verify(userRepository, times(1)).existsById(999L);
         verify(userRepository, never()).deleteById(999L);
+    }
+
+    @Test
+    void testUpdateProfile_nameOnlyChangeDoesNotRequireCurrentPassword() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        ProfileUpdateRequest request = new ProfileUpdateRequest("Jane", "Doe", "test@example.com", null, null);
+        AccountDto updated = userService.updateProfile(1L, request);
+
+        assertEquals("Jane", updated.firstName());
+        verify(userRepository, times(1)).save(any(User.class));
+    }
+
+    @Test
+    void testUpdateProfile_emailChangeWithoutCurrentPasswordRejected() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+
+        ProfileUpdateRequest request = new ProfileUpdateRequest("John", "Doe", "new@example.com", null, null);
+
+        assertThrows(ValidationException.class, () -> userService.updateProfile(1L, request));
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    void testUpdateProfile_wrongCurrentPasswordRejected() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+
+        ProfileUpdateRequest request = new ProfileUpdateRequest("John", "Doe", "test@example.com", "wrong-password",
+                "NewPassword123");
+
+        assertThrows(ValidationException.class, () -> userService.updateProfile(1L, request));
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    void testUpdateProfile_emailChangeWithCorrectCurrentPasswordSucceeds() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+        when(userRepository.findByEmail("new@example.com")).thenReturn(Optional.empty());
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        ProfileUpdateRequest request = new ProfileUpdateRequest("John", "Doe", "new@example.com", "Password123", null);
+        AccountDto updated = userService.updateProfile(1L, request);
+
+        assertEquals("new@example.com", updated.email());
+        verify(userRepository, times(1)).save(any(User.class));
+    }
+
+    @Test
+    void testUpdateProfile_emailChangeToExistingAddressThrows() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+        when(userRepository.findByEmail("taken@example.com")).thenReturn(Optional.of(new User()));
+
+        ProfileUpdateRequest request = new ProfileUpdateRequest("John", "Doe", "taken@example.com", "Password123",
+                null);
+
+        assertThrows(DuplicateEmailException.class, () -> userService.updateProfile(1L, request));
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    void testUpdateAddress_savesAndReturnsCompleteAddress() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        AddressUpdateRequest request = new AddressUpdateRequest(
+                "1 High Street", null, "London", "Greater London", "SW1A 1AA", "United Kingdom", null);
+        AccountDto updated = userService.updateAddress(1L, request);
+
+        assertEquals("1 High Street", updated.address().getLine1());
+        assertTrue(updated.address().isComplete());
+    }
+
+    @Test
+    void testHasCompleteShippingAddress_falseUntilAddressSaved() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+
+        assertFalse(userService.hasCompleteShippingAddress(1L));
+
+        testUser.getAddress().setLine1("1 High Street");
+        testUser.getAddress().setCity("London");
+        testUser.getAddress().setPostcode("SW1A 1AA");
+        testUser.getAddress().setCountry("United Kingdom");
+
+        assertTrue(userService.hasCompleteShippingAddress(1L));
     }
 }

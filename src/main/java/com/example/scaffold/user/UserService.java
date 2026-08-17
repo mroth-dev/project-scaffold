@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.scaffold.config.CacheConfig;
 import com.example.scaffold.exception.NotFoundException;
+import com.example.scaffold.exception.ValidationException;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -59,6 +60,67 @@ public class UserService {
         return toDto(user);
     }
 
+    public AccountDto getAccount(Long id) {
+        log.debug("Fetching account for user: {}", id);
+        return toAccountDto(findUserOrThrow(id));
+    }
+
+    public boolean hasCompleteShippingAddress(Long id) {
+        return findUserOrThrow(id).getAddress().isComplete();
+    }
+
+    @Caching(evict = {
+        @CacheEvict(value = CacheConfig.USER_CACHE, key = "#id"),
+        @CacheEvict(value = CacheConfig.USER_BY_EMAIL_CACHE, allEntries = true),
+        @CacheEvict(value = CacheConfig.USER_SEARCH_CACHE, allEntries = true)
+    })
+    public AccountDto updateProfile(Long id, ProfileUpdateRequest request) {
+        log.debug("Updating profile for user: {}", id);
+        User user = findUserOrThrow(id);
+
+        boolean emailChanged = !user.getEmail().equalsIgnoreCase(request.email());
+        boolean changingPassword = request.newPassword() != null && !request.newPassword().isBlank();
+
+        if (emailChanged || changingPassword) {
+            if (request.currentPassword() == null
+                    || !passwordEncoder.matches(request.currentPassword(), user.getPassword())) {
+                throw new ValidationException("Current password is incorrect");
+            }
+        }
+        if (emailChanged && userRepository.findByEmail(request.email()).isPresent()) {
+            throw new DuplicateEmailException(request.email());
+        }
+
+        user.setFirstName(request.firstName());
+        user.setLastName(request.lastName());
+        user.setEmail(request.email());
+        if (changingPassword) {
+            user.setPassword(passwordEncoder.encode(request.newPassword()));
+        }
+
+        return toAccountDto(userRepository.save(user));
+    }
+
+    @Caching(evict = {
+        @CacheEvict(value = CacheConfig.USER_CACHE, key = "#id"),
+        @CacheEvict(value = CacheConfig.USER_BY_EMAIL_CACHE, allEntries = true),
+        @CacheEvict(value = CacheConfig.USER_SEARCH_CACHE, allEntries = true)
+    })
+    public AccountDto updateAddress(Long id, AddressUpdateRequest request) {
+        log.debug("Updating address for user: {}", id);
+        User user = findUserOrThrow(id);
+        Address address = user.getAddress();
+        address.setLine1(request.line1());
+        address.setLine2(request.line2());
+        address.setCity(request.city());
+        address.setRegion(request.region());
+        address.setPostcode(request.postcode());
+        address.setCountry(request.country());
+        address.setPhone(request.phone());
+
+        return toAccountDto(userRepository.save(user));
+    }
+
     public UserDto createUser(UserRequest request) {
         log.debug("Creating new user with email: {}", request.email());
         if (userRepository.findByEmail(request.email()).isPresent()) {
@@ -81,6 +143,34 @@ public class UserService {
         applyRequest(user, request);
         User savedUser = userRepository.save(user);
         log.debug("Cache evicted for user update: {}", id);
+        return toDto(savedUser);
+    }
+
+    @Caching(evict = {
+        @CacheEvict(value = CacheConfig.USER_CACHE, key = "#id"),
+        @CacheEvict(value = CacheConfig.USER_BY_EMAIL_CACHE, allEntries = true),
+        @CacheEvict(value = CacheConfig.USER_SEARCH_CACHE, allEntries = true)
+    })
+    public UserDto updateRole(Long id, UserRole role) {
+        log.debug("Updating role for user {} to {}", id, role);
+        User user = findUserOrThrow(id);
+        user.setRole(role);
+        User savedUser = userRepository.save(user);
+        log.debug("Cache evicted for user role update: {}", id);
+        return toDto(savedUser);
+    }
+
+    @Caching(evict = {
+        @CacheEvict(value = CacheConfig.USER_CACHE, key = "#id"),
+        @CacheEvict(value = CacheConfig.USER_BY_EMAIL_CACHE, allEntries = true),
+        @CacheEvict(value = CacheConfig.USER_SEARCH_CACHE, allEntries = true)
+    })
+    public UserDto updateStatus(Long id, AccountStatus status) {
+        log.debug("Updating status for user {} to {}", id, status);
+        User user = findUserOrThrow(id);
+        user.setStatus(status);
+        User savedUser = userRepository.save(user);
+        log.debug("Cache evicted for user status update: {}", id);
         return toDto(savedUser);
     }
 
@@ -114,6 +204,10 @@ public class UserService {
             user.setRole(request.role());
         }
         // Status defaults to ACTIVE via entity default
+    }
+
+    private AccountDto toAccountDto(User user) {
+        return new AccountDto(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail(), user.getAddress());
     }
 
     private UserDto toDto(User user) {

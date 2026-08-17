@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.example.scaffold.user.Address;
+
 public record OrderDto(
         Long id,
         Long customerId,
@@ -11,6 +13,7 @@ public record OrderDto(
         BigDecimal totalAmount,
         String promotionCode,
         BigDecimal discountAmount,
+        Address shippingAddress,
         List<OrderItemDto> items,
         LocalDateTime createdAt,
         LocalDateTime updatedAt) {

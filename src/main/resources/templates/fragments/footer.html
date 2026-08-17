@@ -1,34 +1,52 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
-    <footer class="footer sm:footer-horizontal bg-base-200 text-base-content border-t border-base-300 px-4 md:px-8 py-10 mt-20" th:fragment="footer">
-        <nav>
-            <h6 class="footer-title">Scaffold Shop</h6>
-            <p class="max-w-xs text-base-content/70">Quality essentials, thoughtfully made.</p>
-        </nav>
-        <nav>
-            <h6 class="footer-title">Quick Links</h6>
-            <a class="link link-hover" th:href="@{/}">Home</a>
-            <a class="link link-hover" th:href="@{/products}">Products</a>
-            <a class="link link-hover" th:href="@{/cart}">Cart</a>
-            <a class="link link-hover" th:href="@{/orders}" th:if="${authenticated}">My Orders</a>
-            <a class="link link-hover" th:href="@{/login}" th:unless="${authenticated}">Login</a>
-        </nav>
-        <nav>
-            <h6 class="footer-title">Customer Service</h6>
-            <a class="link link-hover" href="#">Contact Us</a>
-            <a class="link link-hover" href="#">Shipping Info</a>
-            <a class="link link-hover" href="#">Returns</a>
-            <a class="link link-hover" href="#">FAQ</a>
-        </nav>
-        <nav>
-            <h6 class="footer-title">Stay Connected</h6>
-            <p class="max-w-xs text-base-content/70 mb-2">Get updates on new arrivals and offers.</p>
-            <div class="join">
-                <input type="email" placeholder="you@example.com" class="input input-sm join-item">
-                <button type="button" class="btn btn-sm btn-primary join-item">Subscribe</button>
+    <footer class="bg-neutral text-neutral-content mt-20" th:fragment="footer">
+        <div class="container mx-auto max-w-7xl px-4 md:px-8 py-14 md:py-16">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-10">
+
+                <nav>
+                    <span class="font-display text-xl font-black tracking-tight block mb-2">SCAFFOLD</span>
+                    <p class="text-sm text-neutral-content/65 max-w-[26ch]">Performance apparel for the modern round.</p>
+                </nav>
+
+                <nav>
+                    <h6 class="font-label text-xs font-semibold tracking-[0.1em] uppercase text-neutral-content/50 mb-3">Shop</h6>
+                    <ul class="space-y-2.5 text-sm">
+                        <li><a class="hover:text-primary transition-colors" th:href="@{/}">Home</a></li>
+                        <li><a class="hover:text-primary transition-colors" th:href="@{/new-in}">New In</a></li>
+                        <li><a class="hover:text-primary transition-colors" th:href="@{/cart}">Cart</a></li>
+                        <li><a class="hover:text-primary transition-colors" th:href="@{/orders}" th:if="${authenticated}">My Orders</a></li>
+                        <li><a class="hover:text-primary transition-colors" th:href="@{/login}" th:unless="${authenticated}">Login</a></li>
+                    </ul>
+                </nav>
+
+                <nav>
+                    <h6 class="font-label text-xs font-semibold tracking-[0.1em] uppercase text-neutral-content/50 mb-3">Support</h6>
+                    <ul class="space-y-2.5 text-sm">
+                        <li><a class="hover:text-primary transition-colors" href="#">Contact Us</a></li>
+                        <li><a class="hover:text-primary transition-colors" href="#">Shipping Info</a></li>
+                        <li><a class="hover:text-primary transition-colors" href="#">Returns</a></li>
+                        <li><a class="hover:text-primary transition-colors" href="#">FAQ</a></li>
+                    </ul>
+                </nav>
+
+                <nav>
+                    <h6 class="font-label text-xs font-semibold tracking-[0.1em] uppercase text-neutral-content/50 mb-3">Stay Connected</h6>
+                    <p class="text-sm text-neutral-content/65 mb-3 max-w-[28ch]">New arrivals and offers, occasionally.</p>
+                    <div class="flex gap-2">
+                        <input type="email" placeholder="you@example.com"
+                               class="font-label min-w-0 flex-1 rounded-field border-none bg-neutral-content/10 px-3 py-2.5 text-sm placeholder:text-neutral-content/40 focus:outline-none focus:bg-neutral-content/20 transition-colors">
+                        <button type="button" class="font-label shrink-0 px-4 rounded-field text-sm font-semibold bg-primary text-primary-content hover:opacity-90 transition-opacity">Subscribe</button>
+                    </div>
+                </nav>
             </div>
-        </nav>
+
+            <div class="mt-12 pt-6 border-t border-neutral-content/15 flex flex-col sm:flex-row justify-between gap-2 text-xs text-neutral-content/40 font-label">
+                <span>&copy; Scaffold &mdash; working name</span>
+                <span>Placeholder catalogue &middot; not final pricing</span>
+            </div>
+        </div>
     </footer>
 </body>
 </html>

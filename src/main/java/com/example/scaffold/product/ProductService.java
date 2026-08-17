@@ -227,6 +227,7 @@ public class ProductService {
             }
             variation.setSize(variationRequest.size());
             variation.setColor(variationRequest.color());
+            variation.setColorHex(variationRequest.colorHex());
             variation.setInventoryCount(
                     variationRequest.inventoryCount() != null ? variationRequest.inventoryCount() : 0);
             variation.setPriceAdjustment(
@@ -259,12 +260,13 @@ public class ProductService {
                         variation.getId(),
                         variation.getSize(),
                         variation.getColor(),
+                        variation.getColorHex(),
                         variation.getSku(),
                         variation.getInventoryCount(),
                         variation.getPriceAdjustment()))
                 .toList();
         List<CategorySummaryDto> categories = product.getCategories().stream()
-                .map(category -> new CategorySummaryDto(category.getId(), category.getName()))
+                .map(category -> new CategorySummaryDto(category.getId(), category.getName(), category.getSlug()))
                 .sorted(Comparator.comparing(CategorySummaryDto::name))
                 .toList();
         return new ProductDto(

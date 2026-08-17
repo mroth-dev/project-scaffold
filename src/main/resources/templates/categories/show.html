@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${category.name} + ' - Scaffold Shop'"></title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <script th:src="@{/webjars/htmx.org/2.0.4/dist/htmx.min.js}"></script>
+</head>
+<body class="min-h-screen flex flex-col">
+    <div th:replace="~{fragments/nav :: nav}"></div>
+
+    <main class="flex-1 container mx-auto px-4 md:px-8 max-w-7xl">
+        <div class="breadcrumbs text-sm mb-4">
+            <ul>
+                <li><a th:href="@{/}">Home</a></li>
+                <li th:each="ancestor : ${breadcrumb}">
+                    <a th:href="@{'/categories/' + ${ancestor.slug}}" th:text="${ancestor.name}"></a>
+                </li>
+                <li th:text="${category.name}"></li>
+            </ul>
+        </div>
+
+        <section class="relative rounded-box overflow-hidden h-56 md:h-72 mb-6">
+            <img th:if="${category.panelImageUrl != null}" th:src="${category.panelImageUrl}"
+                 th:alt="${category.name}" class="w-full h-full object-cover">
+            <div th:unless="${category.panelImageUrl != null}"
+                 class="w-full h-full bg-[linear-gradient(135deg,var(--color-primary)_0%,var(--color-secondary)_55%,var(--color-accent)_100%)]"></div>
+            <div class="absolute inset-0 bg-linear-to-t from-black/75 via-black/30 to-transparent"></div>
+            <div class="absolute bottom-0 left-0 right-0 p-6 md:p-8">
+                <h1 class="text-3xl md:text-4xl font-bold text-white" th:text="${category.name}"></h1>
+                <p class="mt-2 max-w-2xl text-white/80" th:if="${category.description != null}"
+                   th:text="${category.description}"></p>
+            </div>
+        </section>
+
+        <div class="flex gap-2 overflow-x-auto pb-2 mb-8" th:if="${!subcategories.isEmpty()}">
+            <a th:each="subcategory : ${subcategories}" class="btn btn-sm btn-outline rounded-full shrink-0"
+               th:href="@{'/categories/' + ${subcategory.slug}}" th:text="${subcategory.name}"></a>
+        </div>
+
+        <div id="product-results" th:replace="~{products/fragments/results :: productResults}"></div>
+    </main>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

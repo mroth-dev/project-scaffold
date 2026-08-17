@@ -2,47 +2,107 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Scaffold Shop</title>
+    <title>Scaffold &mdash; Performance Golf Apparel</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
     <script th:src="@{/webjars/htmx.org/2.0.4/dist/htmx.min.js}"></script>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col bg-base-100">
+<!--
+  THESIS: the homepage plays the golf-DTC category standard straight --
+  full-bleed lifestyle photography hero, one clear primary action, a clean
+  product grid -- executed at Peter Millar / Malbon Golf's craft level, no
+  irony, no heritage-clubhouse pastiche.
+  OWN-WORLD: deep green (#064E3B) and cream (#E4DCCE) as page-scale fields --
+  green nav, footer, and actions framing a cream canvas; Libre Franklin for
+  display/headlines, Work Sans for body/UI; moderate rounded corners; real
+  photography throughout.
+  STORY: the visitor reads Scaffold as a credible modern golf performance
+  brand and moves into the collection or a specific piece.
+  FIRST VIEWPORT: a full-bleed action photograph of a golfer mid-swing, one
+  brand line, one primary call to action.
+  FORM: category standard (user-selected canon / standing exit over a
+  grounded "course-routing" direction and six unrelated wildcard
+  challengers); reference bar Peter Millar + Malbon Golf.
+  FINISH: unreviewed and undocumented is unfinished; this build ends with
+  the finish review, the verdict, and DESIGN.md.
+-->
     <div th:replace="~{fragments/nav :: nav}"></div>
 
-    <main class="flex-1 container mx-auto m-1 px-4 md:px-8 max-w-7xl">
-        <section th:if="${!carouselProducts.isEmpty()}" class="carousel w-full h-80 rounded-box">
-            <div class="carousel-item relative w-full" th:each="product, iter : ${carouselProducts}" th:id="'slide' + ${iter.index}">
-                <a class="w-full" th:href="@{'/products/' + ${product.id}}">
-                    <img th:if="${!product.images.isEmpty()}" th:src="${product.images[0].url}" th:alt="${product.name}"
-                         class="w-full h-80 object-cover">
-                    <div th:if="${product.images.isEmpty()}"
-                         class="w-full h-80 bg-base-200 flex items-center justify-center text-base-content/40">No image</div>
-                </a>
-                <div class="absolute bottom-4 left-4 bg-base-100/90 rounded-box px-4 py-2">
-                    <p class="font-semibold" th:text="${product.name}"></p>
-                    <p class="text-sm text-base-content/70" th:text="${'£' + product.basePrice}"></p>
-                </div>
-                <div class="absolute flex justify-between -translate-y-1/2 left-4 right-4 top-1/2">
-                    <a class="btn btn-circle btn-sm"
-                       th:href="'#slide' + ${iter.index == 0 ? carouselProducts.size() - 1 : iter.index - 1}">&#10094;</a>
-                    <a class="btn btn-circle btn-sm"
-                       th:href="'#slide' + ${iter.index == carouselProducts.size() - 1 ? 0 : iter.index + 1}">&#10095;</a>
+    <main class="flex-1">
+
+        <!-- Hero: full-bleed, the mechanism at scale -->
+        <section class="relative w-full h-[68vh] min-h-[440px] md:h-[82vh] md:min-h-[600px] overflow-hidden">
+            <img src="https://images.unsplash.com/photo-1535131749006-b7f58c99034b?w=2400&q=80&auto=format&fit=crop"
+                 alt="Golfer mid-swing on a fairway"
+                 class="absolute inset-0 w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-t from-neutral/95 via-neutral/25 to-neutral/10"></div>
+
+            <div class="relative h-full container mx-auto max-w-7xl px-4 md:px-8 flex flex-col justify-end pb-12 md:pb-16">
+                <div class="animate-rise-in max-w-xl">
+                    <h1 class="font-display text-4xl sm:text-5xl md:text-6xl font-black tracking-tight text-neutral-content leading-[0.95]">
+                        Performance apparel<br>for the modern round.
+                    </h1>
+                    <p class="font-label text-base md:text-lg text-neutral-content/80 mt-4 max-w-md">
+                        Technical fabrics and a clean, athletic cut &mdash; built for eighteen holes and everything after.
+                    </p>
+                    <a th:href="@{/new-in}"
+                       class="font-label inline-flex items-center gap-2 mt-7 px-6 py-3.5 rounded-field text-sm font-semibold tracking-wide bg-primary text-primary-content hover:opacity-90 transition-opacity">
+                        Shop the Collection
+                        <span aria-hidden="true">&rarr;</span>
+                    </a>
                 </div>
             </div>
         </section>
 
-        <section class="mt-12 mb-12">
-            <h2 class="text-xl font-bold mb-4">Shop by Category</h2>
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                <a class="card bg-base-100 shadow-sm border border-base-300 hover:shadow-md transition-shadow"
-                   th:each="category : ${categories}" th:href="@{/products(categoryId=${category.id})}">
-                    <div class="card-body items-center text-center py-8">
-                        <h3 class="font-semibold" th:text="${category.name}"></h3>
-                    </div>
-                </a>
-                <p class="col-span-full text-base-content/60" th:if="${categories.isEmpty()}">No categories yet.</p>
-            </div>
-        </section>
+        <div class="container mx-auto px-4 md:px-8 max-w-7xl">
+
+            <!-- Featured products -->
+            <section class="mt-16 md:mt-24 mb-20" th:if="${!carouselProducts.isEmpty()}">
+                <div class="flex items-end justify-between mb-8">
+                    <h2 class="font-display text-2xl md:text-3xl font-extrabold tracking-tight text-base-content">Featured</h2>
+                    <a th:href="@{/new-in}" class="font-label text-sm font-semibold text-primary hover:opacity-70 transition-opacity">View all &rarr;</a>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-5 md:gap-6">
+                    <a th:each="product : ${carouselProducts}" th:href="@{'/products/' + ${product.id}}" class="group block">
+                        <div class="relative aspect-[4/5] rounded-box overflow-hidden bg-base-200">
+                            <img th:if="${!product.images.isEmpty()}" th:src="${product.images[0].url}" th:alt="${product.images[0].altText}"
+                                 class="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-500 ease-out">
+                            <div th:if="${product.images.isEmpty()}"
+                                 class="w-full h-full flex items-center justify-center font-label text-xs text-base-content/40">No image</div>
+                        </div>
+                        <div class="mt-3">
+                            <p class="font-label text-[11px] font-semibold tracking-[0.08em] uppercase text-primary/70"
+                               th:if="${!product.categories.isEmpty()}" th:text="${product.categories[0].name}"></p>
+                            <h3 class="font-display font-bold text-base-content mt-0.5 truncate" th:text="${product.name}"></h3>
+                            <p class="font-label text-sm text-base-content/60 mt-0.5" th:text="${'£' + product.basePrice}"></p>
+                        </div>
+                    </a>
+                </div>
+            </section>
+
+            <!-- Shop by category -->
+            <section class="mb-24">
+                <h2 class="font-display text-2xl md:text-3xl font-extrabold tracking-tight text-base-content mb-8">Shop by Category</h2>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 md:gap-6">
+                    <a th:each="category, iter : ${categories}" th:href="@{'/categories/' + ${category.slug}}"
+                       th:classappend="${iter.index % 2 == 0} ? 'bg-primary text-primary-content' : 'bg-neutral text-neutral-content'"
+                       class="group relative flex flex-col justify-between min-h-[220px] md:min-h-[280px] rounded-box p-7 overflow-hidden transition-transform duration-300 hover:-translate-y-1">
+                        <span class="font-label text-xs font-semibold tracking-[0.15em] uppercase opacity-60" th:text="${category.name}"></span>
+                        <div>
+                            <h3 class="font-display text-3xl md:text-4xl font-black tracking-tight leading-none" th:text="${category.name}"></h3>
+                            <p class="font-label text-sm opacity-70 mt-2 group-hover:opacity-100 transition-opacity">
+                                Shop now &rarr;
+                            </p>
+                        </div>
+                    </a>
+
+                    <p class="col-span-full font-label text-sm text-base-content/50 border border-dashed border-base-300 rounded-box py-10 text-center"
+                       th:if="${categories.isEmpty()}">No categories yet.</p>
+                </div>
+            </section>
+        </div>
     </main>
 
     <div th:replace="~{fragments/footer :: footer}"></div>

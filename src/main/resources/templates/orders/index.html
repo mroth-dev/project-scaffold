@@ -29,7 +29,7 @@
             </table>
         </div>
 
-        <p class="text-base-content/60" th:if="${page.content.isEmpty()}">You haven't placed any orders yet. <a class="link link-primary" th:href="@{/products}">Start shopping</a>.</p>
+        <p class="text-base-content/60" th:if="${page.content.isEmpty()}">You haven't placed any orders yet. <a class="link link-primary" th:href="@{/new-in}">Start shopping</a>.</p>
     </main>
 
     <div th:replace="~{fragments/footer :: footer}"></div>

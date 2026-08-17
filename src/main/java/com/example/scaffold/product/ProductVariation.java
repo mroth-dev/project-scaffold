@@ -33,6 +33,9 @@ public class ProductVariation {
 
     private String color;
 
+    @Column(name = "color_hex", length = 7)
+    private String colorHex;
+
     @Column(nullable = false, unique = true)
     private String sku;
 

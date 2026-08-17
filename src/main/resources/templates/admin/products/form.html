@@ -79,12 +79,18 @@
             <div class="overflow-x-auto">
                 <table class="table">
                     <thead>
-                        <tr><th>Size</th><th>Color</th><th>SKU</th><th>Stock</th><th>Price adj.</th><th></th></tr>
+                        <tr><th>Size</th><th>Color</th><th>Color hex</th><th>SKU</th><th>Stock</th><th>Price adj.</th><th></th></tr>
                     </thead>
                     <tbody id="variation-rows">
                         <tr th:each="variation : ${product != null ? product.variations : {}}">
                             <td><input type="text" name="variationSize" class="input input-sm w-full" th:value="${variation.size}"></td>
                             <td><input type="text" name="variationColor" class="input input-sm w-full" th:value="${variation.color}"></td>
+                            <td>
+                                <input type="color" name="variationColorHex" class="input input-sm w-12 p-1 h-9"
+                                       th:value="${variation.colorHex} ?: '#000000'"
+                                       oninput="this.nextElementSibling.value = this.value">
+                                <output class="text-xs text-base-content/60 ml-1" th:text="${variation.colorHex}"></output>
+                            </td>
                             <td><input type="text" name="variationSku" class="input input-sm w-full" th:value="${variation.sku}"></td>
                             <td><input type="number" min="0" name="variationInventory" class="input input-sm w-20" th:value="${variation.inventoryCount}"></td>
                             <td><input type="number" step="0.01" name="variationPriceAdjustment" class="input input-sm w-24" th:value="${variation.priceAdjustment}"></td>
@@ -124,6 +130,11 @@
         <tr>
             <td><input type="text" name="variationSize" class="input input-sm w-full"></td>
             <td><input type="text" name="variationColor" class="input input-sm w-full"></td>
+            <td>
+                <input type="color" name="variationColorHex" class="input input-sm w-12 p-1 h-9" value="#000000"
+                       oninput="this.nextElementSibling.value = this.value">
+                <output class="text-xs text-base-content/60 ml-1"></output>
+            </td>
             <td><input type="text" name="variationSku" class="input input-sm w-full"></td>
             <td><input type="number" min="0" name="variationInventory" class="input input-sm w-20"></td>
             <td><input type="number" step="0.01" name="variationPriceAdjustment" class="input input-sm w-24"></td>

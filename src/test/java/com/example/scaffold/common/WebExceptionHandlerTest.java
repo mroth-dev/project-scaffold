@@ -34,6 +34,7 @@ import com.example.scaffold.product.ProductViewController;
 import com.example.scaffold.security.CustomUserDetailsService;
 import com.example.scaffold.security.CustomUserDetailsService.CustomUserPrincipal;
 import com.example.scaffold.security.JwtTokenProvider;
+import com.example.scaffold.user.Address;
 
 @WebMvcTest({ProductViewController.class, OrderViewController.class})
 @Import({SecurityConfig.class, JwtTokenProvider.class})
@@ -67,7 +68,7 @@ class WebExceptionHandlerTest {
 
     private OrderDto sampleOrder(Long id, Long customerId) {
         return new OrderDto(id, customerId, OrderStatus.PENDING, new BigDecimal("10.00"), null, BigDecimal.ZERO,
-                List.of(), LocalDateTime.now(), LocalDateTime.now());
+                new Address(), List.of(), LocalDateTime.now(), LocalDateTime.now());
     }
 
     @Test

@@ -63,7 +63,7 @@ class ProductRestControllerTest {
                 new BigDecimal("29.99"), new BigDecimal("19.99"), true,
                 List.of(new ProductImageDto(
                         1L, "http://example.com/image.jpg", "http://example.com/thumb.jpg", "Front view", 0)),
-                List.of(new ProductVariationDto(1L, "M", "Blue", "TSHIRT-001-M-BLUE", 10, BigDecimal.ZERO)),
+                List.of(new ProductVariationDto(1L, "M", "Blue", "#0000FF", "TSHIRT-001-M-BLUE", 10, BigDecimal.ZERO)),
                 List.of(), LocalDateTime.now(), LocalDateTime.now());
     }
 

@@ -65,10 +65,22 @@
             </div>
         </div>
 
-        <p class="text-base-content/60" th:if="${lines.isEmpty()}">Your cart is empty. <a class="link link-primary" th:href="@{/products}">Browse products</a>.</p>
+        <p class="text-base-content/60" th:if="${lines.isEmpty()}">Your cart is empty. <a class="link link-primary" th:href="@{/new-in}">Browse products</a>.</p>
+
+        <div class="mt-6 max-w-sm ml-auto" th:if="${!lines.isEmpty() and authenticated}">
+            <div class="text-sm mb-3" th:if="${hasShippingAddress}">
+                <p class="font-semibold">Shipping to</p>
+                <p th:text="${shippingAddress.line1}"></p>
+                <p th:text="${shippingAddress.city} + ', ' + ${shippingAddress.postcode}"></p>
+                <a class="link link-primary" th:href="@{/account}">Change</a>
+            </div>
+            <div role="alert" class="alert alert-warning text-sm mb-3" th:unless="${hasShippingAddress}">
+                <span>Add a shipping address to check out. <a class="link" th:href="@{/account}">Add one now</a>.</span>
+            </div>
+        </div>
 
         <form class="mt-6" th:if="${!lines.isEmpty()}" th:action="@{/cart/checkout}" method="post">
-            <button type="submit" class="btn btn-primary">Checkout</button>
+            <button type="submit" class="btn btn-primary" th:disabled="${authenticated and !hasShippingAddress}">Checkout</button>
         </form>
     </div>
 </body>

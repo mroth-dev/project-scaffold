@@ -10,7 +10,10 @@ import org.hibernate.type.SqlTypes;
 
 import com.example.scaffold.audit.AuditEntityListener;
 
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
@@ -53,6 +56,18 @@ public class User {
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     private Gender gender;
 
+    @Embedded
+    @AttributeOverrides({
+        @AttributeOverride(name = "line1", column = @Column(name = "address_line1")),
+        @AttributeOverride(name = "line2", column = @Column(name = "address_line2")),
+        @AttributeOverride(name = "city", column = @Column(name = "address_city")),
+        @AttributeOverride(name = "region", column = @Column(name = "address_region")),
+        @AttributeOverride(name = "postcode", column = @Column(name = "address_postcode")),
+        @AttributeOverride(name = "country", column = @Column(name = "address_country")),
+        @AttributeOverride(name = "phone", column = @Column(name = "address_phone")),
+    })
+    private Address address = new Address();
+
     @Enumerated(EnumType.STRING)
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(nullable = false)
@@ -70,4 +85,19 @@ public class User {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    /**
+     * Hibernate maps an {@code @Embedded} whose columns are all NULL back to a
+     * null field, overwriting the initializer above - so a user who has never
+     * saved an address loads with {@code address == null}. Callers treat the
+     * address as always-present and mutate it in place (see
+     * {@code UserService#updateAddress}), so hand back a real instance and keep
+     * it, rather than letting every call site null-check.
+     */
+    public Address getAddress() {
+        if (address == null) {
+            address = new Address();
+        }
+        return address;
+    }
 }

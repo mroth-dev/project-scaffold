@@ -51,8 +51,11 @@
                         </td>
                         <td class="flex gap-2">
                             <a class="link link-primary" th:href="@{'/admin/promotions/' + ${promo.id} + '/edit'}">Edit</a>
-                            <form th:action="@{'/admin/promotions/' + ${promo.id} + (${promo.active} ? '/deactivate' : '/activate')}" method="post">
-                                <button type="submit" class="link" th:text="${promo.active} ? 'Deactivate' : 'Activate'"></button>
+                            <form th:if="${promo.active}" th:action="@{'/admin/promotions/' + ${promo.id} + '/deactivate'}" method="post">
+                                <button type="submit" class="link">Deactivate</button>
+                            </form>
+                            <form th:unless="${promo.active}" th:action="@{'/admin/promotions/' + ${promo.id} + '/activate'}" method="post">
+                                <button type="submit" class="link">Activate</button>
                             </form>
                             <form th:action="@{'/admin/promotions/' + ${promo.id} + '/delete'}" method="post"
                                   onsubmit="return confirm('Delete this promotion?');">

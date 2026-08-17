@@ -34,6 +34,7 @@
                         <th>Role</th>
                         <th>Status</th>
                         <th>Joined</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody id="user-table-body" th:fragment="userTable">
@@ -41,15 +42,33 @@
                         <td th:text="${user.id}"></td>
                         <td th:text="${user.firstName + ' ' + user.lastName}"></td>
                         <td th:text="${user.email}"></td>
-                        <td><span class="badge badge-sm" th:text="${user.role}"></span></td>
+                        <td>
+                            <span th:if="${user.id == currentUserId}" class="badge badge-sm" th:text="${user.role}"></span>
+                            <form th:unless="${user.id == currentUserId}" th:action="@{'/admin/users/' + ${user.id} + '/role'}" method="post">
+                                <select name="role" class="select select-sm" onchange="this.form.submit()">
+                                    <option th:each="r : ${roles}" th:value="${r}" th:text="${r}" th:selected="${r == user.role}"></option>
+                                </select>
+                            </form>
+                        </td>
                         <td>
                             <span class="badge badge-sm" th:classappend="${user.status.name() == 'ACTIVE'} ? 'badge-success' : 'badge-neutral'"
                                   th:text="${user.status}"></span>
                         </td>
                         <td th:text="${#temporals.format(user.createdAt, 'dd MMM yyyy')}"></td>
+                        <td>
+                            <span th:if="${user.id == currentUserId}" class="text-base-content/60 text-sm">You</span>
+                            <th:block th:unless="${user.id == currentUserId}">
+                                <form th:if="${user.status.name() == 'ACTIVE'}" th:action="@{'/admin/users/' + ${user.id} + '/disable'}" method="post">
+                                    <button type="submit" class="link">Disable</button>
+                                </form>
+                                <form th:unless="${user.status.name() == 'ACTIVE'}" th:action="@{'/admin/users/' + ${user.id} + '/enable'}" method="post">
+                                    <button type="submit" class="link">Enable</button>
+                                </form>
+                            </th:block>
+                        </td>
                     </tr>
                     <tr th:if="${users.isEmpty()}">
-                        <td colspan="6" class="text-base-content/60">No users found.</td>
+                        <td colspan="7" class="text-base-content/60">No users found.</td>
                     </tr>
                 </tbody>
             </table>

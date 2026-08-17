@@ -21,6 +21,8 @@ import com.example.scaffold.product.ProductVariationRepository;
 import com.example.scaffold.promotion.PromotionQuote;
 import com.example.scaffold.promotion.PromotionService;
 import com.example.scaffold.security.CustomUserDetailsService.CustomUserPrincipal;
+import com.example.scaffold.user.Address;
+import com.example.scaffold.user.UserService;
 
 @Controller
 @RequestMapping("/cart")
@@ -30,18 +32,20 @@ public class CartViewController {
     private final ProductVariationRepository productVariationRepository;
     private final OrderService orderService;
     private final PromotionService promotionService;
+    private final UserService userService;
 
     public CartViewController(ShoppingCart cart, ProductVariationRepository productVariationRepository,
-            OrderService orderService, PromotionService promotionService) {
+            OrderService orderService, PromotionService promotionService, UserService userService) {
         this.cart = cart;
         this.productVariationRepository = productVariationRepository;
         this.orderService = orderService;
         this.promotionService = promotionService;
+        this.userService = userService;
     }
 
     @GetMapping
-    public String index(Model model) {
-        populateCartModel(model, null);
+    public String index(@AuthenticationPrincipal CustomUserPrincipal principal, Model model) {
+        populateCartModel(model, null, principal);
         return "cart/index";
     }
 
@@ -53,29 +57,31 @@ public class CartViewController {
     }
 
     @PostMapping("/items/{variationId}/remove")
-    public String removeItem(@PathVariable Long variationId, Model model) {
+    public String removeItem(@AuthenticationPrincipal CustomUserPrincipal principal, @PathVariable Long variationId,
+            Model model) {
         cart.remove(variationId);
-        populateCartModel(model, null);
+        populateCartModel(model, null, principal);
         return "cart/fragments/contents :: cartContents";
     }
 
     @PostMapping("/promotion")
-    public String applyPromotion(@RequestParam String code, Model model) {
+    public String applyPromotion(@AuthenticationPrincipal CustomUserPrincipal principal, @RequestParam String code,
+            Model model) {
         BigDecimal subtotal = cartSubtotal(buildCartLines());
         try {
             promotionService.quote(code, subtotal);
             cart.setPromotionCode(code.trim().toUpperCase());
-            populateCartModel(model, null);
+            populateCartModel(model, null, principal);
         } catch (BusinessException ex) {
-            populateCartModel(model, ex.getMessage());
+            populateCartModel(model, ex.getMessage(), principal);
         }
         return "cart/fragments/contents :: cartContents";
     }
 
     @PostMapping("/promotion/remove")
-    public String removePromotion(Model model) {
+    public String removePromotion(@AuthenticationPrincipal CustomUserPrincipal principal, Model model) {
         cart.setPromotionCode(null);
-        populateCartModel(model, null);
+        populateCartModel(model, null, principal);
         return "cart/fragments/contents :: cartContents";
     }
 
@@ -87,6 +93,9 @@ public class CartViewController {
         if (cart.isEmpty()) {
             return "redirect:/cart";
         }
+        if (!userService.hasCompleteShippingAddress(principal.getId())) {
+            return "redirect:/account";
+        }
 
         List<OrderItemRequest> items = cart.getItems().entrySet().stream()
                 .map(entry -> new OrderItemRequest(entry.getKey(), entry.getValue()))
@@ -96,7 +105,7 @@ public class CartViewController {
         return "redirect:/orders/" + order.id();
     }
 
-    private void populateCartModel(Model model, String forcedPromotionError) {
+    private void populateCartModel(Model model, String forcedPromotionError, CustomUserPrincipal principal) {
         List<CartLine> lines = buildCartLines();
         BigDecimal subtotal = cartSubtotal(lines);
 
@@ -112,11 +121,14 @@ public class CartViewController {
             }
         }
 
+        Address shippingAddress = principal != null ? userService.getAccount(principal.getId()).address() : null;
         model.addAttribute("lines", lines);
         model.addAttribute("subtotal", subtotal);
         model.addAttribute("discount", discount);
         model.addAttribute("total", subtotal.subtract(discount));
         model.addAttribute("promotion", promotion);
+        model.addAttribute("shippingAddress", shippingAddress);
+        model.addAttribute("hasShippingAddress", shippingAddress != null && shippingAddress.isComplete());
         model.addAttribute("promotionCode", cart.getPromotionCode());
         model.addAttribute("promotionError", promotionError);
     }

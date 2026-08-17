@@ -12,10 +12,14 @@ import org.hibernate.type.SqlTypes;
 
 import com.example.scaffold.audit.AuditEntityListener;
 import com.example.scaffold.promotion.Promotion;
+import com.example.scaffold.user.Address;
 import com.example.scaffold.user.User;
 
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
@@ -61,6 +65,18 @@ public class Order {
 
     @Column(name = "discount_amount", nullable = false)
     private BigDecimal discountAmount = BigDecimal.ZERO;
+
+    @Embedded
+    @AttributeOverrides({
+        @AttributeOverride(name = "line1", column = @Column(name = "shipping_line1")),
+        @AttributeOverride(name = "line2", column = @Column(name = "shipping_line2")),
+        @AttributeOverride(name = "city", column = @Column(name = "shipping_city")),
+        @AttributeOverride(name = "region", column = @Column(name = "shipping_region")),
+        @AttributeOverride(name = "postcode", column = @Column(name = "shipping_postcode")),
+        @AttributeOverride(name = "country", column = @Column(name = "shipping_country")),
+        @AttributeOverride(name = "phone", column = @Column(name = "shipping_phone")),
+    })
+    private Address shippingAddress = new Address();
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> items = new ArrayList<>();

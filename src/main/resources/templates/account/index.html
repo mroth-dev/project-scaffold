@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>My Account - Scaffold Shop</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <script th:src="@{/webjars/htmx.org/2.0.4/dist/htmx.min.js}"></script>
+</head>
+<body class="min-h-screen flex flex-col">
+    <div th:replace="~{fragments/nav :: nav}"></div>
+
+    <main class="flex-1 container mx-auto px-4 md:px-8 max-w-7xl py-8">
+        <h1 class="text-3xl font-bold mb-6">My Account</h1>
+
+        <div class="grid md:grid-cols-2 gap-6">
+            <div class="card bg-base-100 shadow-sm border border-base-300">
+                <div class="card-body">
+                    <h2 class="card-title">Profile</h2>
+
+                    <div role="alert" class="alert alert-error" th:if="${profileError}">
+                        <span th:text="${profileError}"></span>
+                    </div>
+
+                    <form method="post" th:action="@{/account/profile}" class="flex flex-col gap-3">
+                        <label class="fieldset-label" for="firstName">First name</label>
+                        <input type="text" id="firstName" name="firstName" th:value="${account.firstName}"
+                               required class="input w-full">
+
+                        <label class="fieldset-label" for="lastName">Last name</label>
+                        <input type="text" id="lastName" name="lastName" th:value="${account.lastName}"
+                               class="input w-full">
+
+                        <label class="fieldset-label" for="email">Email</label>
+                        <input type="email" id="email" name="email" th:value="${account.email}"
+                               required class="input w-full">
+
+                        <div class="divider my-1"></div>
+
+                        <label class="fieldset-label" for="currentPassword">Current password</label>
+                        <input type="password" id="currentPassword" name="currentPassword" class="input w-full">
+                        <p class="text-sm text-base-content/60 -mt-2">Required to change your email or password.</p>
+
+                        <label class="fieldset-label" for="newPassword">New password</label>
+                        <input type="password" id="newPassword" name="newPassword" minlength="8" class="input w-full">
+                        <p class="text-sm text-base-content/60 -mt-2">Leave blank to keep your current password.</p>
+
+                        <button type="submit" class="btn btn-primary mt-2 self-start">Save profile</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card bg-base-100 shadow-sm border border-base-300">
+                <div class="card-body">
+                    <h2 class="card-title">Shipping address</h2>
+
+                    <p class="text-sm text-base-content/60" th:unless="${account.address.complete}">
+                        Add a shipping address so you can check out.
+                    </p>
+
+                    <div role="alert" class="alert alert-error" th:if="${addressError}">
+                        <span th:text="${addressError}"></span>
+                    </div>
+
+                    <form method="post" th:action="@{/account/address}" class="flex flex-col gap-3">
+                        <label class="fieldset-label" for="line1">Address line 1</label>
+                        <input type="text" id="line1" name="line1" th:value="${account.address.line1}"
+                               required class="input w-full">
+
+                        <label class="fieldset-label" for="line2">Address line 2</label>
+                        <input type="text" id="line2" name="line2" th:value="${account.address.line2}"
+                               class="input w-full">
+
+                        <label class="fieldset-label" for="city">City</label>
+                        <input type="text" id="city" name="city" th:value="${account.address.city}"
+                               required class="input w-full">
+
+                        <label class="fieldset-label" for="region">County / region</label>
+                        <input type="text" id="region" name="region" th:value="${account.address.region}"
+                               class="input w-full">
+
+                        <label class="fieldset-label" for="postcode">Postcode</label>
+                        <input type="text" id="postcode" name="postcode" th:value="${account.address.postcode}"
+                               required class="input w-full">
+
+                        <label class="fieldset-label" for="country">Country</label>
+                        <input type="text" id="country" name="country" th:value="${account.address.country}"
+                               required class="input w-full">
+
+                        <label class="fieldset-label" for="phone">Phone</label>
+                        <input type="tel" id="phone" name="phone" th:value="${account.address.phone}"
+                               class="input w-full">
+
+                        <button type="submit" class="btn btn-primary mt-2 self-start">Save address</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

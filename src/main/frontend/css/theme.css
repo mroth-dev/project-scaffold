@@ -1,17 +1,16 @@
 /*
- * Brand swatch.
+ * Brand system: modern performance golf.
  *
- * Change the colors below to re-brand the site. Everything else (spacing,
- * radii, component styles) comes from daisyUI and stays untouched.
- *
- * Values use the oklch() color function: oklch(lightness chroma hue).
- *   - lightness: 0% (black) to 100% (white)
- *   - chroma: 0 (grey) to ~0.4 (very saturated)
- *   - hue: 0-360 degrees on the color wheel
+ * Palette is pinned by the brand brief, not chosen here: deep green
+ * #064E3B (primary) and cream #E4DCCE (secondary). The site plays the
+ * category standard straight -- photography-led, clean, confident --
+ * at the craft level of Peter Millar and Malbon Golf. See PRODUCT.md
+ * "Brand Commitments" for the standing direction this records.
  *
  * The site ships with two themes, "light" and "dark". "light" is the
  * default; "dark" is applied automatically when the visitor's OS/browser
- * is set to a dark color scheme (no toggle or JavaScript required).
+ * is set to a dark color scheme, and can also be toggled manually via
+ * the nav's theme switch.
  */
 
 @plugin "daisyui/theme" {
@@ -19,12 +18,28 @@
   default: true;
   color-scheme: light;
 
-  --color-primary: oklch(45% 0.22 262);
-  --color-primary-content: oklch(95% 0.02 262);
-  --color-secondary: oklch(58% 0.16 216);
-  --color-secondary-content: oklch(96% 0.02 216);
-  --color-accent: oklch(70% 0.13 197);
-  --color-accent-content: oklch(30% 0.05 197);
+  --color-base-100: #E4DCCE;
+  --color-base-200: #F1DCB3;
+  --color-base-300: #E0C68F;
+  --color-base-content: #06301F;
+
+  --color-primary: #064E3B;
+  --color-primary-content: #E4DCCE;
+  --color-secondary: #E4DCCE;
+  --color-secondary-content: #064E3B;
+  --color-accent: #8A6D3B;
+  --color-accent-content: #E4DCCE;
+  --color-neutral: #04332A;
+  --color-neutral-content: #E4DCCE;
+
+  --radius-selector: 0.375rem;
+  --radius-field: 0.25rem;
+  --radius-box: 0.5rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 0;
 }
 
 @plugin "daisyui/theme" {
@@ -32,10 +47,26 @@
   prefersdark: true;
   color-scheme: dark;
 
-  --color-primary: oklch(62% 0.2 262);
-  --color-primary-content: oklch(97% 0.02 262);
-  --color-secondary: oklch(68% 0.14 216);
-  --color-secondary-content: oklch(97% 0.02 216);
-  --color-accent: oklch(75% 0.12 197);
-  --color-accent-content: oklch(30% 0.05 197);
+  --color-base-100: #052E22;
+  --color-base-200: #073A2B;
+  --color-base-300: #0F4A38;
+  --color-base-content: #F3E4C8;
+
+  --color-primary: #E4DCCE;
+  --color-primary-content: #06301F;
+  --color-secondary: #0F4A38;
+  --color-secondary-content: #E4DCCE;
+  --color-accent: #C7A467;
+  --color-accent-content: #06301F;
+  --color-neutral: #021A13;
+  --color-neutral-content: #F3E4C8;
+
+  --radius-selector: 0.375rem;
+  --radius-field: 0.25rem;
+  --radius-box: 0.5rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 0;
 }

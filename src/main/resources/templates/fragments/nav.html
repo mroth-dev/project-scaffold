@@ -1,55 +1,90 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
-    <div class="navbar bg-base-100 shadow-sm px-4 md:px-8 mb-8" th:fragment="nav">
-        <div class="navbar-start !w-auto gap-4">
-            <a class="btn btn-ghost text-lg px-2" th:href="@{/}">Scaffold Shop</a>
-            <a class="btn btn-ghost hidden sm:inline-flex" th:href="@{/products}">Products</a>
-        </div>
+    <div class="bg-primary text-primary-content mb-8" th:fragment="nav">
+        <input type="checkbox" id="nav-menu-toggle" class="hidden peer">
 
-        <div class="navbar-center !flex-1 gap-1">
-            <form class="w-full" th:action="@{/products}" method="get">
-                <input type="search" name="query" placeholder="Search products..." autocomplete="off"
-                       th:value="${query}" class="input w-full">
-            </form>
-        </div>
+        <div class="container mx-auto max-w-7xl px-4 md:px-8">
+            <div class="flex items-center justify-between gap-4 md:gap-8 py-4">
 
-        <div class="navbar-end !w-auto gap-2">
-            <a class="btn btn-ghost" th:href="@{/cart}">
-                <div class="indicator">
-                    <span class="indicator-item badge badge-secondary badge-xs" id="nav-cart-count"
-                          th:text="${cartItemCount}">0</span>
-                    <span class="pr-1">Cart</span>
+                <div class="flex items-center gap-0.5 shrink-0">
+                    <label for="nav-menu-toggle" class="flex items-center justify-center w-9 h-9 rounded-field hover:bg-primary-content/10 cursor-pointer transition-colors shrink-0 -ml-1" aria-label="Open categories menu">
+                        <svg class="size-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5" />
+                        </svg>
+                    </label>
+
+                    <a th:href="@{/}" class="flex flex-col justify-center shrink-0 ml-1">
+                        <span class="font-display text-xl md:text-2xl font-black tracking-tight leading-none">SCAFFOLD</span>
+                        <span class="font-label text-[10px] tracking-[0.25em] uppercase text-primary-content/60 mt-0.5">Golf Apparel</span>
+                    </a>
                 </div>
-            </a>
-            <label class="swap swap-rotate btn btn-ghost btn-circle" aria-label="Toggle dark mode">
-                <input type="checkbox" id="theme-toggle" class="theme-controller" value="dark">
-                <svg class="swap-off size-5 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <path d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"
-                          fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
-                <svg class="swap-on size-5 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <path d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z"
-                          fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
-            </label>
-            <div class="dropdown dropdown-end" th:if="${authenticated}">
-                <div tabindex="0" role="button" class="btn btn-ghost" th:text="${currentUserEmail}"></div>
-                <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-10 w-48 p-2 shadow">
-                    <li><a th:href="@{/orders}">My Orders</a></li>
-                    <li th:if="${isAdminOrManager}"><a th:href="@{/admin}">Admin</a></li>
-                    <li>
-                        <form th:action="@{/logout}" method="post">
-                            <button type="submit" class="w-full text-left">Logout</button>
-                        </form>
-                    </li>
-                </ul>
+
+                <form class="hidden md:block flex-1 max-w-sm" th:action="@{/search}" method="get">
+                    <input type="search" name="query" placeholder="Search the collection" autocomplete="off"
+                           th:value="${query}"
+                           class="font-label w-full rounded-field border-none bg-primary-content/10 px-4 py-2.5 text-sm text-primary-content placeholder:text-primary-content/50 focus:outline-none focus:bg-primary-content/20 transition-colors">
+                </form>
+
+                <div class="flex items-center gap-1 md:gap-3 shrink-0">
+                    <a th:href="@{/new-in}" class="font-label hidden sm:inline-flex items-center px-3 py-2 text-sm font-medium hover:text-primary-content/70 transition-colors">
+                        Shop
+                    </a>
+
+                    <a th:href="@{/cart}" class="font-label inline-flex items-center gap-2 rounded-field px-3 py-2 text-sm font-medium hover:bg-primary-content/10 transition-colors">
+                        <span>Cart</span>
+                        <span id="nav-cart-count" class="inline-flex items-center justify-center min-w-5 h-5 px-1 rounded-full bg-primary-content text-primary text-[11px] font-bold" th:text="${cartItemCount}">0</span>
+                    </a>
+
+                    <label class="swap swap-rotate flex items-center justify-center w-9 h-9 rounded-field hover:bg-primary-content/10 cursor-pointer transition-colors" aria-label="Toggle dark mode">
+                        <input type="checkbox" id="theme-toggle" class="theme-controller" value="dark">
+                        <svg class="swap-off size-4 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <path d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"
+                                  fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <svg class="swap-on size-4 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <path d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z"
+                                  fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </label>
+
+                    <div class="dropdown dropdown-end" th:if="${authenticated}">
+                        <div tabindex="0" role="button" class="font-label hidden sm:inline-flex items-center h-9 px-3 rounded-field text-sm font-medium hover:bg-primary-content/10 transition-colors" th:text="${currentUserEmail}"></div>
+                        <ul tabindex="0" class="dropdown-content menu bg-base-100 text-base-content rounded-box z-10 w-52 p-2 shadow-lg mt-2">
+                            <li><a th:href="@{/account}">My Account</a></li>
+                            <li><a th:href="@{/orders}">My Orders</a></li>
+                            <li th:if="${isAdminOrManager}"><a th:href="@{/admin}">Admin</a></li>
+                            <li>
+                                <form th:action="@{/logout}" method="post">
+                                    <button type="submit" class="w-full text-left">Logout</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                    <span class="flex gap-2" th:unless="${authenticated}">
+                        <a class="font-label hidden sm:inline-flex items-center px-3 py-2 text-sm font-medium hover:bg-primary-content/10 rounded-field transition-colors" th:href="@{/login}">Login</a>
+                        <a class="font-label inline-flex items-center px-4 py-2 text-sm font-semibold bg-primary-content text-primary rounded-field hover:opacity-90 transition-opacity" th:href="@{/register}">Register</a>
+                    </span>
+                </div>
             </div>
-            <span class="flex gap-2" th:unless="${authenticated}">
-                <a class="btn btn-ghost" th:href="@{/login}">Login</a>
-                <a class="btn btn-primary" th:href="@{/register}">Register</a>
-            </span>
         </div>
+
+        <label for="nav-menu-toggle" class="hidden peer-checked:block fixed inset-0 bg-black/50 z-40" aria-hidden="true"></label>
+
+        <aside class="fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] -translate-x-full peer-checked:translate-x-0 transition-transform duration-300 ease-out bg-base-100 text-base-content shadow-xl overflow-y-auto">
+            <div class="flex items-center justify-between p-4 border-b border-base-300">
+                <span class="font-label text-sm font-semibold uppercase tracking-wide">Categories</span>
+                <label for="nav-menu-toggle" class="btn btn-ghost btn-sm btn-circle" aria-label="Close categories menu">
+                    <svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 18 18 6M6 6l12 12" />
+                    </svg>
+                </label>
+            </div>
+            <ul class="menu p-4 gap-1">
+                <li><a th:href="@{/new-in}">New In</a></li>
+                <th:block th:replace="~{this :: navCategoryItems(${navCategories})}"></th:block>
+            </ul>
+        </aside>
 
         <script>
             (function () {
@@ -69,5 +104,18 @@
             })();
         </script>
     </div>
+
+    <th:block th:fragment="navCategoryItems(nodes)">
+        <li th:each="node : ${nodes}">
+            <details th:if="${!node.children.isEmpty()}">
+                <summary th:text="${node.name}"></summary>
+                <ul>
+                    <li><a th:href="@{'/categories/' + ${node.slug}}" th:text="'All ' + ${node.name}"></a></li>
+                    <th:block th:replace="~{this :: navCategoryItems(${node.children})}"></th:block>
+                </ul>
+            </details>
+            <a th:unless="${!node.children.isEmpty()}" th:href="@{'/categories/' + ${node.slug}}" th:text="${node.name}"></a>
+        </li>
+    </th:block>
 </body>
 </html>

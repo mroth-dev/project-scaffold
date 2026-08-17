@@ -48,6 +48,7 @@ public class OrderService {
 
         Order order = new Order();
         order.setCustomer(customer);
+        order.setShippingAddress(customer.getAddress().copy());
 
         BigDecimal subtotal = BigDecimal.ZERO;
         for (OrderItemRequest itemRequest : request.items()) {
@@ -163,6 +164,7 @@ public class OrderService {
                 order.getTotalAmount(),
                 order.getPromotion() != null ? order.getPromotion().getCode() : null,
                 order.getDiscountAmount(),
+                order.getShippingAddress(),
                 items,
                 order.getCreatedAt(),
                 order.getUpdatedAt());

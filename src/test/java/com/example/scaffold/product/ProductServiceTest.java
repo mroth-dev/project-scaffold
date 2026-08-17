@@ -77,7 +77,7 @@ class ProductServiceTest {
                 true,
                 List.of(new ProductImageRequest(
                         "http://example.com/image.jpg", "http://example.com/thumb.jpg", "Front view", 0)),
-                List.of(new ProductVariationRequest("M", "Blue", "TSHIRT-001-M-BLUE", 10, BigDecimal.ZERO)),
+                List.of(new ProductVariationRequest("M", "Blue", "#0000FF", "TSHIRT-001-M-BLUE", 10, BigDecimal.ZERO)),
                 List.of());
     }
 

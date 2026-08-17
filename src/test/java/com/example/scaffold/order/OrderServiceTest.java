@@ -59,6 +59,10 @@ class OrderServiceTest {
         customer = new User();
         customer.setId(1L);
         customer.setEmail("customer@example.com");
+        customer.getAddress().setLine1("1 High Street");
+        customer.getAddress().setCity("London");
+        customer.getAddress().setPostcode("SW1A 1AA");
+        customer.getAddress().setCountry("United Kingdom");
 
         product = new Product();
         product.setId(1L);
@@ -88,7 +92,22 @@ class OrderServiceTest {
         assertEquals(1, created.items().size());
         assertEquals("TSHIRT-001-M-WHITE", created.items().get(0).variationSku());
         assertEquals(7, variation.getInventoryCount());
+        assertEquals("1 High Street", created.shippingAddress().getLine1());
         verify(productVariationRepository, times(1)).save(variation);
+    }
+
+    @Test
+    void createOrderSnapshotsAddressSeparatelyFromCustomerRecord() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(customer));
+        when(productVariationRepository.findById(1L)).thenReturn(Optional.of(variation));
+        when(orderRepository.save(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        OrderRequest request = new OrderRequest(List.of(new OrderItemRequest(1L, 1)));
+        OrderDto created = orderService.createOrder(1L, request);
+
+        customer.getAddress().setLine1("Changed after order was placed");
+
+        assertEquals("1 High Street", created.shippingAddress().getLine1());
     }
 
     @Test
